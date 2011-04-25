@@ -314,29 +314,11 @@ import tempfile
 from zipfile import ZipFile
 from subprocess import Popen
 
-class Install(CommandWithSpec):
-    name = 'install'
-    description = N_("install a package")
-
-    @classmethod
-    def customize_parser(self, parser, subparsers, glb):
-        subp = super(Install, self).customize_parser(parser, subparsers, glb)
-
-        subp.add_argument('--pg_config', metavar="PATH", default='pg_config',
-            help = _("path to the pg_config executable to use for install"
-                " [default: %(default)s]"))
-
+class WithUnpacking(object):
     def run(self):
         dir = tempfile.mkdtemp()
         try:
-            self.opts.target = dir
-            fn = Download(self.opts).run()
-            # TODO: verify checksum
-            pdir = self.unpack(fn, dir)
-            logger.info(_("compiling extension"))
-            self.run_make('', dir=pdir)
-            logger.info(_("installing extension"))
-            self.run_make('install', dir=pdir)
+            return self.run_with_temp_dir(dir)
         finally:
             shutil.rmtree(dir)
 
@@ -371,13 +353,68 @@ class Install(CommandWithSpec):
 
         return dirout or destdir
 
+
+class WithMake(WithUnpacking):
+    @classmethod
+    def customize_parser(self, parser, subparsers, glb):
+        subp = super(WithMake, self).customize_parser(parser, subparsers, glb)
+
+        subp.add_argument('--pg_config', metavar="PATH", default='pg_config',
+            help = _("path to the pg_config executable to find the database"
+                " [default: %(default)s]"))
+
     def run_make(self, cmd, dir):
-        cmd  = "make PG_CONFIG=%s %s" % (self.opts.pg_config, cmd)
-        logger.debug(_("running: %s"), cmd)
-        p = Popen(cmd, cwd=dir, shell=True)
+        cmdline = ['make', 'PG_CONFIG=%s' % self.opts.pg_config]
+        if cmd == 'installcheck':
+            cmdline.append('PGUSER=postgres')
+
+        cmdline.append(cmd)
+
+        cmdline = " ".join(cmdline)
+        logger.debug(_("running: %s"), cmdline)
+        p = Popen(cmdline, cwd=dir, shell=True)
         p.communicate()
         if p.returncode:
             raise PgxnClientException(
                 _("command returned %s") % p.returncode)
 
+
+class Install(WithMake, CommandWithSpec):
+    name = 'install'
+    description = N_("install a package")
+
+    def run_with_temp_dir(self, dir):
+        self.opts.target = dir
+        fn = Download(self.opts).run()
+        # TODO: verify checksum
+        pdir = self.unpack(fn, dir)
+
+        logger.info(_("building extension"))
+        self.run_make('all', dir=pdir)
+
+        logger.info(_("installing extension"))
+        self.run_make('install', dir=pdir)
+
+
+class Check(WithMake, CommandWithSpec):
+    name = 'check'
+    description = N_("run a distribution's test")
+
+    def run_with_temp_dir(self, dir):
+        self.opts.target = dir
+        fn = Download(self.opts).run()
+        # TODO: verify checksum
+        pdir = self.unpack(fn, dir)
+
+        logger.info(_("checking extension"))
+        try:
+            self.run_make('installcheck', dir=pdir)
+        except PgxnClientException, e:
+            # if the test failed, copy locally the regression result
+            for ext in ('out', 'diffs'):
+                fn = os.path.join(pdir, 'regression.' + ext)
+                if os.path.exists(fn):
+                    logger.info(_('copying regression.%s'), ext)
+                    shutil.copy(fn, './regression.' + ext)
+            raise
 

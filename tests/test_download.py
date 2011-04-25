@@ -1,4 +1,4 @@
-from mock import patch
+from mock import patch, Mock
 from unittest2 import TestCase
 
 import os
@@ -68,5 +68,67 @@ class InstallTestCase(TestCase):
         self.assertRaises(PgxnClientException, main, ['install', 'foobar'])
 
         self.assertEquals(mock_popen.call_count, 1)
+
+
+class CheckTestCase(TestCase):
+    @patch('pgxn.client.commands.Popen')
+    @patch('pgxn.client.api.get_file')
+    def test_check_latest(self, mock_get, mock_popen):
+        mock_get.side_effect = fake_get_file
+        pop = mock_popen.return_value
+        pop.returncode = 0
+
+        from pgxn.client.cli import main
+        main(['check', 'foobar'])
+
+        self.assertEquals(mock_popen.call_count, 1)
+        for i, (args, kw) in enumerate(mock_popen.call_args_list):
+            self.assertTrue(args[0].startswith('make'))
+
+    @patch('pgxn.client.commands.Popen')
+    @patch('pgxn.client.api.get_file')
+    def test_check_fails(self, mock_get, mock_popen):
+        mock_get.side_effect = fake_get_file
+        pop = mock_popen.return_value
+        pop.returncode = 1
+
+        from pgxn.client.cli import main
+        from pgxn.client.errors import PgxnClientException
+
+        self.assertRaises(PgxnClientException, main, ['check', 'foobar'])
+
+        self.assertEquals(mock_popen.call_count, 1)
+
+    @patch('pgxn.client.commands.Popen')
+    @patch('pgxn.client.api.get_file')
+    def test_check_fails(self, mock_get, mock_popen):
+        mock_get.side_effect = fake_get_file
+
+        def create_regression_files(*args, **kwargs):
+            cwd = kwargs['cwd']
+            open(os.path.join(cwd, 'regression.out'), 'w').close()
+            open(os.path.join(cwd, 'regression.diffs'), 'w').close()
+            return Mock()
+
+        mock_popen.side_effect = create_regression_files
+        pop = mock_popen.return_value
+        pop.returncode = 1
+
+        self.assert_(not os.path.exists('regression.out'),
+            "Please remove temp file 'regression.out' from current dir")
+        self.assert_(not os.path.exists('regression.diffs'),
+            "Please remove temp file 'regression.diffs' from current dir")
+
+        from pgxn.client.cli import main
+        from pgxn.client.errors import PgxnClientException
+
+        self.assertRaises(PgxnClientException, main, ['check', 'foobar'])
+
+        self.assertEquals(mock_popen.call_count, 1)
+        self.assert_(os.path.exists('regression.out'))
+        os.unlink('regression.out')
+        self.assert_(os.path.exists('regression.diffs'))
+        os.unlink('regression.diffs')
+
 
 
