@@ -35,18 +35,3 @@ def get_file(url):
             raise NetworkError(_("unexpected response %d for '%s'")
                 % (e.code, e.url))
 
-def get_json(url):
-    return json.load(get_file(url))
-
-def download(url, fn):
-    logger.info(_("saving %s"), fn)
-    fin = get_file(url)
-    fout = open(fn, "wb")
-    try:
-        while 1:
-            data = fin.read(8192)
-            if not data: break
-            fout.write(data)
-    finally:
-        fout.close()
-

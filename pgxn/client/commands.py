@@ -6,12 +6,13 @@ pgxn.client -- commands module
 
 # This file is part of the PGXN client
 
+import os
 import logging
 import argparse
 
 from pgxn.client import __version__
 from pgxn.client import Spec, Extension, SemVer
-from pgxn.client import network
+from pgxn.client.api import Api
 from pgxn.client.i18n import _, N_, gettext
 from pgxn.client.errors import PgxnClientException
 
@@ -76,6 +77,7 @@ class Command(object):
         """
         self.opts = opts
         self.parser = parser
+        self._api = None
 
     @classmethod
     def customize_parser(self, parser, subparsers, glb):
@@ -100,11 +102,15 @@ class Command(object):
         subp.set_defaults(cmd=self)
         return subp
 
+    @property
+    def api(self):
+        if self._api is None:
+            self._api = Api(mirror=self.opts.mirror)
+
+        return self._api
+
     def get_url(self, fragment):
         return self.opts.mirror.rstrip('/') + fragment
-
-    def get_json(self, fragment):
-        return network.get_json(self.get_url(fragment))
 
 
 class User(Command):
@@ -120,13 +126,13 @@ class User(Command):
 
     def run(self):
         if not self.opts.name:
-            data = self.get_json('/stats/user.json')
+            data = self.api.stats('user')
             for u in data['prolific']:
                 print (u"%(nickname)s: %(name)s "
                     "(%(dists)d dists, %(releases)d releases)"
                     % u)
         else:
-            data = self.get_json('/user/%s.json' % self.opts.name)
+            data = self.api.user(self.opts.name)
             print data
 
 
@@ -146,7 +152,7 @@ class Mirror(Command):
             help = _("return full details for each mirror"))
 
     def run(self):
-        data = self.get_json('/meta/mirrors.json')
+        data = self.api.mirrors()
         if self.opts.uri:
             detailed = True
             data = [ d for d in data if d['uri'] == self.opts.uri ]
@@ -167,7 +173,6 @@ class Mirror(Command):
 
                 print
 
-from urllib import urlencode
 
 class Search(Command):
     name = 'search'
@@ -190,10 +195,7 @@ class Search(Command):
             help = _("the string to search"))
 
     def run(self):
-        url = "/search/%s?%s" % (
-            self.opts.where, urlencode({'q': self.opts.query}))
-
-        data = self.get_json(url)
+        data = self.api.search(self.opts.where, self.opts.query)
 
         for hit in data['hits']:
             print "%s %s" % (hit['dist'], hit['version'])
@@ -270,20 +272,43 @@ class Download(CommandWithSpec):
 
     @classmethod
     def customize_parser(self, parser, subparsers, glb):
-        return super(Download, self).customize_parser(parser, subparsers, glb)
+        subp = super(Download, self).customize_parser(parser, subparsers, glb)
+        subp.add_argument('--target', metavar='PATH', default='.',
+            help = _('Target directory and/or filename to save'))
+
+        return subp
 
     def run(self):
         spec = self.get_spec()
-        data = self.get_json('/dist/%s.json' % spec.name)
-        version = self.get_best_version(data, spec)
-        parts = {'name': spec.name, 'ver': version }
+        data = self.api.dist(spec.name)
+        ver = self.get_best_version(data, spec)
 
-        url = "/dist/%(name)s/%(ver)s/%(name)s-%(ver)s.pgz" % parts
-        fn = "%(name)s-%(ver)s.pgz" % parts
-        network.download(self.get_url(url), fn)
+        fin = self.api.download(spec.name, ver)
+        fn = self._get_local_file_name(fin.url)
+        logger.info(_("saving %s"), fn)
+        fout = open(fn, "wb")
+        try:
+            while 1:
+                data = fin.read(8192)
+                if not data: break
+                fout.write(data)
+        finally:
+            fout.close()
+
+        # TODO: verify checksum
+        return fn
+
+    def _get_local_file_name(self, url):
+        from urlparse import urlsplit
+        if os.path.isdir(self.opts.target):
+            basename = urlsplit(url)[2].rsplit('/', 1)[-1]
+            fn = os.path.join(self.opts.target, basename)
+        else:
+            fn = self.opts.target
+
+        return os.path.abspath(fn)
 
 
-import os
 import shutil
 import tempfile
 from zipfile import ZipFile
@@ -302,17 +327,11 @@ class Install(CommandWithSpec):
                 " [default: %(default)s]"))
 
     def run(self):
-        spec = self.get_spec()
-        data = self.get_json('/dist/%s.json' % spec.name)
-        version = self.get_best_version(data, spec)
-
-        parts = {'name': spec.name, 'ver': version }
-        url = "/dist/%(name)s/%(ver)s/%(name)s-%(ver)s.pgz" % parts
-
         dir = tempfile.mkdtemp()
         try:
-            fn = dir + "/%(name)s-%(ver)s.pgz" % parts
-            network.download(self.get_url(url), fn)
+            self.opts.target = dir
+            fn = Download(self.opts).run()
+            # TODO: verify checksum
             pdir = self.unpack(fn, dir)
             logger.info(_("compiling extension"))
             self.run_make('', dir=pdir)
