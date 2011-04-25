@@ -9,9 +9,9 @@ pgxn.client -- command line interface
 
 import sys
 
+from pgxn.client.cli import main
 from pgxn.client.i18n import _
 from pgxn.client.errors import PgxnException
-from pgxn.client.commands import get_option_parser, run_commands
 
 import logging
 logging.basicConfig(
@@ -19,14 +19,9 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S")
 logger = logging.getLogger()
 
-def main():
-    parser = get_option_parser()
-    opt = parser.parse_args()
-    run_commands(opt, parser)
-
 if __name__ == '__main__':
     try:
-        main()
+        main(sys.argv[1:])
 
     except PgxnException, e:
         logger.error("%s", e)

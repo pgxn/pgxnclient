@@ -1,0 +1,16 @@
+{
+   "dist": "/dist/{dist}.json",
+   "download": "/dist/{dist}/{version}/{dist}-{version}.pgz",
+   "extension": "/extension/{extension}.json",
+   "htmldoc": "/dist/{dist}/{version}/{+docpath}.html",
+   "meta": "/dist/{dist}/{version}/META.json",
+   "mirrors": "/meta/mirrors.json",
+   "readme": "/dist/{dist}/{version}/README.txt",
+   "search": "/search/{in}/",
+   "source": "/src/{dist}/{dist}-{version}/",
+   "spec": "/meta/spec.{format}",
+   "stats": "/stats/{stats}.json",
+   "tag": "/tag/{tag}.json",
+   "user": "/user/{user}.json",
+   "userlist": "/users/{char}.json"
+}

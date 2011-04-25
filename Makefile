@@ -14,6 +14,9 @@ ENV_LIB = $(ENV_DIR)/lib
 EASY_INSTALL = PYTHONPATH=$(ENV_LIB) $(ENV_BIN)/easy_install-$(PYTHON_VERSION) -d $(ENV_LIB) -s $(ENV_BIN)
 EZ_SETUP = $(ENV_BIN)/ez_setup.py
 
+check:
+	PYTHONPATH=.:$(ENV_LIB) $(ENV_BIN)/unit2 discover
+
 
 # Install development dependencies.
 
@@ -22,7 +25,8 @@ env: easy_install
 	mkdir -p $(ENV_LIB)
 	$(EASY_INSTALL) uri
 	$(EASY_INSTALL) argparse
-	$(EASY_INSTALL) zc.buildout
+	$(EASY_INSTALL) unittest2
+	$(EASY_INSTALL) mock
 
 easy_install: ez_setup
 	PYTHONPATH=$(ENV_LIB) $(PYTHON) $(EZ_SETUP) -d $(ENV_LIB) -s $(ENV_BIN) setuptools
