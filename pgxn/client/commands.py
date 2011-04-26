@@ -457,18 +457,23 @@ class Load(WithPgConfig, CommandWithSpec):
         pgver = self.get_pg_version()
         logger.debug("PostgreSQL version: %d.%d.%d", *pgver)
 
-        if pgver < (9,1,0):
-            if not sqlfile:
-                raise PgxnClientException(
-                    "extension '%s' doesn't specifies sql file:"
-                    " cannot install on PostgreSQL %d.%d.%d"
-                    % ((name, ) + pgver))
+        if pgver >= (9,1,0):
+            if self.is_extension(name):
+                self.create_extension(name)
+                return
+            else:
+                logger.warn("extension '%s' doesn't include a control file:"
+                    " falling back on sql loading", name)
 
-            fn = self.find_sql_file(name, sqlfile)
-            self.load_sql(fn)
+        if not sqlfile:
+            raise PgxnClientException(
+                "extension '%s' doesn't specifies sql file:"
+                " cannot install on PostgreSQL %d.%d.%d"
+                % ((name, ) + pgver))
 
-        else:
-            self.create_extension(name)
+        fn = self.find_sql_file(name, sqlfile)
+        self.load_sql(fn)
+
 
     def get_pg_version(self):
         data = self.call_psql('SELECT version();')
@@ -482,6 +487,12 @@ class Load(WithPgConfig, CommandWithSpec):
                 "cannot parse version number from '%s'" % data)
 
         return (int(m.group(1)), int(m.group(2)), int(m.group(3) or 0))
+
+    def is_extension(self, name):
+        fn = os.path.join(self.call_pg_config('sharedir'),
+            "extension", name + ".control")
+        logger.debug("checking if exists %s", fn)
+        return os.path.exists(fn)
 
     def create_extension(self, name):
         # TODO: namespace etc.
@@ -507,7 +518,7 @@ class Load(WithPgConfig, CommandWithSpec):
         cmdline = [self.find_psql()]
         # load via pipe to enable psql commands in the file
         if not data:
-            fin = open(fn, 'r')
+            fin = open(filename, 'r')
             p = Popen(cmdline, stdin=fin)
             p.communicate()
         else:
