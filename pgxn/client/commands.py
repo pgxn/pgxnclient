@@ -545,7 +545,11 @@ class Load(WithPgConfig, CommandWithSpec):
             sqlfile.rsplit('.', 1)[0] + '/' + sqlfile,
             'contrib/' + sqlfile,
         ]
+        tried = set()
         for fn in tries:
+            if fn in tried:
+                continue
+            tried.add(fn)
             fn = sharedir + '/' + fn
             logger.debug("checking sql file in %s" % fn)
             if os.path.exists(fn):
