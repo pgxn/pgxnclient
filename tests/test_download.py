@@ -180,7 +180,7 @@ class CheckTestCase(TestCase):
 
     @patch('pgxn.client.commands.Popen')
     @patch('pgxn.client.api.get_file')
-    def test_check_fails(self, mock_get, mock_popen):
+    def test_check_diff_moved(self, mock_get, mock_popen):
         mock_get.side_effect = fake_get_file
 
         def create_regression_files(*args, **kwargs):
