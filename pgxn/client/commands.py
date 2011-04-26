@@ -466,10 +466,10 @@ class Load(WithPgConfig, CommandWithSpec):
                     " falling back on sql loading", name)
 
         if not sqlfile:
-            raise PgxnClientException(
+            sqlfile = name + '.sql'
+            logger.warn(
                 "extension '%s' doesn't specifies sql file:"
-                " cannot install on PostgreSQL %d.%d.%d"
-                % ((name, ) + pgver))
+                " trying to use '%s'", name, sqlfile)
 
         fn = self.find_sql_file(name, sqlfile)
         self.load_sql(fn)
