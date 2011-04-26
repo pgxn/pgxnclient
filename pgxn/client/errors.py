@@ -16,6 +16,9 @@ class PgxnException(Exception):
 class PgxnClientException(PgxnException):
     """Base class for the exceptions raised by the pgxn.client package."""
 
+class UserAbort(PgxnClientException):
+    """The user requested to stop the operation."""
+
 class BadSpecError(PgxnClientException):
     """A bad package specification."""
 

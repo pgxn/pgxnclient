@@ -14,7 +14,7 @@ from pgxn.client import __version__
 from pgxn.client import Spec, Extension, Name, SemVer
 from pgxn.client.api import Api
 from pgxn.client.i18n import _, N_, gettext
-from pgxn.client.errors import PgxnClientException
+from pgxn.client.errors import PgxnClientException, UserAbort
 from pgxn.client.network import download
 
 logger = logging.getLogger('pgxn.client.commands')
@@ -88,6 +88,8 @@ class Command(object):
             help = _("the mirror to interact with [default: %(default)s]"))
         glb.add_argument("--verbose", action='store_true',
             help = _("print more informations"))
+        glb.add_argument("--yes", action='store_true',
+            help = _("assume affermative answer to all questions"))
 
     def run(self):
         raise NotImplementedError
@@ -112,6 +114,19 @@ class Command(object):
 
     def get_url(self, fragment):
         return self.opts.mirror.rstrip('/') + fragment
+
+    def confirm(self, prompt):
+        if self.opts.yes:
+            return True
+
+        while 1:
+            ans = raw_input(_("%s [y/N] ") % prompt)
+            if _('no').startswith(ans.lower()):
+                raise UserAbort(_("operation interrupted on user request"))
+            elif _('yes').startswith(ans.lower()):
+                return True
+            else:
+                prompt = _("Please answer yes or no")
 
 
 class User(Command):
@@ -497,16 +512,25 @@ class Load(WithPgConfig, CommandWithSpec):
                 self.create_extension(name)
                 return
             else:
-                logger.warn("extension '%s' doesn't include a control file:"
-                    " falling back on sql loading", name)
+                self.confirm(_("""\
+The extension '%s' doesn't contain a control file:
+it will be installed as a loose set of objects.
+Do you want to continue?""")
+                    % name)
 
+        confirm = False
         if not sqlfile:
             sqlfile = name + '.sql'
-            logger.warn(
-                "extension '%s' doesn't specifies sql file:"
-                " trying to use '%s'", name, sqlfile)
+            confirm = True
 
         fn = self.find_sql_file(name, sqlfile)
+        if confirm:
+            self.confirm(_("""\
+The extension '%s' doesn't specify a SQL file.
+'%s' is probably the right one.
+Do you want to load it?""")
+                % (name, fn))
+
         self.load_sql(fn)
 
 

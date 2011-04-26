@@ -11,7 +11,7 @@ import sys
 
 from pgxn.client.cli import main
 from pgxn.client.i18n import _
-from pgxn.client.errors import PgxnException
+from pgxn.client.errors import PgxnException, UserAbort
 
 import logging
 logging.basicConfig(
@@ -22,6 +22,10 @@ logger = logging.getLogger()
 if __name__ == '__main__':
     try:
         main(sys.argv[1:])
+
+    except UserAbort, e:
+        logger.info("%s", e)
+        sys.exit(1)
 
     except PgxnException, e:
         logger.error("%s", e)
