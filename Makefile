@@ -23,7 +23,6 @@ check:
 env: easy_install
 	mkdir -p $(ENV_BIN)
 	mkdir -p $(ENV_LIB)
-	$(EASY_INSTALL) uri
 	$(EASY_INSTALL) argparse
 	$(EASY_INSTALL) unittest2
 	$(EASY_INSTALL) mock

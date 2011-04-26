@@ -7,9 +7,9 @@ pgxn.client -- client API stub
 # This file is part of the PGXN client
 
 import json
-from uri import expand_template
 from urllib import urlencode
 
+from pgxn.utils.uri import expand_template
 from pgxn.client.network import get_file
 
 class Api(object):
