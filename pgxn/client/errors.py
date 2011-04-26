@@ -22,6 +22,9 @@ class BadSpecError(PgxnClientException):
 class NetworkError(PgxnClientException):
     """An error from the other side of the wire."""
 
+class BadChecksum(PgxnClientException):
+    """A downloaded file is not what expected."""
+
 class ResourceNotFound(NetworkError):
     """Resource not found on the server."""
 

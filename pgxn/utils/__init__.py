@@ -16,3 +16,9 @@ if sys.version_info >= (2, 6):
     import json
 else:
     import simplejson as json
+
+# Import the sha1 object without warnings
+if sys.version_info >= (2, 5):
+    from hashlib import sha1
+else:
+    from sha import new as sha1

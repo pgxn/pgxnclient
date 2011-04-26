@@ -1,0 +1,72 @@
+{
+   "abstract": "A mock distribution",
+   "date": "2011-04-20T23:47:22Z",
+   "description": "This library doesn't exist.",
+   "docs": {
+      "README": {
+         "title": "foobar 0.42.1"
+      },
+      "doc/pair": {
+         "abstract": "Abstract of an abstract project",
+         "title": "foobar 0.42.1"
+      }
+   },
+   "license": "postgresql",
+   "maintainer": [
+      "Daniele Varrazzo <piro@example.com>"
+   ],
+   "name": "foobar",
+   "provides": {
+      "foobar": {
+         "abstract": "A non existing extension",
+         "docfile": "doc/foobar.md",
+         "docpath": "doc/foobar",
+         "file": "sql/foobar.sql",
+         "version": "0.42.1"
+      }
+   },
+   "release_status": "stable",
+   "releases": {
+      "stable": [
+         {
+            "date": "2010-10-29T22:44:42Z",
+            "version": "0.42.1"
+         },
+         {
+            "date": "2010-10-19T03:59:54Z",
+            "version": "0.42.0"
+         }
+      ],
+      "testing": [
+         {
+            "date": "2011-04-20T23:47:22Z",
+            "version": "0.43.2b1"
+         }
+      ]
+   },
+   "resources": {
+      "bugtracker": {
+         "web": "http://github.com/piro/foobar/issues/"
+      },
+      "repository": {
+         "type": "git",
+         "url": "git://github.com/piro/foobar.git",
+         "web": "http://github.com/piro/foobar/"
+      }
+   },
+   "sha1": "8888888888888888888888888888888888888888",
+   "special_files": [
+      "Changes",
+      "README.md",
+      "META.json",
+      "Makefile",
+      "foobar.control"
+   ],
+   "tags": [
+      "foo",
+      "bar",
+      "testing"
+   ],
+   "user": "piro",
+   "version": "0.42.1"
+}

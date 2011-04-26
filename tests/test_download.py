@@ -10,7 +10,8 @@ class FakeFile(file):
     url = None
     pass
 
-def fake_get_file(url):
+def fake_get_file(url, urlmap=None):
+    if urlmap: url = urlmap.get(url, url)
     fn = os.path.dirname(__file__) + "/data/" + quote(url, safe="")
     f = FakeFile(fn, 'rb')
     f.url = url
@@ -78,6 +79,28 @@ class DownloadTestCase(TestCase):
             ifunlink(fn1)
             ifunlink(fn2)
 
+    @patch('pgxn.client.api.get_file')
+    def test_download_bad_sha1(self, mock):
+        def fakefake(url):
+            return fake_get_file(url, urlmap = {
+                'http://api.pgxn.org/dist/foobar.json':
+                'http://api.pgxn.org/dist/foobar-badsha1.json'})
+
+        mock.side_effect = fakefake
+
+        fn = 'foobar-0.42.1.pgz'
+        self.assert_(not os.path.exists(fn))
+
+        try:
+            from pgxn.client.cli import main
+            from pgxn.client.errors import BadChecksum
+            e = self.assertRaises(BadChecksum,
+                main, ['download', 'foobar'])
+
+            self.assert_(not os.path.exists(fn))
+
+        finally:
+            ifunlink(fn)
 
 class InstallTestCase(TestCase):
     @patch('pgxn.client.commands.Popen')
@@ -107,6 +130,23 @@ class InstallTestCase(TestCase):
         self.assertRaises(PgxnClientException, main, ['install', 'foobar'])
 
         self.assertEquals(mock_popen.call_count, 1)
+
+    @patch('pgxn.client.commands.Popen')
+    @patch('pgxn.client.api.get_file')
+    def test_install_bad_sha1(self, mock_get, mock_popen):
+        def fakefake(url):
+            return fake_get_file(url, urlmap = {
+                'http://api.pgxn.org/dist/foobar.json':
+                'http://api.pgxn.org/dist/foobar-badsha1.json'})
+
+        mock_get.side_effect = fakefake
+        pop = mock_popen.return_value
+        pop.returncode = 0
+
+        from pgxn.client.cli import main
+        from pgxn.client.errors import BadChecksum
+        self.assertRaises(BadChecksum,
+            main, ['install', 'foobar'])
 
 
 class CheckTestCase(TestCase):
@@ -169,6 +209,24 @@ class CheckTestCase(TestCase):
         finally:
             ifunlink('regression.out')
             ifunlink('regression.diffs')
+
+    @patch('pgxn.client.commands.Popen')
+    @patch('pgxn.client.api.get_file')
+    def test_check_bad_sha1(self, mock_get, mock_popen):
+        def fakefake(url):
+            return fake_get_file(url, urlmap = {
+                'http://api.pgxn.org/dist/foobar.json':
+                'http://api.pgxn.org/dist/foobar-badsha1.json'})
+
+        mock_get.side_effect = fakefake
+        pop = mock_popen.return_value
+        pop.returncode = 1
+
+        from pgxn.client.cli import main
+        from pgxn.client.errors import BadChecksum
+        self.assertRaises(BadChecksum, main, ['check', 'foobar'])
+
+        self.assertEquals(mock_popen.call_count, 0)
 
 
 class LoadTestCase(TestCase):

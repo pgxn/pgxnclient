@@ -267,6 +267,9 @@ class CommandWithSpec(Command):
         return best
 
 
+from pgxn.utils import sha1
+from pgxn.client.errors import BadChecksum
+
 class Download(CommandWithSpec):
     name = 'download'
     description = N_("download a distribution from the network")
@@ -284,12 +287,37 @@ class Download(CommandWithSpec):
         data = self.api.dist(spec.name)
         ver = self.get_best_version(data, spec)
 
+        try:
+            chk = data['sha1']
+        except KeyError:
+            raise PgxnClientException(
+                "sha1 missing from the distribution meta")
+
         fin = self.api.download(spec.name, ver)
         fn = self._get_local_file_name(fin.url)
         fn = download(fin, fn, rename=True)
-
-        # TODO: verify checksum
+        self.verify_checksum(fn, chk)
         return fn
+
+    def verify_checksum(self, fn, chk):
+        """Verify that a downloaded file has the expected sha1."""
+        sha = sha1()
+        logger.debug(_("checking sha1 of '%s'"), fn)
+        f = open(fn, "rb")
+        try:
+            while 1:
+                data = f.read(8192)
+                if not data: break
+                sha.update(data)
+        finally:
+            f.close()
+
+        sha = sha.hexdigest()
+        if sha != chk:
+            os.unlink(fn)
+            logger.error(_("file %s has sha1 %s instead of %s"),
+                fn, sha, chk)
+            raise BadChecksum(_("bad sha1 in downloaded file"))
 
     def _get_local_file_name(self, url):
         from urlparse import urlsplit
@@ -397,7 +425,6 @@ class Install(WithMake, CommandWithSpec):
     def run_with_temp_dir(self, dir):
         self.opts.target = dir
         fn = Download(self.opts).run()
-        # TODO: verify checksum
         pdir = self.unpack(fn, dir)
 
         self.maybe_run_configure(pdir)
@@ -430,7 +457,6 @@ class Check(WithMake, CommandWithSpec):
     def run_with_temp_dir(self, dir):
         self.opts.target = dir
         fn = Download(self.opts).run()
-        # TODO: verify checksum
         pdir = self.unpack(fn, dir)
 
         logger.info(_("checking extension"))
