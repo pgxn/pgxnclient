@@ -4,6 +4,8 @@ from unittest2 import TestCase
 import os
 from urllib import quote
 
+from testutils import ifunlink
+
 class FakeFile(file):
     url = None
     pass
@@ -23,9 +25,11 @@ class DownloadTestCase(TestCase):
         self.assert_(not os.path.exists(fn))
 
         from pgxn.client.cli import main
-        main(['download', 'foobar'])
-        self.assert_(os.path.exists(fn))
-        os.unlink(fn)
+        try:
+            main(['download', 'foobar'])
+            self.assert_(os.path.exists(fn))
+        finally:
+            ifunlink(fn)
 
     @patch('pgxn.client.api.get_file')
     def test_download_testing(self, mock):
@@ -35,9 +39,11 @@ class DownloadTestCase(TestCase):
         self.assert_(not os.path.exists(fn))
 
         from pgxn.client.cli import main
-        main(['download', '--testing', 'foobar'])
-        self.assert_(os.path.exists(fn))
-        os.unlink(fn)
+        try:
+            main(['download', '--testing', 'foobar'])
+            self.assert_(os.path.exists(fn))
+        finally:
+            ifunlink(fn)
 
 
 class InstallTestCase(TestCase):
@@ -122,13 +128,14 @@ class CheckTestCase(TestCase):
         from pgxn.client.cli import main
         from pgxn.client.errors import PgxnClientException
 
-        self.assertRaises(PgxnClientException, main, ['check', 'foobar'])
-
-        self.assertEquals(mock_popen.call_count, 1)
-        self.assert_(os.path.exists('regression.out'))
-        os.unlink('regression.out')
-        self.assert_(os.path.exists('regression.diffs'))
-        os.unlink('regression.diffs')
+        try:
+            self.assertRaises(PgxnClientException, main, ['check', 'foobar'])
+            self.assertEquals(mock_popen.call_count, 1)
+            self.assert_(os.path.exists('regression.out'))
+            self.assert_(os.path.exists('regression.diffs'))
+        finally:
+            ifunlink('regression.out')
+            ifunlink('regression.diffs')
 
 
 class LoadTestCase(TestCase):
