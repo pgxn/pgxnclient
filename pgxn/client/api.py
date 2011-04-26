@@ -16,8 +16,10 @@ class Api(object):
     def __init__(self, mirror):
         self.mirror = mirror
 
-    def dist(self, name):
-        return json.load(self.call('dist', {'dist': name}))
+    def dist(self, dist, version=''):
+        return json.load(self.call(
+            version and 'meta' or 'dist',
+            {'dist': dist, 'version': version}))
 
     def download(self, dist, version):
         return self.call('download', {'dist': dist, 'version': version})

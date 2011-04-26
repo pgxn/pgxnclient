@@ -11,7 +11,7 @@ import logging
 import argparse
 
 from pgxn.client import __version__
-from pgxn.client import Spec, Extension, SemVer
+from pgxn.client import Spec, Extension, Name, SemVer
 from pgxn.client.api import Api
 from pgxn.client.i18n import _, N_, gettext
 from pgxn.client.errors import PgxnClientException
@@ -312,7 +312,7 @@ class Download(CommandWithSpec):
 import shutil
 import tempfile
 from zipfile import ZipFile
-from subprocess import Popen
+from subprocess import Popen, PIPE
 
 class WithUnpacking(object):
     def run(self):
@@ -354,15 +354,33 @@ class WithUnpacking(object):
         return dirout or destdir
 
 
-class WithMake(WithUnpacking):
+class WithPgConfig(object):
     @classmethod
     def customize_parser(self, parser, subparsers, glb):
-        subp = super(WithMake, self).customize_parser(parser, subparsers, glb)
+        subp = super(WithPgConfig, self).customize_parser(
+            parser, subparsers, glb)
 
         subp.add_argument('--pg_config', metavar="PATH", default='pg_config',
             help = _("path to the pg_config executable to find the database"
                 " [default: %(default)s]"))
 
+    def call_pg_config(self, what, _cache={}):
+        if what in _cache:
+            return _cache[what]
+
+        cmdline = "%s --%s" % (self.opts.pg_config, what)
+        logger.debug("running pg_config with: %s", cmdline)
+        p = Popen(cmdline, stdout=PIPE, shell=True)
+        out, err = p.communicate()
+        if p.returncode:
+            raise PgxnClientException(
+                "%s returned %s" % (cmdline, p.returncode))
+
+        rv = _cache[what] = out.rstrip()
+        return rv
+
+
+class WithMake(WithPgConfig, WithUnpacking):
     def run_make(self, cmd, dir):
         cmdline = ['make', 'PG_CONFIG=%s' % self.opts.pg_config]
         if cmd == 'installcheck':
@@ -381,7 +399,7 @@ class WithMake(WithUnpacking):
 
 class Install(WithMake, CommandWithSpec):
     name = 'install'
-    description = N_("install a package")
+    description = N_("install a distribution")
 
     def run_with_temp_dir(self, dir):
         self.opts.target = dir
@@ -417,4 +435,113 @@ class Check(WithMake, CommandWithSpec):
                     logger.info(_('copying regression.%s'), ext)
                     shutil.copy(fn, './regression.' + ext)
             raise
+
+
+class Load(WithPgConfig, CommandWithSpec):
+    name = 'load'
+    description = N_('load the extensions in a distribution into a database')
+
+    def run(self):
+        spec = self.get_spec()
+        data = self.api.dist(spec.name)
+        ver = self.get_best_version(data, spec)
+        # TODO: this can be avoided if installing the last version
+        dist = self.api.dist(spec.name, ver)
+
+        # TODO: probably unordered before Python 2.7 or something
+        for name, data in dist['provides'].items():
+            sql = data.get('file')
+            self.load_ext(name, sql)
+
+    def load_ext(self, name, sqlfile):
+        pgver = self.get_pg_version()
+        logger.debug("PostgreSQL version: %d.%d.%d", *pgver)
+
+        if pgver < (9,1,0):
+            if not sqlfile:
+                raise PgxnClientException(
+                    "extension '%s' doesn't specifies sql file:"
+                    " cannot install on PostgreSQL %d.%d.%d"
+                    % ((name, ) + pgver))
+
+            fn = self.find_sql_file(name, sqlfile)
+            self.load_sql(fn)
+
+        else:
+            self.create_extension(name)
+
+    def get_pg_version(self):
+        data = self.call_psql('SELECT version();')
+        return self.parse_pg_version(data)
+
+    def parse_pg_version(self, data):
+        import re
+        m = re.match(r'\S+\s+(\d+)\.(\d+)(?:\.(\d+))?', data)
+        if m is None:
+            raise PgxnClientException(
+                "cannot parse version number from '%s'" % data)
+
+        return (int(m.group(1)), int(m.group(2)), int(m.group(3) or 0))
+
+    def create_extension(self, name):
+        # TODO: namespace etc.
+        cmd = "CREATE EXTENSION %s;" % Name(name)
+        self.load_sql(data=cmd)
+
+    def call_psql(self, command):
+        cmdline = [self.find_psql()]
+        if command is not None:
+            cmdline.append('-tA')   # tuple only, unaligned
+            cmdline.extend(['-c', command])
+
+        logger.debug("calling %s", cmdline)
+        p = Popen(cmdline, stdout=PIPE)
+        out, err = p.communicate()
+        if p.returncode:
+            raise PgxnClientException(
+                "psql returned %s running command" % (p.returncode))
+
+        return out
+
+    def load_sql(self, filename=None, data=None):
+        cmdline = [self.find_psql()]
+        # load via pipe to enable psql commands in the file
+        if not data:
+            fin = open(fn, 'r')
+            p = Popen(cmdline, stdin=fin)
+            p.communicate()
+        else:
+            p = Popen(cmdline, stdin=PIPE)
+            p.communicate(data)
+
+        if p.returncode:
+            raise PgxnClientException(
+                "psql returned %s loading extension" % (p.returncode))
+
+    def find_psql(self):
+        return self.call_pg_config('bindir') + '/psql'
+
+    def find_sql_file(self, name, sqlfile):
+        # In the extension the sql can be specified with a directory,
+        # butit gets flattened into the target dir by the Makefile
+        sqlfile = os.path.basename(sqlfile)
+
+        sharedir = self.call_pg_config('sharedir')
+        # TODO: we only check in contrib and in <name>: actually it may be
+        # somewhere else - only the makefile knows!
+        tries = [
+            name + '/' + sqlfile,
+            sqlfile.rsplit('.', 1)[0] + '/' + sqlfile,
+            'contrib/' + sqlfile,
+        ]
+        for fn in tries:
+            fn = sharedir + '/' + fn
+            logger.debug("checking sql file in %s" % fn)
+            if os.path.exists(fn):
+                return fn
+        else:
+            raise PgxnClientException(
+                "cannot find sql file for extension '%s': '%s'"
+                % (name, sqlfile))
+
 
