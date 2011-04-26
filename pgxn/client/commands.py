@@ -407,11 +407,27 @@ class Install(WithMake, CommandWithSpec):
         # TODO: verify checksum
         pdir = self.unpack(fn, dir)
 
+        self.maybe_run_configure(pdir)
+
         logger.info(_("building extension"))
         self.run_make('all', dir=pdir)
 
         logger.info(_("installing extension"))
         self.run_make('install', dir=pdir)
+
+    def maybe_run_configure(self, dir):
+        fn = os.path.join(dir, 'configure')
+        logger.debug("checking '%s'", fn)
+        # TODO: probably not portable
+        if not os.path.exists(fn):
+            return
+
+        logger.info(_("running configure"))
+        p = Popen(fn)
+        p.communicate()
+        if p.returncode:
+            raise PgxnClientException(
+                _("configure failed with return code %s") % p.returncode)
 
 
 class Check(WithMake, CommandWithSpec):
