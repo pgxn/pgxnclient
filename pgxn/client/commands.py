@@ -276,6 +276,11 @@ class CommandWithSpec(Command):
             rels.extend([SemVer(r['version']) for r in drels['unstable']])
 
         # todo: real filtering
+        if not rels:
+            raise ResourceNotFound(
+                _("no suitable version found for extension '%s'"
+                    " (release level: %s)" % (spec.name, self.opts.status)))
+
         rels.sort(reverse=True)
         best = rels[0]
         logger.info(_("best version: %s %s"), spec.name, best)
