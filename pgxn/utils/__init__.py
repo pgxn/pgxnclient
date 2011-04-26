@@ -7,4 +7,12 @@ pgxn.client -- misc utilities package
 # This file is part of the PGXN client
 
 
+# Import the proper JSON library
+# dependencies note: simplejson is certified for Python 2.5, and supports
+# Python 2.4 up to version 2.0.9. After that the package is in the stdlib
 
+import sys
+if sys.version_info >= (2, 6):
+    import json
+else:
+    import simplejson as json

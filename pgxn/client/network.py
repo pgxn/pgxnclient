@@ -6,7 +6,6 @@ pgxn.client -- network interaction
 
 # This file is part of the PGXN client
 
-import json
 import urllib2
 
 from pgxn.client import __version__
