@@ -8,7 +8,7 @@ pgxn.client -- commands module
 
 import os
 import logging
-import argparse
+from pgxn.utils import argparse
 
 from pgxn.client import __version__
 from pgxn.client import Spec, Extension, Name, SemVer
