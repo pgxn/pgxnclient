@@ -45,6 +45,39 @@ class DownloadTestCase(TestCase):
         finally:
             ifunlink(fn)
 
+    @patch('pgxn.client.api.get_file')
+    def test_download_rename(self, mock):
+        mock.side_effect = fake_get_file
+
+        fn = 'foobar-0.42.1.pgz'
+        fn1= 'foobar-0.42.1-1.pgz'
+        fn2= 'foobar-0.42.1-2.pgz'
+
+        for tmp in (fn, fn1, fn2):
+            self.assert_(not os.path.exists(tmp))
+
+        try:
+            f = open(fn, "w")
+            f.write('test')
+            f.close()
+
+            from pgxn.client.cli import main
+            main(['download', 'foobar'])
+            self.assert_(os.path.exists(fn1))
+            self.assert_(not os.path.exists(fn2))
+
+            main(['download', 'foobar'])
+            self.assert_(os.path.exists(fn2))
+
+            f = open(fn)
+            self.assertEquals(f.read(), 'test')
+            f.close()
+
+        finally:
+            ifunlink(fn)
+            ifunlink(fn1)
+            ifunlink(fn2)
+
 
 class InstallTestCase(TestCase):
     @patch('pgxn.client.commands.Popen')

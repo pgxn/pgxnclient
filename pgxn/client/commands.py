@@ -15,6 +15,7 @@ from pgxn.client import Spec, Extension, Name, SemVer
 from pgxn.client.api import Api
 from pgxn.client.i18n import _, N_, gettext
 from pgxn.client.errors import PgxnClientException
+from pgxn.client.network import download
 
 logger = logging.getLogger('pgxn.client.commands')
 
@@ -285,15 +286,7 @@ class Download(CommandWithSpec):
 
         fin = self.api.download(spec.name, ver)
         fn = self._get_local_file_name(fin.url)
-        logger.info(_("saving %s"), fn)
-        fout = open(fn, "wb")
-        try:
-            while 1:
-                data = fin.read(8192)
-                if not data: break
-                fout.write(data)
-        finally:
-            fout.close()
+        fn = download(fin, fn, rename=True)
 
         # TODO: verify checksum
         return fn
