@@ -240,3 +240,36 @@ class LoadTestCase(TestCase):
             'PostgreSQL 9.1alpha5 on i686-pc-linux-gnu, compiled by GCC gcc'
             ' (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5, 32-bit '))
 
+    @patch('pgxn.client.commands.Load.is_extension')
+    @patch('pgxn.client.commands.Load.get_pg_version')
+    @patch('pgxn.client.commands.Popen')
+    @patch('pgxn.client.api.get_file')
+    def test_check_psql_options(self,
+            mock_get, mock_popen, mock_pgver, mock_isext):
+        mock_get.side_effect = fake_get_file
+        pop = mock_popen.return_value
+        pop.returncode = 0
+        pop.communicate.return_value = ('', '')
+        mock_pgver.return_value = (9,1,0)
+        mock_isext.return_value = True
+
+        from pgxn.client.cli import main
+
+        main(['--yes', 'load', '--dbname', 'dbdb', 'foobar'])
+        args = mock_popen.call_args[0][0]
+        self.assertEqual('dbdb', args[args.index('--dbname') + 1])
+
+        main(['--yes', 'load', '-U', 'meme', 'foobar'])
+        args = mock_popen.call_args[0][0]
+        self.assertEqual('meme', args[args.index('--username') + 1])
+
+        main(['--yes', 'load', '--port', '666', 'foobar'])
+        args = mock_popen.call_args[0][0]
+        self.assertEqual('666', args[args.index('--port') + 1])
+
+        main(['--yes', 'load', '-h', 'somewhere', 'foobar'])
+        args = mock_popen.call_args[0][0]
+        self.assertEqual('somewhere', args[args.index('--host') + 1])
+
+
+

@@ -492,7 +492,48 @@ class Check(WithMake, CommandWithSpec):
             raise
 
 
-class Load(WithPgConfig, CommandWithSpec):
+class WithDatabase(object):
+    @classmethod
+    def customize_parser(self, parser, subparsers, glb):
+        subp = super(WithDatabase, self).customize_parser(
+            parser, subparsers, glb)
+
+        g = subp.add_argument_group(_("Database connections options"))
+
+        g.add_argument('-d', '--dbname', metavar="DBNAME",
+            help = _("database name to install into"))
+        g.add_argument('-h', '--host', metavar="HOST",
+            help = _("database server host or socket directory"))
+        g.add_argument('-p', '--port', metavar="PORT", type=int,
+            help = _("database server port"))
+        g.add_argument('-U', '--username', metavar="NAME",
+            help = _("database user name"))
+
+        subp.epilog += _("""
+The default database connection options depend on the value of environment
+variables PGDATABASE, PGHOST, PGPORT, PGUSER.
+""")
+        return subp
+
+    def get_psql_options(self):
+        """
+        Return the cmdline options to connect to the specified database.
+        """
+        rv = []
+
+        if self.opts.dbname:
+            rv.extend(['--dbname', self.opts.dbname])
+        if self.opts.host:
+            rv.extend(['--host', self.opts.host])
+        if self.opts.port:
+            rv.extend(['--port', str(self.opts.port)])
+        if self.opts.username:
+            rv.extend(['--username', self.opts.username])
+
+        return rv
+
+
+class Load(WithPgConfig, WithDatabase, CommandWithSpec):
     name = 'load'
     description = N_('load the extensions in a distribution into a database')
 
@@ -565,6 +606,7 @@ Do you want to load it?""")
 
     def call_psql(self, command):
         cmdline = [self.find_psql()]
+        cmdline.extend(self.get_psql_options())
         if command is not None:
             cmdline.append('-tA')   # tuple only, unaligned
             cmdline.extend(['-c', command])
@@ -580,6 +622,7 @@ Do you want to load it?""")
 
     def load_sql(self, filename=None, data=None):
         cmdline = [self.find_psql()]
+        cmdline.extend(self.get_psql_options())
         # load via pipe to enable psql commands in the file
         if not data:
             fin = open(filename, 'r')
