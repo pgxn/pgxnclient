@@ -16,7 +16,8 @@ from pgxn.client.errors import PgxnException, UserAbort
 import logging
 logging.basicConfig(
     format="%(levelname)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S")
+    datefmt="%Y-%m-%d %H:%M:%S",
+    stream=sys.stdout)
 logger = logging.getLogger()
 
 if __name__ == '__main__':
