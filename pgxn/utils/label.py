@@ -31,7 +31,9 @@ class Label(str):
         return str.__new__(cls, value)
 
     re_label = re.compile(
-        r'^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$',
+        # TODO: quick hack - remove the _ from here!!!
+        # I assumed the packages were Label but they aren't
+        r'^[a-z]([-a-z0-9_]{0,61}[a-z0-9_])?$',
         re.IGNORECASE)
 
     def __eq__(self, other):

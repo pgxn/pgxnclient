@@ -441,28 +441,6 @@ class Install(WithMake, CommandWithSpec):
                 _("configure failed with return code %s") % p.returncode)
 
 
-class Check(WithMake, CommandWithSpec):
-    name = 'check'
-    description = N_("run a distribution's test")
-
-    def run_with_temp_dir(self, dir):
-        self.opts.target = dir
-        fn = Download(self.opts).run()
-        pdir = self.unpack(fn, dir)
-
-        logger.info(_("checking extension"))
-        try:
-            self.run_make('installcheck', dir=pdir)
-        except PgxnClientException, e:
-            # if the test failed, copy locally the regression result
-            for ext in ('out', 'diffs'):
-                fn = os.path.join(pdir, 'regression.' + ext)
-                if os.path.exists(fn):
-                    logger.info(_('copying regression.%s'), ext)
-                    shutil.copy(fn, './regression.' + ext)
-            raise
-
-
 class WithDatabase(object):
     @classmethod
     def customize_parser(self, parser, subparsers, glb):
@@ -502,6 +480,28 @@ variables PGDATABASE, PGHOST, PGPORT, PGUSER.
             rv.extend(['--username', self.opts.username])
 
         return rv
+
+
+class Check(WithMake, WithDatabase, CommandWithSpec):
+    name = 'check'
+    description = N_("run a distribution's test")
+
+    def run_with_temp_dir(self, dir):
+        self.opts.target = dir
+        fn = Download(self.opts).run()
+        pdir = self.unpack(fn, dir)
+
+        logger.info(_("checking extension"))
+        try:
+            self.run_make('installcheck', dir=pdir)
+        except PgxnClientException, e:
+            # if the test failed, copy locally the regression result
+            for ext in ('out', 'diffs'):
+                fn = os.path.join(pdir, 'regression.' + ext)
+                if os.path.exists(fn):
+                    logger.info(_('copying regression.%s'), ext)
+                    shutil.copy(fn, './regression.' + ext)
+            raise
 
 
 class Load(WithPgConfig, WithDatabase, CommandWithSpec):
