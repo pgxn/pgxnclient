@@ -13,17 +13,11 @@ import re
 
 from pgxn.client.errors import BadSpecError
 
+from pgxn.utils.semver import SemVer
+
 class Name(str):
     """A string representing a package name."""
     # TODO: range
-
-class SemVer(str):
-    """A string representing a semantic version specification.
-
-    See: http://semver.org/
-    """
-    # TODO: format and ordering
-
 
 class Spec(object):
     """A name together with a range of versions."""
