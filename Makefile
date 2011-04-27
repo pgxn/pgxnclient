@@ -4,7 +4,7 @@
 # 
 # This file is part of the PGXN client
 
-.PHONY: env
+.PHONY: env sdist upload
 
 PYTHON := python$(PYTHON_VERSION)
 PYTHON_VERSION ?= $(shell $(PYTHON) -c 'import sys; print ("%d.%d" % sys.version_info[:2])')
@@ -33,3 +33,11 @@ ez_setup:
 	mkdir -p $(ENV_BIN)
 	mkdir -p $(ENV_LIB)
 	wget -O $(EZ_SETUP) http://peak.telecommunity.com/dist/ez_setup.py
+
+sdist:
+	$(PYTHON) setup.py sdist --manifest-only
+	$(PYTHON) setup.py sdist --force-manifest --formats=gztar,zip
+
+upload:
+	$(PYTHON) setup.py sdist --formats=gztar,zip upload
+

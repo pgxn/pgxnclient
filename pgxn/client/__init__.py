@@ -6,7 +6,8 @@ pgxn.client -- main package
 
 # This file is part of the PGXN client
 
-__version__ = '0.1dev0'
+# TODO: in a single place - now it's in the setup too.
+__version__ = '0.1a1'
 
 
 import re
