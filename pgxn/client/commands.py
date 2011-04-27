@@ -407,7 +407,7 @@ class Install(WithMake, CommandWithSpec):
             return
 
         logger.info(_("running configure"))
-        p = Popen(fn)
+        p = Popen(fn, cwd=dir)
         p.communicate()
         if p.returncode:
             raise PgxnClientException(
