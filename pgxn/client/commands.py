@@ -393,7 +393,7 @@ class WithPgConfig(object):
 
 
 class WithMake(WithPgConfig, WithUnpacking):
-    def run_make(self, cmd, dir):
+    def run_make(self, cmd, dir, env=None):
         cmdline = ['make', 'PG_CONFIG=%s' % self.opts.pg_config]
         if cmd == 'installcheck':
             cmdline.append('PGUSER=postgres')
@@ -402,7 +402,7 @@ class WithMake(WithPgConfig, WithUnpacking):
 
         cmdline = " ".join(cmdline)
         logger.debug(_("running: %s"), cmdline)
-        p = Popen(cmdline, cwd=dir, shell=True)
+        p = Popen(cmdline, cwd=dir, shell=True, env=env)
         p.communicate()
         if p.returncode:
             raise PgxnClientException(
@@ -469,16 +469,20 @@ variables PGDATABASE, PGHOST, PGPORT, PGUSER.
         Return the cmdline options to connect to the specified database.
         """
         rv = []
+        if self.opts.dbname: rv.extend(['--dbname', self.opts.dbname])
+        if self.opts.host: rv.extend(['--host', self.opts.host])
+        if self.opts.port: rv.extend(['--port', str(self.opts.port)])
+        if self.opts.username: rv.extend(['--username', self.opts.username])
+        return rv
 
-        if self.opts.dbname:
-            rv.extend(['--dbname', self.opts.dbname])
-        if self.opts.host:
-            rv.extend(['--host', self.opts.host])
-        if self.opts.port:
-            rv.extend(['--port', str(self.opts.port)])
-        if self.opts.username:
-            rv.extend(['--username', self.opts.username])
-
+    def get_psql_env(self):
+        """Return a dict with env variables to connect to the specified db."""
+        rv = {}
+        if self.opts.dbname: rv['PGDATABASE'] = self.opts.dbname
+        if self.opts.host: rv['PGHOST'] = self.opts.host
+        if self.opts.port: rv['PGPORT'] = str(self.opts.port)
+        # TODO: PGUSER doesn't get passed?
+        if self.opts.username: rv['PGUSER'] = self.opts.username
         return rv
 
 
@@ -492,8 +496,10 @@ class Check(WithMake, WithDatabase, CommandWithSpec):
         pdir = self.unpack(fn, dir)
 
         logger.info(_("checking extension"))
+        env = os.environ.copy()
+        env.update(self.get_psql_env())
         try:
-            self.run_make('installcheck', dir=pdir)
+            self.run_make('installcheck', dir=pdir, env=env)
         except PgxnClientException, e:
             # if the test failed, copy locally the regression result
             for ext in ('out', 'diffs'):
