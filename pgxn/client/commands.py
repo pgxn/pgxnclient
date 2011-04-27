@@ -197,6 +197,7 @@ class Search(Command):
 from pgxn.client.errors import BadSpecError
 
 class CommandWithSpec(Command):
+    # TODO: the spec should possibly be a local file or a full url
     @classmethod
     def customize_parser(self, parser, subparsers, glb):
         # bail out if it is not a subclass being invoked
