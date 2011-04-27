@@ -11,7 +11,7 @@ import logging
 from pgxn.utils import argparse
 
 from pgxn.client import __version__
-from pgxn.client import Spec, Extension, Name, SemVer
+from pgxn.client import Spec, Extension, Label, SemVer
 from pgxn.client.api import Api
 from pgxn.client.i18n import _, N_, gettext
 from pgxn.client.errors import PgxnClientException, UserAbort
@@ -601,7 +601,7 @@ Do you want to load it?""")
 
     def create_extension(self, name):
         # TODO: namespace etc.
-        cmd = "CREATE EXTENSION %s;" % Name(name)
+        cmd = "CREATE EXTENSION %s;" % Label(name)
         self.load_sql(data=cmd)
 
     def call_psql(self, command):

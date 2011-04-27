@@ -14,10 +14,8 @@ import re
 from pgxn.client.errors import BadSpecError
 
 from pgxn.utils.semver import SemVer
+from pgxn.utils.label import Label
 
-class Name(str):
-    """A string representing a package name."""
-    # TODO: range
 
 class Spec(object):
     """A name together with a range of versions."""
@@ -38,7 +36,7 @@ class Spec(object):
         if m is None:
             raise BadSpecError('bad format')
 
-        name = Name(m.group(1))
+        name = Label(m.group(1))
         op = m.group(2)
         if op == '=':
             op = '=='
