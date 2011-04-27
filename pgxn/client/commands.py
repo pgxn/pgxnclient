@@ -129,29 +129,6 @@ class Command(object):
                 prompt = _("Please answer yes or no")
 
 
-class User(Command):
-    name = 'user'
-    description = N_("return information about a PGXN user")
-
-    @classmethod
-    def customize_parser(self, parser, subparsers, glb):
-        subp = self._make_subparser(subparsers)
-        subp.add_argument('name', nargs='?', metavar="USERNAME",
-            help = _("the user to get details for;"
-                " print an users list if not specified"))
-
-    def run(self):
-        if not self.opts.name:
-            data = self.api.stats('user')
-            for u in data['prolific']:
-                print (u"%(nickname)s: %(name)s "
-                    "(%(dists)d dists, %(releases)d releases)"
-                    % u)
-        else:
-            data = self.api.user(self.opts.name)
-            print data
-
-
 from pgxn.client.errors import ResourceNotFound
 
 class Mirror(Command):
