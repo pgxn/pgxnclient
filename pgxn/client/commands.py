@@ -169,7 +169,7 @@ class Mirror(Command):
 
 class Search(Command):
     name = 'search'
-    description = N_("install an extension into a database")
+    description = N_("search in the available extensions")
 
     @classmethod
     def customize_parser(self, parser, subparsers, glb):
