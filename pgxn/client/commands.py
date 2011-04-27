@@ -324,8 +324,8 @@ class Download(CommandWithSpec):
 
 import shutil
 import tempfile
-from zipfile import ZipFile
 from subprocess import Popen, PIPE
+from pgxn.utils.zip import unpack
 
 class WithUnpacking(object):
     def run(self):
@@ -336,35 +336,7 @@ class WithUnpacking(object):
             shutil.rmtree(dir)
 
     def unpack(self, zipname, destdir):
-        logger.info(_("unpacking: %s"), zipname)
-        destdir = os.path.abspath(destdir)
-        zf = ZipFile(zipname, 'r')
-        dirout = None
-        try:
-            for fn in zf.namelist():
-                fname = os.path.abspath(os.path.join(destdir, fn))
-                if not fname.startswith(destdir):
-                    raise PgxnClientException(
-                        "archive trying to escape! %s" % fname)
-                # TODO: is this the right way to check for dirs?
-                if fn.endswith('/'):
-                    # Assume we will work in the first dir of the archive
-                    if dirout is None:
-                        dirout = fname
-
-                    os.makedirs(fname)
-                    continue
-
-                logger.debug(_("saving: %s"), fname)
-                f = open(fname, "wb")
-                try:
-                    f.write(zf.read(fn))
-                finally:
-                    f.close()
-        finally:
-            zf.close()
-
-        return dirout or destdir
+        return unpack(zipname, destdir)
 
 
 class WithPgConfig(object):
@@ -403,7 +375,7 @@ class WithMake(WithPgConfig, WithUnpacking):
 
         cmdline = " ".join(cmdline)
         logger.debug(_("running: %s"), cmdline)
-        p = Popen(cmdline, cwd=dir, shell=True, env=env)
+        p = Popen(cmdline, cwd=dir, shell=True, env=env, close_fds=True)
         p.communicate()
         if p.returncode:
             raise PgxnClientException(
