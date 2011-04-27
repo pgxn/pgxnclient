@@ -102,6 +102,76 @@ class DownloadTestCase(TestCase):
         finally:
             ifunlink(fn)
 
+    def test_version(self):
+        from pgxn.client import Spec
+        from pgxn.client.commands import Download
+        from pgxn.client.errors import ResourceNotFound
+
+        opt = Mock()
+        opt.status = 'stable'
+        cmd = Download(opt)
+
+        for spec, res, data in [
+            ('foo', '1.2.0', {'stable': [ '1.2.0' ]}),
+            ('foo', '1.2.0', {'stable': [ '1.2.0', '1.2.0b' ]}),
+            ('foo=1.2', '1.2.0', {'stable': [ '1.2.0' ]}),
+            ('foo>=1.1', '1.2.0', {'stable': [ '1.1.0', '1.2.0' ]}),
+            ('foo>=1.1', '1.2.0', {
+                'stable': [ '1.1.0', '1.2.0' ],
+                'testing': [ '1.3.0' ],
+                'unstable': [ '1.4.0' ], }),
+            ]:
+            spec = Spec.parse(spec)
+            data = { 'releases':
+                dict([(k, [{'version': v} for v in vs])
+                    for k, vs in data.items()]) }
+
+            self.assertEqual(res, cmd.get_best_version(data, spec))
+
+        for spec, res, data in [
+            ('foo>=1.3', '1.2.0', {'stable': [ '1.2.0' ]}),
+            ('foo>=1.3', '1.2.0', {
+                'stable': [ '1.2.0' ],
+                'testing': [ '1.3.0' ], }),
+            ]:
+            spec = Spec.parse(spec)
+            data = { 'releases':
+                dict([(k, [{'version': v} for v in vs])
+                    for k, vs in data.items()]) }
+
+            self.assertRaises(ResourceNotFound, cmd.get_best_version, data, spec)
+
+        opt.status = 'testing'
+
+        for spec, res, data in [
+            ('foo>=1.1', '1.3.0', {
+                'stable': [ '1.1.0', '1.2.0' ],
+                'testing': [ '1.3.0' ],
+                'unstable': [ '1.4.0' ], }),
+            ]:
+            spec = Spec.parse(spec)
+            data = { 'releases':
+                dict([(k, [{'version': v} for v in vs])
+                    for k, vs in data.items()]) }
+
+            self.assertEqual(res, cmd.get_best_version(data, spec))
+
+        opt.status = 'unstable'
+
+        for spec, res, data in [
+            ('foo>=1.1', '1.4.0', {
+                'stable': [ '1.1.0', '1.2.0' ],
+                'testing': [ '1.3.0' ],
+                'unstable': [ '1.4.0' ], }),
+            ]:
+            spec = Spec.parse(spec)
+            data = { 'releases':
+                dict([(k, [{'version': v} for v in vs])
+                    for k, vs in data.items()]) }
+
+            self.assertEqual(res, cmd.get_best_version(data, spec))
+
+
 class InstallTestCase(TestCase):
     @patch('pgxn.client.commands.Popen')
     @patch('pgxn.client.api.get_file')

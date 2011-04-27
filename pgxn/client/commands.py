@@ -249,8 +249,6 @@ class CommandWithSpec(Command):
 
     def get_spec(self):
         spec = self.opts.spec
-        if spec is None:
-            return self._run_recent()
 
         try:
             spec = Spec.parse(spec)
@@ -258,33 +256,29 @@ class CommandWithSpec(Command):
             self.parser.error(_("cannot parse package '%s': %s")
                 % (spec, e))
 
-        if spec.op and spec.op != '==':
-            raise NotImplementedError('TODO: operator %s' % op)
-
         return spec
 
     def get_best_version(self, data, spec):
         """Return the best version an user may want for a distribution.
         """
         drels = data['releases']
-        rels = []
+        vers = []
         if 'stable' in drels:
-            rels.extend([SemVer(r['version']) for r in drels['stable']])
+            vers.extend([SemVer(r['version']) for r in drels['stable']])
         if self.opts.status in ('testing', 'unstable') and 'testing' in drels:
-            rels.extend([SemVer(r['version']) for r in drels['testing']])
+            vers.extend([SemVer(r['version']) for r in drels['testing']])
         if self.opts.status == 'unstable' and 'unstable' in drels:
-            rels.extend([SemVer(r['version']) for r in drels['unstable']])
+            vers.extend([SemVer(r['version']) for r in drels['unstable']])
 
-        # todo: real filtering
-        if not rels:
+        vers.sort(reverse=True)
+        for ver in vers:
+            if spec.accepted(ver):
+                logger.info(_("best version: %s %s"), spec.name, ver)
+                return ver
+        else:
             raise ResourceNotFound(
                 _("no suitable version found for extension '%s'"
                     " (release level: %s)" % (spec.name, self.opts.status)))
-
-        rels.sort(reverse=True)
-        best = rels[0]
-        logger.info(_("best version: %s %s"), spec.name, best)
-        return best
 
 
 from pgxn.utils import sha1

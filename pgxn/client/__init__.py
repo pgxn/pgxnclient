@@ -10,6 +10,7 @@ __version__ = '0.1dev0'
 
 
 import re
+import operator as _op
 
 from pgxn.client.errors import BadSpecError
 
@@ -34,7 +35,8 @@ class Spec(object):
         # split operator/version and name
         m = re.match(r'(.+?)(?:(==|=|>=|>|<=|<)(.*))?$', spec)
         if m is None:
-            raise BadSpecError('bad format')
+            raise BadSpecError(
+                _("bad format for version specification: '%s'"), spec)
 
         name = Label(m.group(1))
         op = m.group(2)
@@ -42,11 +44,18 @@ class Spec(object):
             op = '=='
 
         if op is not None:
-            ver = SemVer(m.group(3))
+            ver = SemVer.clean(m.group(3))
         else:
             ver = None
 
         return Spec(name, op, ver)
+
+    def accepted(self, version, _map = {
+            '==': _op.eq, '<=': _op.le, '<': _op.lt, '>=': _op.ge, '>': _op.gt}):
+        """Return True if the given version is accepted in the spec."""
+        if self.op is None:
+            return True
+        return _map[self.op](version, self.ver)
 
 
 class Extension(object):
