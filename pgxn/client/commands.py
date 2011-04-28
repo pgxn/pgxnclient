@@ -214,13 +214,13 @@ class CommandWithSpec(Command):
 
         g = subp.add_mutually_exclusive_group(required=False)
         g.add_argument('--stable', dest='status',
-            action='store_const', const='stable', default='stable',
+            action='store_const', const=Spec.STABLE, default=Spec.STABLE,
             help=_("only accept stable distributions [default]"))
         g.add_argument('--testing', dest='status',
-            action='store_const', const='testing',
+            action='store_const', const=Spec.TESTING,
             help=_("accept testing distributions too"))
         g.add_argument('--unstable', dest='status',
-            action='store_const', const='unstable',
+            action='store_const', const=Spec.UNSTABLE,
             help=_("accept unstable distributions too"))
 
         return subp
@@ -240,23 +240,36 @@ class CommandWithSpec(Command):
         """Return the best version an user may want for a distribution.
         """
         drels = data['releases']
-        vers = []
-        if 'stable' in drels:
-            vers.extend([SemVer(r['version']) for r in drels['stable']])
-        if self.opts.status in ('testing', 'unstable') and 'testing' in drels:
-            vers.extend([SemVer(r['version']) for r in drels['testing']])
-        if self.opts.status == 'unstable' and 'unstable' in drels:
-            vers.extend([SemVer(r['version']) for r in drels['unstable']])
 
-        vers.sort(reverse=True)
-        for ver in vers:
-            if spec.accepted(ver):
-                logger.info(_("best version: %s %s"), spec.name, ver)
-                return ver
+        # Get the maximum version for each release status satisfying the spec
+        vers = [ None ] * len(Spec.STATUS)
+        for n, d in drels.iteritems():
+            lvl = Spec.STATUS[n]
+            vs = filter(spec.accepted, [SemVer(r['version']) for r in d])
+            if vs:
+                vers[Spec.STATUS[n]] = max(vs)
+
+        # Is there any result at the desired release status?
+        want = [ v for lvl, v in enumerate(vers)
+            if lvl >= self.opts.status and v is not None ] 
+        if want:
+            ver = max(want)
+            logger.info(_("best version: %s %s"), spec.name, ver)
+            return ver
+
+        # Not found: is there any hint we can give?
+        if self.opts.status > Spec.TESTING and vers[Spec.TESTING]:
+            hint = (vers[Spec.TESTING], _('testing'))
+        elif self.opts.status > Spec.UNSTABLE and vers[Spec.UNSTABLE]:
+            hint = (vers[Spec.UNSTABLE], _('unstable'))
         else:
-            raise ResourceNotFound(
-                _("no suitable version found for extension '%s'"
-                    " (release level: %s)" % (spec.name, self.opts.status)))
+            hint = None
+
+        msg = _("no suitable version found for %s") % spec
+        if hint:
+            msg += _(" but there is version %s at level %s") % hint
+
+        raise ResourceNotFound(msg)
 
 
 from pgxn.utils import sha1

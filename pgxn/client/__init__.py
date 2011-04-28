@@ -21,10 +21,28 @@ from pgxn.utils.label import Label
 
 class Spec(object):
     """A name together with a range of versions."""
+
+    # Available release statuses.
+    # Order matters.
+    UNSTABLE = 0
+    TESTING = 1
+    STABLE = 2
+
+    STATUS = {
+        'unstable': UNSTABLE,
+        'testing': TESTING,
+        'stable': STABLE, }
+
     def __init__(self, name, op=None, ver=None):
         self.name = name
         self.op = op
         self.ver = ver
+
+    def __str__(self):
+        if self.op is None:
+            return self.name
+        else:
+            return "%s%s%s" % (self.name, self.op, self.ver)
 
     @classmethod
     def parse(self, spec):

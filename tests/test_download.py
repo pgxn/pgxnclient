@@ -108,7 +108,7 @@ class DownloadTestCase(TestCase):
         from pgxn.client.errors import ResourceNotFound
 
         opt = Mock()
-        opt.status = 'stable'
+        opt.status = Spec.STABLE
         cmd = Download(opt)
 
         for spec, res, data in [
@@ -141,7 +141,7 @@ class DownloadTestCase(TestCase):
 
             self.assertRaises(ResourceNotFound, cmd.get_best_version, data, spec)
 
-        opt.status = 'testing'
+        opt.status = Spec.TESTING
 
         for spec, res, data in [
             ('foo>=1.1', '1.3.0', {
@@ -156,7 +156,7 @@ class DownloadTestCase(TestCase):
 
             self.assertEqual(res, cmd.get_best_version(data, spec))
 
-        opt.status = 'unstable'
+        opt.status = Spec.UNSTABLE
 
         for spec, res, data in [
             ('foo>=1.1', '1.4.0', {
