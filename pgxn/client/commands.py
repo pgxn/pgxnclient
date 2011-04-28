@@ -81,7 +81,7 @@ class Command(object):
         self._api = None
 
     @classmethod
-    def customize_parser(self, parser, subparsers, glb):
+    def customize_parser(self, parser, subparsers, glb, **kwargs):
         subp = self._make_subparser(subparsers)
         glb.add_argument("--mirror", metavar="URL",
             default = 'http://api.pgxn.org/',
@@ -90,6 +90,8 @@ class Command(object):
             help = _("print more informations"))
         glb.add_argument("--yes", action='store_true',
             help = _("assume affermative answer to all questions"))
+
+        return subp
 
     def run(self):
         raise NotImplementedError
@@ -136,13 +138,15 @@ class Mirror(Command):
     description = N_("return info about the mirrors available")
 
     @classmethod
-    def customize_parser(self, parser, subparsers, glb):
+    def customize_parser(self, parser, subparsers, glb, **kwargs):
         subp = self._make_subparser(subparsers)
         subp.add_argument('uri', nargs='?', metavar="URI",
             help = _("return detailed info about this mirror."
                 " If not specified return a list of mirror URIs"))
         subp.add_argument('--detailed', action="store_true",
             help = _("return full details for each mirror"))
+
+        return subp
 
     def run(self):
         data = self.api.mirrors()
@@ -172,7 +176,7 @@ class Search(Command):
     description = N_("search in the available extensions")
 
     @classmethod
-    def customize_parser(self, parser, subparsers, glb):
+    def customize_parser(self, parser, subparsers, glb, **kwargs):
         subp = self._make_subparser(subparsers)
         g = subp.add_mutually_exclusive_group()
         g.add_argument('--dist', dest='where', action='store_const',
@@ -187,6 +191,8 @@ class Search(Command):
         subp.add_argument('query',
             help = _("the string to search"))
 
+        return subp
+
     def run(self):
         data = self.api.search(self.opts.where, self.opts.query)
 
@@ -199,7 +205,8 @@ from pgxn.client.errors import BadSpecError
 class CommandWithSpec(Command):
     # TODO: the spec should possibly be a local file or a full url
     @classmethod
-    def customize_parser(self, parser, subparsers, glb):
+    def customize_parser(self, parser, subparsers, glb,
+            with_status=True, **kwargs):
         # bail out if it is not a subclass being invoked
         if not self.name:
             return
@@ -212,16 +219,17 @@ class CommandWithSpec(Command):
         subp.add_argument('spec', metavar='SPEC',
             help = _("name and optional version of the package"))
 
-        g = subp.add_mutually_exclusive_group(required=False)
-        g.add_argument('--stable', dest='status',
-            action='store_const', const=Spec.STABLE, default=Spec.STABLE,
-            help=_("only accept stable distributions [default]"))
-        g.add_argument('--testing', dest='status',
-            action='store_const', const=Spec.TESTING,
-            help=_("accept testing distributions too"))
-        g.add_argument('--unstable', dest='status',
-            action='store_const', const=Spec.UNSTABLE,
-            help=_("accept unstable distributions too"))
+        if with_status:
+            g = subp.add_mutually_exclusive_group(required=False)
+            g.add_argument('--stable', dest='status',
+                action='store_const', const=Spec.STABLE, default=Spec.STABLE,
+                help=_("only accept stable distributions [default]"))
+            g.add_argument('--testing', dest='status',
+                action='store_const', const=Spec.TESTING,
+                help=_("accept testing distributions too"))
+            g.add_argument('--unstable', dest='status',
+                action='store_const', const=Spec.UNSTABLE,
+                help=_("accept unstable distributions too"))
 
         return subp
 
@@ -272,6 +280,60 @@ class CommandWithSpec(Command):
         raise ResourceNotFound(msg)
 
 
+class List(CommandWithSpec):
+    name = 'list'
+    description = N_("list the available versions of a distribution")
+
+    @classmethod
+    def customize_parser(self, parser, subparsers, glb, **kwargs):
+        subp = super(List, self).customize_parser(parser, subparsers, glb,
+            with_status=False, **kwargs)
+
+        return subp
+
+    def run(self):
+        spec = self.get_spec()
+        data = self.api.dist(spec.name)
+        name = data['name']
+        vs = [ (SemVer(d['version']), s)
+            for s, ds in data['releases'].iteritems()
+            for d in ds ]
+        vs = [ (v, s) for v, s in vs if spec.accepted(v) ]
+        vs.sort(reverse=True)
+        for v, s in vs:
+            print name, v, s
+
+
+class Info(CommandWithSpec):
+    name = 'info'
+    description = N_("obtain informations about a distribution")
+
+    @classmethod
+    def customize_parser(self, parser, subparsers, glb, **kwargs):
+        subp = super(Info, self).customize_parser(parser, subparsers, glb,
+            with_status=True, **kwargs)
+
+        return subp
+
+    def run(self):
+        spec = self.get_spec()
+        if spec.is_single_version():
+            pass
+
+        else:
+            self.list_versions(spec)
+
+    def list_versions(self, spec):
+        data = self.api.dist(spec.name)
+        name = data['name']
+        vs = [ (SemVer(d['version']), s)
+            for s, ds in data['releases'].iteritems()
+            for d in ds ]
+        vs.sort(reverse=True)
+        for v, s in vs:
+            print name, v, s
+
+ 
 from pgxn.utils import sha1
 from pgxn.client.errors import BadChecksum
 
@@ -280,8 +342,9 @@ class Download(CommandWithSpec):
     description = N_("download a distribution from the network")
 
     @classmethod
-    def customize_parser(self, parser, subparsers, glb):
-        subp = super(Download, self).customize_parser(parser, subparsers, glb)
+    def customize_parser(self, parser, subparsers, glb, **kwargs):
+        subp = super(Download, self).customize_parser(
+            parser, subparsers, glb, **kwargs)
         subp.add_argument('--target', metavar='PATH', default='.',
             help = _('Target directory and/or filename to save'))
 
@@ -354,13 +417,15 @@ class WithUnpacking(object):
 
 class WithPgConfig(object):
     @classmethod
-    def customize_parser(self, parser, subparsers, glb):
+    def customize_parser(self, parser, subparsers, glb, **kwargs):
         subp = super(WithPgConfig, self).customize_parser(
-            parser, subparsers, glb)
+            parser, subparsers, glb, **kwargs)
 
         subp.add_argument('--pg_config', metavar="PATH", default='pg_config',
             help = _("path to the pg_config executable to find the database"
                 " [default: %(default)s]"))
+
+        return subp
 
     def call_pg_config(self, what, _cache={}):
         if what in _cache:
@@ -429,9 +494,9 @@ class Install(WithMake, CommandWithSpec):
 
 class WithDatabase(object):
     @classmethod
-    def customize_parser(self, parser, subparsers, glb):
+    def customize_parser(self, parser, subparsers, glb, **kwargs):
         subp = super(WithDatabase, self).customize_parser(
-            parser, subparsers, glb)
+            parser, subparsers, glb, **kwargs)
 
         g = subp.add_argument_group(_("Database connections options"))
 

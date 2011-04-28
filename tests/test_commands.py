@@ -17,6 +17,40 @@ def fake_get_file(url, urlmap=None):
     f.url = url
     return f
 
+
+class ListTestCase(TestCase):
+    def _get_output(self, cmdline):
+        @patch('sys.stdout')
+        @patch('pgxn.client.api.get_file')
+        def do(mock, stdout):
+            mock.side_effect = fake_get_file
+            from pgxn.client.cli import main
+            main(cmdline)
+            return u''.join([a[0] for a, k in stdout.write.call_args_list]) \
+                .encode('ascii')
+
+        return do()
+
+    def test_list(self):
+        output = self._get_output(['list', 'foobar'])
+        self.assertEqual(output, """\
+foobar 0.43.2b1 testing
+foobar 0.42.1 stable
+foobar 0.42.0 stable
+""")
+
+    def test_list_op(self):
+        output = self._get_output(['list', 'foobar>0.42.0'])
+        self.assertEqual(output, """\
+foobar 0.43.2b1 testing
+foobar 0.42.1 stable
+""")
+
+    def test_list_empty(self):
+        output = self._get_output(['list', 'foobar>=0.43.2'])
+        self.assertEqual(output, "")
+
+
 class DownloadTestCase(TestCase):
     @patch('pgxn.client.api.get_file')
     def test_download_latest(self, mock):
