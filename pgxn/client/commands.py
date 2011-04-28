@@ -360,10 +360,11 @@ class Info(CommandWithSpec):
             print "%s: %s: %s" % (k, ext, dext['version'])
 
         k = 'prereqs'
-        for phase, rels in data[k].iteritems():
-            for rel, pkgs in rels.iteritems():
-                for pkg, ver in pkgs.iteritems():
-                    print "%s: %s: %s %s" % (phase, rel, pkg, ver)
+        if k in data:
+            for phase, rels in data[k].iteritems():
+                for rel, pkgs in rels.iteritems():
+                    for pkg, ver in pkgs.iteritems():
+                        print "%s: %s: %s %s" % (phase, rel, pkg, ver)
 
  
 from pgxn.utils import sha1

@@ -2,7 +2,7 @@ pgxn.client 0.1a3
 =================
 
 - Fixed executable mode for scripts unpacked from the zip files.
-- Added 'list' command.
+- Added 'list' and 'info' commands.
 
 
 pgxn.client 0.1a2
