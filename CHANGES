@@ -1,0 +1,16 @@
+pgxn.client 0.1a3
+=================
+
+- Fixed executable mode for scripts unpacked from the zip files.
+
+
+pgxn.client 0.1a2
+=================
+
+- Added database connection parameters for the 'check' command.
+
+
+pgxn.client 0.1a1
+=================
+
+- Fist version released on PyPI.
