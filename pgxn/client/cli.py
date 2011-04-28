@@ -6,6 +6,8 @@ pgxn.client -- command line entry point
 
 # This file is part of the PGXN client
 
+import sys
+
 from pgxn.client.commands import get_option_parser, run_commands
 
 def main(argv=None):

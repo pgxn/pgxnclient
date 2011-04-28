@@ -12,6 +12,7 @@ __version__ = '0.1a3'
 import re
 import operator as _op
 
+from pgxn.client.i18n import _
 from pgxn.client.errors import BadSpecError
 
 from pgxn.utils.semver import SemVer
