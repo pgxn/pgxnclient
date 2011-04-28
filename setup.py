@@ -10,8 +10,10 @@ pgxn.client -- setup script
 
 from distutils.core import setup
 
+from pgxn.client import __version__
+
 setup(name='pgxn.client',
-    version='0.1a2',
+    version=__version__,
     description='A command line tool to interact with the PostgreSQL Extension Network.',
     author='Daniele Varrazzo',
     author_email='daniele.varrazzo@gmail.com',
