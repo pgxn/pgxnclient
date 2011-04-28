@@ -21,6 +21,19 @@ class Api(object):
             version and 'meta' or 'dist',
             {'dist': dist, 'version': version}))
 
+    def ext(self, ext):
+        return json.load(self.call('extension', {'extension': ext}))
+
+    def meta(self, dist, version, as_json=True):
+        f = self.call('meta', {'dist': dist, 'version': version})
+        if as_json:
+            return json.load(f)
+        else:
+            return f.read()
+
+    def readme(self, dist, version):
+        return self.call('readme', {'dist': dist, 'version': version}).read()
+
     def download(self, dist, version):
         return self.call('download', {'dist': dist, 'version': version})
 

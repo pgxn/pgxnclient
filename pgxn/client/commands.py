@@ -310,28 +310,60 @@ class Info(CommandWithSpec):
 
     @classmethod
     def customize_parser(self, parser, subparsers, glb, **kwargs):
-        subp = super(Info, self).customize_parser(parser, subparsers, glb,
-            with_status=True, **kwargs)
+        subp = super(Info, self).customize_parser(
+            parser, subparsers, glb, **kwargs)
+
+        g = subp.add_mutually_exclusive_group()
+        g.add_argument('--details', dest='what', action='store_const',
+            const='details', default='details',
+            help=_("show details about the distribution [default]"))
+        g.add_argument('--meta', dest='what', action='store_const', const='meta',
+            help=_("show the distribution META.json"))
+        g.add_argument('--readme', dest='what', action='store_const', const='readme',
+            help=_("show the distribution README"))
 
         return subp
 
     def run(self):
         spec = self.get_spec()
-        if spec.is_single_version():
-            pass
-
-        else:
-            self.list_versions(spec)
-
-    def list_versions(self, spec):
         data = self.api.dist(spec.name)
-        name = data['name']
-        vs = [ (SemVer(d['version']), s)
-            for s, ds in data['releases'].iteritems()
-            for d in ds ]
-        vs.sort(reverse=True)
-        for v, s in vs:
-            print name, v, s
+        ver = self.get_best_version(data, spec)
+        getattr(self, 'print_' + self.opts.what)(spec, ver)
+
+    def print_meta(self, spec, ver):
+        print self.api.meta(spec.name, ver, as_json=False)
+
+    def print_readme(self, spec, ver):
+        print self.api.readme(spec.name, ver)
+        
+    def print_details(self, spec, ver):
+        data = self.api.meta(spec.name, ver)
+        for k in [u'name', u'abstract', u'description', u'maintainer', u'license',
+                u'release_status', u'version', u'date', u'sha1']:
+            try:
+                v = data[k]
+            except KeyError:
+                logger.warn(_("data key '%s' not found"), k)
+                continue
+
+            if isinstance(v, list):
+                for vv in v:
+                    print "%s: %s" % (k, vv)
+            elif isinstance(v, dict):
+                for kk, vv in v.iteritems():
+                    print "%s: %s: %s" % (k, kk, vv)
+            else:
+                print "%s: %s" % (k, v)
+
+        k = 'provides'
+        for ext, dext in data[k].iteritems():
+            print "%s: %s: %s" % (k, ext, dext['version'])
+
+        k = 'prereqs'
+        for phase, rels in data[k].iteritems():
+            for rel, pkgs in rels.iteritems():
+                for pkg, ver in pkgs.iteritems():
+                    print "%s: %s: %s %s" % (phase, rel, pkg, ver)
 
  
 from pgxn.utils import sha1
