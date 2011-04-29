@@ -1,3 +1,9 @@
+master
+======
+
+- The spec can point to a local file/directory for install
+
+
 pgxn.client 0.1a3
 =================
 

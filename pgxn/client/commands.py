@@ -206,16 +206,23 @@ class CommandWithSpec(Command):
     # TODO: the spec should possibly be a local file or a full url
     @classmethod
     def customize_parser(self, parser, subparsers, glb,
-            with_status=True, **kwargs):
+            with_status=True, can_be_local=False, **kwargs):
         # bail out if it is not a subclass being invoked
         if not self.name:
             return
 
-        subp = self._make_subparser(subparsers,
-            epilog=_("""
-            SPEC can either specify just a name or contain required versions
-            indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
-            """))
+        epilog=_("""
+SPEC can either specify just a name or contain required versions
+indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
+""")
+
+        if can_be_local:
+            epilog += _("""
+SPEC may also be a local zip file or unpacked directory, but in this case
+it should contain at least a '%s', for instance '.%spkgname.zip
+""") % (os.sep, os.sep)
+
+        subp = self._make_subparser(subparsers, epilog=epilog)
         subp.add_argument('spec', metavar='SPEC',
             help = _("name and optional version of the package"))
 
@@ -233,14 +240,18 @@ class CommandWithSpec(Command):
 
         return subp
 
-    def get_spec(self):
+    def get_spec(self, can_be_local=False):
         spec = self.opts.spec
 
         try:
             spec = Spec.parse(spec)
-        except BadSpecError, e:
+        except (ValueError, BadSpecError), e:
             self.parser.error(_("cannot parse package '%s': %s")
                 % (spec, e))
+
+        if not can_be_local and spec.is_local():
+            raise PgxnClientException(
+                _("you cannot use a local resource with this command"))
 
         return spec
 
@@ -497,10 +508,22 @@ class Install(WithMake, CommandWithSpec):
     name = 'install'
     description = N_("install a distribution")
 
+    @classmethod
+    def customize_parser(self, parser, subparsers, glb, **kwargs):
+        subp = super(Install, self).customize_parser(
+            parser, subparsers, glb,
+            can_be_local=True, **kwargs)
+
     def run_with_temp_dir(self, dir):
-        self.opts.target = dir
-        fn = Download(self.opts).run()
-        pdir = self.unpack(fn, dir)
+        spec = self.get_spec(can_be_local=True)
+        if spec.is_dir():
+            pdir = spec.dirname
+        elif spec.is_file():
+            pdir = self.unpack(spec.filename, dir)
+        else:   # download
+            self.opts.target = dir
+            fn = Download(self.opts).run()
+            pdir = self.unpack(fn, dir)
 
         self.maybe_run_configure(pdir)
 
