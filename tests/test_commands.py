@@ -117,8 +117,8 @@ class DownloadTestCase(TestCase):
     def test_download_bad_sha1(self, mock):
         def fakefake(url):
             return fake_get_file(url, urlmap = {
-                'http://api.pgxn.org/dist/foobar.json':
-                'http://api.pgxn.org/dist/foobar-badsha1.json'})
+                'http://api.pgxn.org/dist/foobar/0.42.1/META.json':
+                'http://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'})
 
         mock.side_effect = fakefake
 
@@ -240,8 +240,8 @@ class InstallTestCase(TestCase):
     def test_install_bad_sha1(self, mock_get, mock_popen):
         def fakefake(url):
             return fake_get_file(url, urlmap = {
-                'http://api.pgxn.org/dist/foobar.json':
-                'http://api.pgxn.org/dist/foobar-badsha1.json'})
+                'http://api.pgxn.org/dist/foobar/0.42.1/META.json':
+                'http://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'})
 
         mock_get.side_effect = fakefake
         pop = mock_popen.return_value
@@ -319,8 +319,8 @@ class CheckTestCase(TestCase):
     def test_check_bad_sha1(self, mock_get, mock_popen):
         def fakefake(url):
             return fake_get_file(url, urlmap = {
-                'http://api.pgxn.org/dist/foobar.json':
-                'http://api.pgxn.org/dist/foobar-badsha1.json'})
+                'http://api.pgxn.org/dist/foobar/0.42.1/META.json':
+                'http://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'})
 
         mock_get.side_effect = fakefake
         pop = mock_popen.return_value
