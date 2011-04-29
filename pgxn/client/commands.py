@@ -398,6 +398,7 @@ class Download(CommandWithSpec):
         spec = self.get_spec()
         data = self.api.dist(spec.name)
         ver = self.get_best_version(data, spec)
+        data = self.api.meta(spec.name, ver)
 
         try:
             chk = data['sha1']
