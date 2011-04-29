@@ -100,28 +100,3 @@ class Spec(object):
         return _map[self.op](version, self.ver)
 
 
-class Extension(object):
-    def __init__(self, name=None, version=None, status=None, abstract=None):
-        self.name = name
-        self.version = version
-        self.status = status
-        self.abstract = abstract
-
-    @classmethod
-    def from_json(self, data):
-        data1 = data[data['latest']]
-        name = data['extension']
-        abstract = data1.get('abstract')
-
-        rv = []
-        for ver, vdata in data['versions'].iteritems():
-            vdata = vdata[0]
-            ver = SemVer(ver)
-            ext = Extension(name=name, version=ver,
-                status=vdata.get('status', 'stable'),
-                abstract=abstract)
-            rv.append(ext)
-
-        rv.sort(key=lambda x: x.version, reverse=True)
-        return rv
-
