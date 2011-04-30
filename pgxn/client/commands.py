@@ -35,8 +35,9 @@ def get_option_parser():
         title = _("COMMAND"),
         help = _("The command to execute"))
 
-    clss = CommandType.subclasses[:]
+    clss = [ cls for cls in CommandType.subclasses if cls.name ]
     clss.sort(key=lambda c: c.name)
+    clss.insert(0, Command)
     for cls in clss:
         cls.customize_parser(parser, subparsers, glb)
 
@@ -523,9 +524,6 @@ class InstallUninstall(WithMake, CommandWithSpec):
 
     @classmethod
     def customize_parser(self, parser, subparsers, glb, **kwargs):
-        # Not invoked by a concrete subclass
-        if not self.name: return
-
         subp = super(InstallUninstall, self).customize_parser(
             parser, subparsers, glb,
             can_be_local=True, **kwargs)
@@ -661,56 +659,13 @@ class Check(WithMake, WithDatabase, CommandWithSpec):
             raise
 
 
-class Load(WithPgConfig, WithDatabase, CommandWithSpec):
-    name = 'load'
-    description = N_('load the extensions in a distribution into a database')
-
-    def run(self):
-        spec = self.get_spec()
-        data = self.api.dist(spec.name)
-        ver = self.get_best_version(data, spec)
-        # TODO: this can be avoided if installing the last version
-        dist = self.api.dist(spec.name, ver)
-
-        # TODO: probably unordered before Python 2.7 or something
-        for name, data in dist['provides'].items():
-            sql = data.get('file')
-            self.load_ext(name, sql)
-
-    def load_ext(self, name, sqlfile):
-        pgver = self.get_pg_version()
-        logger.debug("PostgreSQL version: %d.%d.%d", *pgver)
-
-        if pgver >= (9,1,0):
-            if self.is_extension(name):
-                self.create_extension(name)
-                return
-            else:
-                self.confirm(_("""\
-The extension '%s' doesn't contain a control file:
-it will be installed as a loose set of objects.
-Do you want to continue?""")
-                    % name)
-
-        confirm = False
-        if not sqlfile:
-            sqlfile = name + '.sql'
-            confirm = True
-
-        fn = self.find_sql_file(name, sqlfile)
-        if confirm:
-            self.confirm(_("""\
-The extension '%s' doesn't specify a SQL file.
-'%s' is probably the right one.
-Do you want to load it?""")
-                % (name, fn))
-
-        self.load_sql(fn)
-
-
+class LoadUnload(WithPgConfig, WithDatabase, CommandWithSpec):
     def get_pg_version(self):
+        """Return the version of the selected database."""
         data = self.call_psql('SELECT version();')
-        return self.parse_pg_version(data)
+        pgver = self.parse_pg_version(data)
+        logger.debug("PostgreSQL version: %d.%d.%d", *pgver)
+        return pgver
 
     def parse_pg_version(self, data):
         import re
@@ -726,11 +681,6 @@ Do you want to load it?""")
             "extension", name + ".control")
         logger.debug("checking if exists %s", fn)
         return os.path.exists(fn)
-
-    def create_extension(self, name):
-        # TODO: namespace etc.
-        cmd = "CREATE EXTENSION %s;" % Label(name)
-        self.load_sql(data=cmd)
 
     def call_psql(self, command):
         cmdline = [self.find_psql()]
@@ -794,4 +744,103 @@ Do you want to load it?""")
                 "cannot find sql file for extension '%s': '%s'"
                 % (name, sqlfile))
 
+class Load(LoadUnload):
+    name = 'load'
+    description = N_("load a distribution's extensions into a database")
+
+    def run(self):
+        spec = self.get_spec()
+        data = self.api.dist(spec.name)
+        ver = self.get_best_version(data, spec)
+        dist = self.api.dist(spec.name, ver)
+
+        # TODO: probably unordered before Python 2.7 or something
+        for name, data in dist['provides'].items():
+            sql = data.get('file')
+            self.load_ext(name, sql)
+
+    def load_ext(self, name, sqlfile):
+        pgver = self.get_pg_version()
+
+        if pgver >= (9,1,0):
+            if self.is_extension(name):
+                self.create_extension(name)
+                return
+            else:
+                self.confirm(_("""\
+The extension '%s' doesn't contain a control file:
+it will be installed as a loose set of objects.
+Do you want to continue?""")
+                    % name)
+
+        confirm = False
+        if not sqlfile:
+            sqlfile = name + '.sql'
+            confirm = True
+
+        fn = self.find_sql_file(name, sqlfile)
+        if confirm:
+            self.confirm(_("""\
+The extension '%s' doesn't specify a SQL file.
+'%s' is probably the right one.
+Do you want to load it?""")
+                % (name, fn))
+
+        self.load_sql(fn)
+
+    def create_extension(self, name):
+        # TODO: namespace etc.
+        cmd = "CREATE EXTENSION %s;" % Label(name)
+        self.load_sql(data=cmd)
+
+class Unload(LoadUnload):
+    name = 'unload'
+    description = N_("unload a distribution's extensions from a database")
+
+    def run(self):
+        spec = self.get_spec()
+        data = self.api.dist(spec.name)
+        ver = self.get_best_version(data, spec)
+        dist = self.api.dist(spec.name, ver)
+
+        # TODO: ensure ordering
+        provs = dist['provides'].items()
+        provs.reverse()
+        for name, data in provs:
+            sql = data.get('file')
+            self.load_ext(name, sql)
+
+    def load_ext(self, name, sqlfile):
+        pgver = self.get_pg_version()
+
+        if pgver >= (9,1,0):
+            if self.is_extension(name):
+                self.drop_extension(name)
+                return
+            else:
+                self.confirm(_("""\
+The extension '%s' doesn't contain a control file:
+will look for an SQL script to unload the objects.
+Do you want to continue?""")
+                    % name)
+
+        if not sqlfile:
+            sqlfile = name + '.sql'
+
+        sqlfile = 'uninstall_' + sqlfile
+
+        fn = self.find_sql_file(name, sqlfile)
+        self.confirm(_("""\
+In order to unload the extension '%s' looks like you will have
+to load the file '%s'.
+Do you want to execute it?""")
+                % (name, fn))
+
+        self.load_sql(fn)
+
+    def drop_extension(self, name):
+        # TODO: namespace etc.
+        # TODO: cascade
+        cmd = "DROP EXTENSION %s;" % Label(name)
+        self.load_sql(data=cmd)
 
