@@ -578,6 +578,7 @@ class HelpFormatter(object):
             result = action.metavar
         elif action.choices is not None:
             choice_strs = [str(choice) for choice in action.choices]
+            choice_strs.sort()
             result = '{%s}' % ','.join(choice_strs)
         else:
             result = default_metavar
