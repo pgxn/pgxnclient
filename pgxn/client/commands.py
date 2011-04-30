@@ -519,22 +519,25 @@ class WithMake(WithPgConfig, WithUnpacking):
                 _("command returned %s") % p.returncode)
 
 
-class Install(WithMake, CommandWithSpec):
-    name = 'install'
-    description = N_("download, build and install a distribution")
+class InstallUninstall(WithMake, CommandWithSpec):
 
     @classmethod
     def customize_parser(self, parser, subparsers, glb, **kwargs):
-        subp = super(Install, self).customize_parser(
+        # Not invoked by a concrete subclass
+        if not self.name: return
+
+        subp = super(InstallUninstall, self).customize_parser(
             parser, subparsers, glb,
             can_be_local=True, **kwargs)
 
         g = subp.add_mutually_exclusive_group()
         g.add_argument('--sudo', metavar="PROG", default='sudo',
-            help = _("run PROG to elevate privileges when installing"
-                " the extension [default: %(default)s]"))
+            help = _("run PROG to elevate privileges when required"
+                " [default: %(default)s]"))
         g.add_argument('--nosudo', dest='sudo', action='store_false',
-            help = _("don't elevate privileges when installing the extension"))
+            help = _("never elevate privileges"))
+
+        return subp
 
     def run_with_temp_dir(self, dir):
         spec = self.get_spec(can_be_local=True)
@@ -552,8 +555,11 @@ class Install(WithMake, CommandWithSpec):
         logger.info(_("building extension"))
         self.run_make('all', dir=pdir)
 
-        logger.info(_("installing extension"))
-        self.run_make('install', dir=pdir, sudo=self.opts.sudo)
+        self._inun(pdir)
+
+    def _inun(self, pdir):
+        """Run the specific command, implemented in the subclass."""
+        raise NotImplementedError
 
     def maybe_run_configure(self, dir):
         fn = os.path.join(dir, 'configure')
@@ -568,6 +574,22 @@ class Install(WithMake, CommandWithSpec):
         if p.returncode:
             raise PgxnClientException(
                 _("configure failed with return code %s") % p.returncode)
+
+class Install(InstallUninstall):
+    name = 'install'
+    description = N_("download, build and install a distribution")
+
+    def _inun(self, pdir):
+        logger.info(_("installing extension"))
+        self.run_make('install', dir=pdir, sudo=self.opts.sudo)
+
+class Uninstall(InstallUninstall):
+    name = 'uninstall'
+    description = N_("remove a distribution from the system")
+
+    def _inun(self, pdir):
+        logger.info(_("removing extension"))
+        self.run_make('uninstall', dir=pdir, sudo=self.opts.sudo)
 
 
 class WithDatabase(object):
