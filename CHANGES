@@ -4,6 +4,7 @@ master
 - The spec can point to a local file/directory for install
 - Read the sha1 from the META.json as it may be different from the one
   in the dist.json
+- Run sudo in the installation phase of the install command.
 
 
 pgxn.client 0.1a3

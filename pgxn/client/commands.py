@@ -488,17 +488,31 @@ class WithPgConfig(object):
         return rv
 
 
+import shlex
+
 class WithMake(WithPgConfig, WithUnpacking):
-    def run_make(self, cmd, dir, env=None):
-        cmdline = ['make', 'PG_CONFIG=%s' % self.opts.pg_config]
+    def run_make(self, cmd, dir, env=None, sudo=None):
+        """Invoke make with the selected command.
+
+        :param cmd: the make target
+        :param dir: the direcrory to run the command into
+        :param env: variables to add to the make environment
+        :param sudo: if set, use the provided command/arg to elevate
+            privileges
+        """
+        cmdline = []
+
+        if sudo:
+            cmdline.extend(shlex.split(sudo))
+
+        cmdline.extend(['make', 'PG_CONFIG=%s' % self.opts.pg_config])
         if cmd == 'installcheck':
             cmdline.append('PGUSER=postgres')
 
         cmdline.append(cmd)
 
-        cmdline = " ".join(cmdline)
         logger.debug(_("running: %s"), cmdline)
-        p = Popen(cmdline, cwd=dir, shell=True, env=env, close_fds=True)
+        p = Popen(cmdline, cwd=dir, shell=False, env=env, close_fds=True)
         p.communicate()
         if p.returncode:
             raise PgxnClientException(
@@ -507,13 +521,20 @@ class WithMake(WithPgConfig, WithUnpacking):
 
 class Install(WithMake, CommandWithSpec):
     name = 'install'
-    description = N_("install a distribution")
+    description = N_("download, build and install a distribution")
 
     @classmethod
     def customize_parser(self, parser, subparsers, glb, **kwargs):
         subp = super(Install, self).customize_parser(
             parser, subparsers, glb,
             can_be_local=True, **kwargs)
+
+        g = subp.add_mutually_exclusive_group()
+        g.add_argument('--sudo', metavar="PROG", default='sudo',
+            help = _("run PROG to elevate privileges when installing"
+                " the extension [default: %(default)s]"))
+        g.add_argument('--nosudo', dest='sudo', action='store_false',
+            help = _("don't elevate privileges when installing the extension"))
 
     def run_with_temp_dir(self, dir):
         spec = self.get_spec(can_be_local=True)
@@ -532,7 +553,7 @@ class Install(WithMake, CommandWithSpec):
         self.run_make('all', dir=pdir)
 
         logger.info(_("installing extension"))
-        self.run_make('install', dir=pdir)
+        self.run_make('install', dir=pdir, sudo=self.opts.sudo)
 
     def maybe_run_configure(self, dir):
         fn = os.path.join(dir, 'configure')

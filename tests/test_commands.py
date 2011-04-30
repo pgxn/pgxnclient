@@ -218,8 +218,8 @@ class InstallTestCase(TestCase):
         main(['install', 'foobar'])
 
         self.assertEquals(mock_popen.call_count, 2)
-        for i, (args, kw) in enumerate(mock_popen.call_args_list):
-            self.assertTrue(args[0].startswith('make'))
+        self.assertEquals(['make'], mock_popen.call_args_list[0][0][0][:1])
+        self.assertEquals(['sudo', 'make'], mock_popen.call_args_list[1][0][0][:2])
 
     @patch('pgxn.client.commands.Popen')
     @patch('pgxn.client.api.get_file')
@@ -252,6 +252,35 @@ class InstallTestCase(TestCase):
         self.assertRaises(BadChecksum,
             main, ['install', 'foobar'])
 
+    @patch('pgxn.client.commands.Popen')
+    @patch('pgxn.client.api.get_file')
+    def test_install_nosudo(self, mock_get, mock_popen):
+        mock_get.side_effect = fake_get_file
+        pop = mock_popen.return_value
+        pop.returncode = 0
+
+        from pgxn.client.cli import main
+        main(['install', '--nosudo', 'foobar'])
+
+        self.assertEquals(mock_popen.call_count, 2)
+        self.assertEquals(['make'], mock_popen.call_args_list[0][0][0][:1])
+        self.assertEquals(['make'], mock_popen.call_args_list[1][0][0][:1])
+
+    @patch('pgxn.client.commands.Popen')
+    @patch('pgxn.client.api.get_file')
+    def test_install_sudo(self, mock_get, mock_popen):
+        mock_get.side_effect = fake_get_file
+        pop = mock_popen.return_value
+        pop.returncode = 0
+
+        from pgxn.client.cli import main
+        main(['install', '--sudo', 'gksudo -d "hello world"', 'foobar'])
+
+        self.assertEquals(mock_popen.call_count, 2)
+        self.assertEquals(['make'], mock_popen.call_args_list[0][0][0][:1])
+        self.assertEquals(['gksudo', '-d', 'hello world', 'make'],
+            mock_popen.call_args_list[1][0][0][:4])
+
 
 class CheckTestCase(TestCase):
     @patch('pgxn.client.commands.Popen')
@@ -265,8 +294,7 @@ class CheckTestCase(TestCase):
         main(['check', 'foobar'])
 
         self.assertEquals(mock_popen.call_count, 1)
-        for i, (args, kw) in enumerate(mock_popen.call_args_list):
-            self.assertTrue(args[0].startswith('make'))
+        self.assertEquals(['make'], mock_popen.call_args_list[0][0][0][:1])
 
     @patch('pgxn.client.commands.Popen')
     @patch('pgxn.client.api.get_file')
