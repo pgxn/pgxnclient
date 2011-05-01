@@ -64,13 +64,7 @@ class Api(object):
         return url
 
     def get_template(self, meth):
-        tmpl = self.get_index()[meth]
-
-        # TODO: broken API?
-        if meth == 'search':
-            tmpl = tmpl.rstrip('/')
-
-        return tmpl
+        return self.get_index()[meth]
 
     _api_index = None
 
