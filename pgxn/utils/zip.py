@@ -11,6 +11,7 @@ import stat
 import shutil
 from zipfile import ZipFile
 
+from pgxn.utils import json
 from pgxn.client.i18n import _
 from pgxn.client.errors import PgxnClientException
 
@@ -62,4 +63,21 @@ def unpack(zipname, destdir):
 
     return dirout or destdir
 
+def get_meta_from_zip(filename):
+    try:
+        zf = ZipFile(filename, 'r')
+    except Exception, e:
+        raise PgxnClientException(
+            _("cannot open archive '%s': %s") % (filename, e))
+
+    try:
+        # Return the first file with the expected name
+        for fn in zf.namelist():
+            if fn.endswith('META.json'):
+                return json.load(zf.open(fn))
+        else:
+            raise PgxnClientException(
+                _("file 'META.json' not found in archive '%s'") % filename)
+    finally:
+        zf.close()
 

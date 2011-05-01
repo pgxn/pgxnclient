@@ -8,6 +8,7 @@ pgxn.client -- commands module
 
 import os
 import logging
+from pgxn.utils import json
 from pgxn.utils import argparse
 
 from pgxn.client import __version__
@@ -202,6 +203,7 @@ class Search(Command):
 
 
 from pgxn.client.errors import BadSpecError
+from pgxn.utils.zip import get_meta_from_zip
 
 class CommandWithSpec(Command):
     # TODO: the spec should possibly be a local file or a full url
@@ -220,7 +222,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         if can_be_local:
             epilog += _("""
 SPEC may also be a local zip file or unpacked directory, but in this case
-it should contain at least a '%s', for instance '.%spkgname.zip
+it should contain at least a '%s', for instance '.%spkgname.zip'.
 """) % (os.sep, os.sep)
 
         subp = self._make_subparser(subparsers, epilog=epilog)
@@ -290,6 +292,27 @@ it should contain at least a '%s', for instance '.%spkgname.zip
             msg += _(" but there is version %s at level %s") % hint
 
         raise ResourceNotFound(msg)
+
+    def get_meta(self, spec):
+        if not spec.is_local():
+            # Get the metadata from the API
+            data = self.api.dist(spec.name)
+            ver = self.get_best_version(data, spec)
+            return self.api.meta(spec.name, ver)
+
+        elif spec.is_dir():
+            # Get the metadata from a directory
+            fn = os.path.join(spec.dirname, 'META.json')
+            logger.debug("reading %s", fn)
+            if not os.path.exists(fn):
+                raise PgxnClientException(
+                    _("file 'META.json' not found in '%s'") % dir)
+
+            return json.load(open(fn))
+
+        elif spec.is_file():
+            # Get the metadata from a zip file
+            return get_meta_from_zip(spec.filename)
 
 
 class List(CommandWithSpec):
@@ -397,9 +420,7 @@ class Download(CommandWithSpec):
 
     def run(self):
         spec = self.get_spec()
-        data = self.api.dist(spec.name)
-        ver = self.get_best_version(data, spec)
-        data = self.api.meta(spec.name, ver)
+        data = self.get_meta(spec)
 
         try:
             chk = data['sha1']
@@ -407,7 +428,7 @@ class Download(CommandWithSpec):
             raise PgxnClientException(
                 "sha1 missing from the distribution meta")
 
-        fin = self.api.download(spec.name, ver)
+        fin = self.api.download(spec.name, SemVer(data['version']))
         fn = self._get_local_file_name(fin.url)
         fn = download(fin, fn, rename=True)
         self.verify_checksum(fn, chk)
@@ -450,10 +471,10 @@ from subprocess import Popen, PIPE
 from pgxn.utils.zip import unpack
 
 class WithUnpacking(object):
-    def run(self):
+    def call_with_temp_dir(self, f, *args, **kwargs):
         dir = tempfile.mkdtemp()
         try:
-            return self.run_with_temp_dir(dir)
+            return f(dir, *args, **kwargs)
         finally:
             shutil.rmtree(dir)
 
@@ -537,7 +558,10 @@ class InstallUninstall(WithMake, CommandWithSpec):
 
         return subp
 
-    def run_with_temp_dir(self, dir):
+    def run(self):
+        return self.call_with_temp_dir(self._run)
+
+    def _run(self, dir):
         spec = self.get_spec(can_be_local=True)
         if spec.is_dir():
             pdir = spec.dirname
@@ -639,7 +663,10 @@ class Check(WithMake, WithDatabase, CommandWithSpec):
     name = 'check'
     description = N_("run a distribution's test")
 
-    def run_with_temp_dir(self, dir):
+    def run(self):
+        return self.call_with_temp_dir(self._run)
+
+    def _run(self, dir):
         self.opts.target = dir
         fn = Download(self.opts).run()
         pdir = self.unpack(fn, dir)
@@ -660,6 +687,14 @@ class Check(WithMake, WithDatabase, CommandWithSpec):
 
 
 class LoadUnload(WithPgConfig, WithDatabase, CommandWithSpec):
+    @classmethod
+    def customize_parser(self, parser, subparsers, glb, **kwargs):
+        subp = super(LoadUnload, self).customize_parser(
+            parser, subparsers, glb,
+            can_be_local=True, **kwargs)
+
+        return subp
+
     def get_pg_version(self):
         """Return the version of the selected database."""
         data = self.call_psql('SELECT version();')
@@ -749,10 +784,8 @@ class Load(LoadUnload):
     description = N_("load a distribution's extensions into a database")
 
     def run(self):
-        spec = self.get_spec()
-        data = self.api.dist(spec.name)
-        ver = self.get_best_version(data, spec)
-        dist = self.api.dist(spec.name, ver)
+        spec = self.get_spec(can_be_local=True)
+        dist = self.get_meta(spec)
 
         # TODO: probably unordered before Python 2.7 or something
         for name, data in dist['provides'].items():
@@ -798,10 +831,8 @@ class Unload(LoadUnload):
     description = N_("unload a distribution's extensions from a database")
 
     def run(self):
-        spec = self.get_spec()
-        data = self.api.dist(spec.name)
-        ver = self.get_best_version(data, spec)
-        dist = self.api.dist(spec.name, ver)
+        spec = self.get_spec(can_be_local=True)
+        dist = self.get_meta(spec)
 
         # TODO: ensure ordering
         provs = dist['provides'].items()

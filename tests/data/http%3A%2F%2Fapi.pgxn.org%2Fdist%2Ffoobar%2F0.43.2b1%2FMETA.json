@@ -22,7 +22,7 @@
          "docfile": "doc/foobar.md",
          "docpath": "doc/foobar",
          "file": "sql/foobar.sql",
-         "version": "0.42.1"
+         "version": "0.43.2b1"
       }
    },
    "release_status": "stable",
@@ -68,5 +68,5 @@
       "testing"
    ],
    "user": "piro",
-   "version": "0.42.1"
+   "version": "0.43.2b1"
 }
