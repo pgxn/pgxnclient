@@ -9,7 +9,7 @@ Label -- a valid RFC 1034 identifier
 
 import re
 
-from pgxn.client.i18n import _
+from pgxnclient.i18n import _
 
 
 class Label(str):

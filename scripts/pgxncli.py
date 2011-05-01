@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-pgxn.client -- command line interface
+pgxnclient -- command line interface
 """
 
 # Copyright (C) 2011 Daniele Varrazzo
@@ -9,9 +9,9 @@ pgxn.client -- command line interface
 
 import sys
 
-from pgxn.client.cli import main
-from pgxn.client.i18n import _
-from pgxn.client.errors import PgxnException, UserAbort
+from pgxnclient.cli import main
+from pgxnclient.i18n import _
+from pgxnclient.errors import PgxnException, UserAbort
 
 import logging
 logging.basicConfig(

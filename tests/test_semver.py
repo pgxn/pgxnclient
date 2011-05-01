@@ -1,6 +1,6 @@
 from unittest2 import TestCase
 
-from pgxn.client import SemVer
+from pgxnclient import SemVer
 
 class SemVerTestCase(TestCase):
     def test_ok(self):

@@ -1,5 +1,5 @@
 """
-pgxn.client -- package exceptions
+pgxnclient -- package exceptions
 
 These exceptions can be used to signal expected problems and to exit in a
 controlled way from the program.
@@ -14,7 +14,7 @@ class PgxnException(Exception):
     """Base class for the exceptions known in the pgxn package."""
 
 class PgxnClientException(PgxnException):
-    """Base class for the exceptions raised by the pgxn.client package."""
+    """Base class for the exceptions raised by the pgxnclient package."""
 
 class UserAbort(PgxnClientException):
     """The user requested to stop the operation."""

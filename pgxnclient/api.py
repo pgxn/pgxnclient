@@ -1,5 +1,5 @@
 """
-pgxn.client -- client API stub
+pgxnclient -- client API stub
 """
 
 # Copyright (C) 2011 Daniele Varrazzo
@@ -8,9 +8,9 @@ pgxn.client -- client API stub
 
 from urllib import urlencode
 
-from pgxn.utils import json
-from pgxn.utils.uri import expand_template
-from pgxn.client.network import get_file
+from pgxnclient.utils import json
+from pgxnclient.utils.uri import expand_template
+from pgxnclient.network import get_file
 
 class Api(object):
     def __init__(self, mirror):

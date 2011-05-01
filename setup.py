@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-pgxn.client -- setup script
+pgxnclient -- setup script
 """
 
 # Copyright (C) 2011 Daniele Varrazzo
@@ -10,15 +10,15 @@ pgxn.client -- setup script
 
 from distutils.core import setup
 
-from pgxn.client import __version__
+from pgxnclient import __version__
 
-setup(name='pgxn.client',
+setup(name='pgxnclient',
     version=__version__,
     description='A command line tool to interact with the PostgreSQL Extension Network.',
     author='Daniele Varrazzo',
     author_email='daniele.varrazzo@gmail.com',
     url='https://github.com/dvarrazzo/pgxn-client/',
-    packages=['pgxn', 'pgxn.client', 'pgxn.utils'],
+    packages=['pgxnclient', 'pgxnclient.utils'],
     scripts=['scripts/pgxn', 'scripts/pgxncli.py'],
     license='BSD',
 )

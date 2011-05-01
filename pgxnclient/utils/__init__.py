@@ -1,5 +1,5 @@
 """
-pgxn.client -- misc utilities package
+pgxnclient -- misc utilities package
 """
 
 # Copyright (C) 2011 Daniele Varrazzo

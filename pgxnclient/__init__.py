@@ -1,5 +1,5 @@
 """
-pgxn.client -- main package
+pgxnclient -- main package
 """
 
 # Copyright (C) 2011 Daniele Varrazzo
@@ -13,11 +13,11 @@ import os
 import re
 import operator as _op
 
-from pgxn.client.i18n import _
-from pgxn.client.errors import BadSpecError, ResourceNotFound
+from pgxnclient.i18n import _
+from pgxnclient.errors import BadSpecError, ResourceNotFound
 
-from pgxn.utils.semver import SemVer
-from pgxn.utils.label import Label
+from pgxnclient.utils.semver import SemVer
+from pgxnclient.utils.label import Label
 
 
 class Spec(object):

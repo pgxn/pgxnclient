@@ -22,7 +22,7 @@ understand each other.
 import re
 import operator
 
-from pgxn.client.i18n import _
+from pgxnclient.i18n import _
 
 class SemVer(str):
     """A string representing a semantic version number.

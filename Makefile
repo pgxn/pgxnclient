@@ -1,4 +1,4 @@
-# pgxn.client Makefile
+# pgxnclient Makefile
 #
 # Copyright (C) 2011 Daniele Varrazzo
 # 

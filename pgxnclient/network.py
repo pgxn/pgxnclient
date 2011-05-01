@@ -1,5 +1,5 @@
 """
-pgxn.client -- network interaction
+pgxnclient -- network interaction
 """
 
 # Copyright (C) 2011 Daniele Varrazzo
@@ -10,16 +10,16 @@ import os
 import urllib2
 from itertools import count
 
-from pgxn.client import __version__
-from pgxn.client.i18n import _
-from pgxn.client.errors import NetworkError, ResourceNotFound, BadRequestError
+from pgxnclient import __version__
+from pgxnclient.i18n import _
+from pgxnclient.errors import NetworkError, ResourceNotFound, BadRequestError
 
 import logging
-logger = logging.getLogger('pgxn.client.network')
+logger = logging.getLogger('pgxnclient.network')
 
 def get_file(url):
     opener = urllib2.build_opener()
-    opener.addheaders = [('User-agent', 'pgxn.client/%s' % __version__)]
+    opener.addheaders = [('User-agent', 'pgxnclient/%s' % __version__)]
     logger.debug('opening url: %s', url)
     try:
         return opener.open(url)

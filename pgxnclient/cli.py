@@ -1,5 +1,5 @@
 """
-pgxn.client -- command line entry point
+pgxnclient -- command line entry point
 """
 
 # Copyright (C) 2011 Daniele Varrazzo
@@ -8,7 +8,7 @@ pgxn.client -- command line entry point
 
 import sys
 
-from pgxn.client.commands import get_option_parser, run_commands
+from pgxnclient.commands import get_option_parser, run_commands
 
 def main(argv=None):
     if argv is None:

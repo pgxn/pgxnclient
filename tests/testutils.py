@@ -1,5 +1,5 @@
 """
-pgxn.client -- unit test utilities
+pgxnclient -- unit test utilities
 """
 
 # Copyright (C) 2011 Daniele Varrazzo

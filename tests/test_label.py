@@ -1,6 +1,6 @@
 from unittest2 import TestCase
 
-from pgxn.client import Label
+from pgxnclient import Label
 
 class LabelTestCase(TestCase):
     def test_ok(self):

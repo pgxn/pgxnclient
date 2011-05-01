@@ -1,5 +1,5 @@
 """
-pgxn.client -- internationalization support
+pgxnclient -- internationalization support
 """
 
 # Copyright (C) 2011 Daniele Varrazzo

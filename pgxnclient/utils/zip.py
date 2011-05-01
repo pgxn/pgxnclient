@@ -1,5 +1,5 @@
 """
-pgxn.client -- zip file utilities
+pgxnclient -- zip file utilities
 """
 
 # Copyright (C) 2011 Daniele Varrazzo
@@ -11,12 +11,12 @@ import stat
 import shutil
 from zipfile import ZipFile
 
-from pgxn.utils import json
-from pgxn.client.i18n import _
-from pgxn.client.errors import PgxnClientException
+from pgxnclient.utils import json
+from pgxnclient.i18n import _
+from pgxnclient.errors import PgxnClientException
 
 import logging
-logger = logging.getLogger('pgxn.utils.zip')
+logger = logging.getLogger('pgxnclient.utils.zip')
 
 def unpack(zipname, destdir):
     logger.info(_("unpacking: %s"), zipname)

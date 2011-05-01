@@ -1,5 +1,5 @@
 """
-pgxn.client -- commands module
+pgxnclient -- commands module
 """
 
 # Copyright (C) 2011 Daniele Varrazzo
@@ -8,17 +8,17 @@ pgxn.client -- commands module
 
 import os
 import logging
-from pgxn.utils import json
-from pgxn.utils import argparse
+from pgxnclient.utils import json
+from pgxnclient.utils import argparse
 
-from pgxn.client import __version__
-from pgxn.client import Spec, Label, SemVer
-from pgxn.client.api import Api
-from pgxn.client.i18n import _, N_, gettext
-from pgxn.client.errors import PgxnClientException, UserAbort
-from pgxn.client.network import download
+from pgxnclient import __version__
+from pgxnclient import Spec, Label, SemVer
+from pgxnclient.api import Api
+from pgxnclient.i18n import _, N_, gettext
+from pgxnclient.errors import PgxnClientException, UserAbort
+from pgxnclient.network import download
 
-logger = logging.getLogger('pgxn.client.commands')
+logger = logging.getLogger('pgxnclient.commands')
 
 def get_option_parser():
     parser = argparse.ArgumentParser(
@@ -133,7 +133,7 @@ class Command(object):
                 prompt = _("Please answer yes or no")
 
 
-from pgxn.client.errors import ResourceNotFound
+from pgxnclient.errors import ResourceNotFound
 
 class Mirror(Command):
     name = 'mirror'
@@ -202,8 +202,8 @@ class Search(Command):
             print "%s %s" % (hit['dist'], hit['version'])
 
 
-from pgxn.client.errors import BadSpecError
-from pgxn.utils.zip import get_meta_from_zip
+from pgxnclient.errors import BadSpecError
+from pgxnclient.utils.zip import get_meta_from_zip
 
 class CommandWithSpec(Command):
     # TODO: the spec should possibly be a local file or a full url
@@ -402,8 +402,8 @@ class Info(CommandWithSpec):
                         print "%s: %s: %s %s" % (phase, rel, pkg, ver)
 
  
-from pgxn.utils import sha1
-from pgxn.client.errors import BadChecksum
+from pgxnclient.utils import sha1
+from pgxnclient.errors import BadChecksum
 
 class Download(CommandWithSpec):
     name = 'download'
@@ -468,7 +468,7 @@ class Download(CommandWithSpec):
 import shutil
 import tempfile
 from subprocess import Popen, PIPE
-from pgxn.utils.zip import unpack
+from pgxnclient.utils.zip import unpack
 
 class WithUnpacking(object):
     def call_with_temp_dir(self, f, *args, **kwargs):
