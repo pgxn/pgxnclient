@@ -1,5 +1,5 @@
-master
-======
+pgxnclient 0.1a4
+================
 
 - The spec can point to a local file/directory for install
 - Read the sha1 from the META.json as it may be different from the one
