@@ -12,7 +12,8 @@ line tool designed to interact with the `PostgreSQL Extension Network
 extensions in a PostgreSQL installation or database.
 
 - Home page: http://pgxnclient.projects.postgresql.org/
-- Source repository: https://github.com/dvarrazzo/pgxnclient
+- Source repository: https://github.com/dvarrazzo/pgxnclient/
+- PgFoundry project: http://pgfoundry.org/projects/pgxnclient/
 
 Contents:
 
