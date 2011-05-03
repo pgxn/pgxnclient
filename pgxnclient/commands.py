@@ -30,11 +30,11 @@ def get_option_parser():
         version="%%(prog)s %s" % __version__,
         help = _("print the version number and exit"))
 
-    glb = parser.add_argument_group(_("Global options"))
+    glb = parser.add_argument_group(_("global options"))
 
     subparsers = parser.add_subparsers(
         title = _("COMMAND"),
-        help = _("The command to execute"))
+        help = _("the command to execute"))
 
     clss = [ cls for cls in CommandType.subclasses if cls.name ]
     clss.sort(key=lambda c: c.name)
@@ -91,7 +91,7 @@ class Command(object):
         glb.add_argument("--verbose", action='store_true',
             help = _("print more informations"))
         glb.add_argument("--yes", action='store_true',
-            help = _("assume affermative answer to all questions"))
+            help = _("assume affirmative answer to all questions"))
 
         return subp
 
@@ -316,6 +316,7 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
 
 
 class List(CommandWithSpec):
+    # TODO: too generic name? rename to 'versions'?
     name = 'list'
     description = N_("list the available versions of a distribution")
 
@@ -620,7 +621,7 @@ class WithDatabase(object):
         subp = super(WithDatabase, self).customize_parser(
             parser, subparsers, glb, **kwargs)
 
-        g = subp.add_argument_group(_("Database connections options"))
+        g = subp.add_argument_group(_("database connections options"))
 
         g.add_argument('-d', '--dbname', metavar="DBNAME",
             help = _("database name to install into"))
