@@ -46,3 +46,8 @@ ez_setup:
 clean:
 	$(RM) -r html
 
+upload:
+	tar cjf - -C html . \
+	| ssh dvarrazzo@pgfoundry.org \
+	tar xjvf - -C /home/pgfoundry.org/groups/pgxnclient/htdocs
+
