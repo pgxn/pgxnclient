@@ -111,6 +111,12 @@ The database to install into can be specified using options
 system ones and can be also set using environment variables
 :envvar:`PGDATABASE`, :envvar:`PGHOST`, :envvar:`PGPORT`, :envvar:`PGUSER`.
 
+The command supports also a ``--pg_config`` option that can be used to specify
+an alternative :program:`pg_config` to use to look for installation scripts:
+you may need to specify the parameter if there are many PostgreSQL
+installations on the system, and should be consistent to the one specified
+in the ``install`` command.
+
 If the specified database version is at least PostgreSQL 9.1, and if the
 extension specifies a ``.control`` file, it will be loaded using the `CREATE
 EXTENSION`_ command, otherwise it will be loaded as a loose set of objects.
@@ -121,4 +127,15 @@ For more informations see the `extensions documentation`__.
 
 .. todo:: Specify a schema
 .. todo:: Is pg_config really required here?
+
+The command is based on the `'provides' section`__ of the package META: if a
+SQL file is specified, that file will be used to load the extension. Note that
+loading is only attempted if the file extension is ``.sql``: if it's not, we
+assume that the extension is not really a PostgreSQL extension (it may be for
+instance a script). If no ``file`` is specified, a file named
+:samp:`{extension}.sql` will be looked for in a few directories under the
+PostgreSQL ``shared`` directory and it will be loaded after an user
+confirmation.
+
+.. __: http://pgxn.org/spec/#provides
 

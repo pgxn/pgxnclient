@@ -794,6 +794,15 @@ class Load(LoadUnload):
             self.load_ext(name, sql)
 
     def load_ext(self, name, sqlfile):
+        logger.debug(_("installing extension '%s' with file: %s"),
+            name, sqlfile)
+
+        if sqlfile and not sqlfile.endswith('.sql'):
+            logger.info(
+                _("the file '%s' doesn't seem a SQL file: not loading it"),
+                sqlfile)
+            return
+
         pgver = self.get_pg_version()
 
         if pgver >= (9,1,0):
