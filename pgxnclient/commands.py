@@ -780,6 +780,15 @@ class LoadUnload(WithPgConfig, WithDatabase, CommandWithSpec):
                 "cannot find sql file for extension '%s': '%s'"
                 % (name, sqlfile))
 
+    def _register_loaded(self, fn):
+        if not hasattr(self, '_loaded'):
+            self._loaded = []
+
+        self._loaded.append(fn)
+
+    def _is_loaded(self, fn):
+        return hasattr(self, '_loaded') and fn in self._loaded
+
 class Load(LoadUnload):
     name = 'load'
     description = N_("load a distribution's extensions into a database")
@@ -829,7 +838,11 @@ The extension '%s' doesn't specify a SQL file.
 Do you want to load it?""")
                 % (name, fn))
 
-        self.load_sql(fn)
+        if self._is_loaded(fn):
+            logger.info(_("file %s already loaded"), fn)
+        else:
+            self.load_sql(fn)
+            self._register_loaded(fn)
 
     def create_extension(self, name):
         # TODO: namespace etc.
