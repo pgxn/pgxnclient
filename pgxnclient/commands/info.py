@@ -20,8 +20,10 @@ class Mirror(Command):
     description = N_("return informations about the available mirrors")
 
     @classmethod
-    def customize_parser(self, parser, subparsers, glb, **kwargs):
-        subp = self._make_subparser(subparsers)
+    def customize_parser(self, parser, subparsers, **kwargs):
+        subp = super(Mirror, self).customize_parser(
+            parser, subparsers, **kwargs)
+
         subp.add_argument('uri', nargs='?', metavar="URI",
             help = _("return detailed info about this mirror."
                 " If not specified return a list of mirror URIs"))
@@ -58,8 +60,10 @@ class Search(Command):
     description = N_("search in the available extensions")
 
     @classmethod
-    def customize_parser(self, parser, subparsers, glb, **kwargs):
-        subp = self._make_subparser(subparsers)
+    def customize_parser(self, parser, subparsers, **kwargs):
+        subp = super(Search, self).customize_parser(
+            parser, subparsers, **kwargs)
+
         g = subp.add_mutually_exclusive_group()
         g.add_argument('--dist', dest='where', action='store_const',
             const="dists", default='dists',
@@ -87,9 +91,9 @@ class Info(CommandWithSpec):
     description = N_("print informations about a distribution")
 
     @classmethod
-    def customize_parser(self, parser, subparsers, glb, **kwargs):
+    def customize_parser(self, parser, subparsers, **kwargs):
         subp = super(Info, self).customize_parser(
-            parser, subparsers, glb, **kwargs)
+            parser, subparsers, **kwargs)
 
         g = subp.add_mutually_exclusive_group()
         g.add_argument('--details', dest='what',

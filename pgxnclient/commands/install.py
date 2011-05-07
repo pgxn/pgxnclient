@@ -27,9 +27,9 @@ class Download(CommandWithSpec):
     description = N_("download a distribution from the network")
 
     @classmethod
-    def customize_parser(self, parser, subparsers, glb, **kwargs):
+    def customize_parser(self, parser, subparsers, **kwargs):
         subp = super(Download, self).customize_parser(
-            parser, subparsers, glb, **kwargs)
+            parser, subparsers, **kwargs)
         subp.add_argument('--target', metavar='PATH', default='.',
             help = _('Target directory and/or filename to save'))
 
@@ -83,11 +83,13 @@ class Download(CommandWithSpec):
 
 
 class InstallUninstall(WithMake, CommandWithSpec):
-
+    """
+    Base class to implement the ``install`` and ``uninstall`` commands.
+    """
     @classmethod
-    def customize_parser(self, parser, subparsers, glb, **kwargs):
+    def customize_parser(self, parser, subparsers, **kwargs):
         subp = super(InstallUninstall, self).customize_parser(
-            parser, subparsers, glb,
+            parser, subparsers,
             can_be_local=True, **kwargs)
 
         g = subp.add_mutually_exclusive_group()
@@ -135,6 +137,7 @@ class InstallUninstall(WithMake, CommandWithSpec):
             raise PgxnClientException(
                 _("configure failed with return code %s") % p.returncode)
 
+
 class Install(InstallUninstall):
     name = 'install'
     description = N_("download, build and install a distribution")
@@ -157,10 +160,13 @@ class Uninstall(InstallUninstall):
 
 
 class LoadUnload(WithPgConfig, WithDatabase, CommandWithSpec):
+    """
+    Base class to implement the ``load`` and ``unload`` commands.
+    """
     @classmethod
-    def customize_parser(self, parser, subparsers, glb, **kwargs):
+    def customize_parser(self, parser, subparsers, **kwargs):
         subp = super(LoadUnload, self).customize_parser(
-            parser, subparsers, glb,
+            parser, subparsers,
             can_be_local=True, **kwargs)
 
         return subp

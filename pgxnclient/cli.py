@@ -8,7 +8,7 @@ pgxnclient -- command line entry point
 
 import sys
 
-from pgxnclient.commands import get_option_parser, load_commands, run_commands
+from pgxnclient.commands import get_option_parser, load_commands, run_command
 
 def main(argv=None):
     if argv is None:
@@ -16,5 +16,5 @@ def main(argv=None):
     load_commands()
     parser = get_option_parser()
     opt = parser.parse_args(argv)
-    run_commands(opt, parser)
+    run_command(opt, parser)
 

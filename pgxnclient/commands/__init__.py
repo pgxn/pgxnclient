@@ -31,8 +31,10 @@ def get_option_parser():
     """
     Return an option parser populated with the available commands.
 
-    The function relies on the `Command` subclasses being already created:
-    call `load_commands()` before calling this function.
+    The parser is populated with all the options defined by the implemented
+    commands.  Only commands defining a ``name`` attribute are added.
+    The function relies on the `Command` subclasses being already
+    created: call `load_commands()` before calling this function.
     """
     parser = argparse.ArgumentParser(
         # usage = _("%(prog)s [global options] COMMAND [command options]"),
@@ -43,8 +45,17 @@ def get_option_parser():
         version="%%(prog)s %s" % __version__,
         help = _("print the version number and exit"))
 
+    # Populate the parser global options
     glb = parser.add_argument_group(_("global options"))
+    glb.add_argument("--mirror", metavar="URL",
+        default = 'http://api.pgxn.org/',
+        help = _("the mirror to interact with [default: %(default)s]"))
+    glb.add_argument("--verbose", action='store_true',
+        help = _("print more informations"))
+    glb.add_argument("--yes", action='store_true',
+        help = _("assume affirmative answer to all questions"))
 
+    # Populate the parser subcommands
     subparsers = parser.add_subparsers(
         title = _("available commands"),
         metavar = 'COMMAND',
@@ -52,9 +63,8 @@ def get_option_parser():
 
     clss = [ cls for cls in CommandType.subclasses if cls.name ]
     clss.sort(key=lambda c: c.name)
-    clss.insert(0, Command)
     for cls in clss:
-        cls.customize_parser(parser, subparsers, glb)
+        cls.customize_parser(parser, subparsers)
 
     return parser
 
@@ -83,7 +93,8 @@ def load_commands():
                 modname, e.__class__.__name__, e)
 
 
-def run_commands(opts, parser):
+def run_command(opts, parser):
+    """Run the command specified by options parsed on the command line."""
     # setup the logging
     logging.getLogger().setLevel(
         opts.verbose and logging.DEBUG or logging.INFO)
@@ -91,6 +102,12 @@ def run_commands(opts, parser):
 
 
 class CommandType(type):
+    """
+    Metaclass for the Command class.
+
+    This metaclass allows self-registration of the commands: any Command
+    subclass is automatically added to the `subclasses` list.
+    """
     subclasses = []
     def __new__(cls, name, bases, dct):
         rv = type.__new__(cls, name, bases, dct)
@@ -106,6 +123,11 @@ class Command(object):
     Base class to implement client commands.
 
     Provide the argument parsing framework and API dispatch.
+
+    Commands should subclass this class and possibly other mixin classes, set
+    a value for the `name` and `description` arguments and implement the
+    `run()` method. If command line parser customization is required,
+    `customize_parser()` should be extended.
     """
     __metaclass__ = CommandType
     name = None
@@ -122,26 +144,27 @@ class Command(object):
         self._api = None
 
     @classmethod
-    def customize_parser(self, parser, subparsers, glb, **kwargs):
-        subp = self._make_subparser(subparsers)
-        glb.add_argument("--mirror", metavar="URL",
-            default = 'http://api.pgxn.org/',
-            help = _("the mirror to interact with [default: %(default)s]"))
-        glb.add_argument("--verbose", action='store_true',
-            help = _("print more informations"))
-        glb.add_argument("--yes", action='store_true',
-            help = _("assume affirmative answer to all questions"))
+    def customize_parser(self, parser, subparsers, **kwargs):
+        """Customise the option parser.
 
-        return subp
+        :param parser: the option parser to be customized
+        :param subparsers: the action object where to register a command subparser
+        :return: the new subparser created
+
+        Subclasses should extend this method in order to add new options or a
+        subparser implementing a new command. Be careful in calling the
+        superclass' `customize_parser()` via `super()` in order to call all
+        the mixins methods. Also note that the method must be a classmethod.
+        """
+        return self.__make_subparser(subparsers)
 
     def run(self):
+        """The actions to take when the command is invoked."""
         raise NotImplementedError
 
     @classmethod
-    def _make_subparser(self, subparsers, description=None, epilog=None):
-        # bail out if it is not a subclass being invoked
-        if not self.name:
-            return
+    def __make_subparser(self, subparsers, description=None, epilog=None):
+        """Create a new subparser with help populated."""
         subp = subparsers.add_parser(self.name,
             help = gettext(self.description),
             description = description or gettext(self.description),
@@ -151,15 +174,22 @@ class Command(object):
 
     @property
     def api(self):
+        """Return an `Api` instance to communicate with PGXN.
+
+        Use the value provided with ``--mirror`` to decide where to connect.
+        """
         if self._api is None:
             self._api = Api(mirror=self.opts.mirror)
 
         return self._api
 
-    def get_url(self, fragment):
-        return self.opts.mirror.rstrip('/') + fragment
-
     def confirm(self, prompt):
+        """Prompt an user confirmation.
+
+        Raise `UserAbort` if the user replies "no".
+
+        The method is no-op if the ``--yes`` option is specified.
+        """
         if self.opts.yes:
             return True
 
@@ -186,13 +216,29 @@ from pgxnclient.errors import BadSpecError
 from pgxnclient.utils.zip import get_meta_from_zip
 
 class CommandWithSpec(Command):
+    """Command subclass for commands taking a package specification.
+
+    This class adds a positional argument SPEC to the parser and related
+    options.
+
+    TODO: make this a mixin consistently with the other classes.
+    """
     # TODO: the spec should possibly be a local file or a full url
     @classmethod
-    def customize_parser(self, parser, subparsers, glb,
-            with_status=True, can_be_local=False, **kwargs):
-        # bail out if it is not a subclass being invoked
-        if not self.name:
-            return
+    def customize_parser(self, parser, subparsers,
+        with_status=True, can_be_local=False, epilog=None, **kwargs):
+        """
+        Add the SPEC related options to the parser.
+
+        If *can_be_local* is true, the spec also accepts a local file or
+        directory; otherwise only a name with optional version and operator is
+        accepted.
+
+        If *with_status* is true, options ``--stable``, ``--testing``,
+        ``--unstable`` are also handled.
+        """
+        if epilog is not None:
+            raise NotImplementedError("find the best way to mix epilogs in")
 
         epilog=_("""
 SPEC can either specify just a name or contain required versions
@@ -205,7 +251,9 @@ SPEC may also be a local zip file or unpacked directory, but in this case
 it should contain at least a '%s', for instance '.%spkgname.zip'.
 """) % (os.sep, os.sep)
 
-        subp = self._make_subparser(subparsers, epilog=epilog)
+        subp = super(CommandWithSpec, self).customize_parser(
+            parser, subparsers, epilog=epilog, **kwargs)
+
         subp.add_argument('spec', metavar='SPEC',
             help = _("name and optional version of the package"))
 
@@ -224,6 +272,14 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
         return subp
 
     def get_spec(self, can_be_local=False):
+        """
+        Return the package specification requested.
+
+        Return a `Spec` instance.
+
+        *can_be_local* should be consistent with the value provided to
+        `customize_parser()`.
+        """
         spec = self.opts.spec
 
         try:
@@ -239,7 +295,13 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
         return spec
 
     def get_best_version(self, data, spec, quiet=False):
-        """Return the best version an user may want for a distribution.
+        """
+        Return the best version an user may want for a distribution.
+
+        Return a `SemVer` instance.
+
+        Raise `ResourceNotFound` if no version is found with the provided
+        specification and options.
         """
         drels = data['releases']
 
@@ -275,6 +337,11 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
         raise ResourceNotFound(msg)
 
     def get_meta(self, spec):
+        """
+        Return the content of the ``META.json`` file for *spec*.
+
+        Return the object obtained parsing the JSON.
+        """
         if not spec.is_local():
             # Get the metadata from the API
             data = self.api.dist(spec.name)
@@ -301,7 +368,17 @@ import tempfile
 from pgxnclient.utils.zip import unpack
 
 class WithUnpacking(object):
+    """
+    Mixin to implement commands that may deal with zip files.
+    """
     def call_with_temp_dir(self, f, *args, **kwargs):
+        """
+        Call a function in the context of a temporary directory.
+
+        Create the temp directory and pass its name as first argument to *f*.
+        Other arguments and keywords are passed to *f* too. Upon exit delete
+        the directory.
+        """
         dir = tempfile.mkdtemp()
         try:
             return f(dir, *args, **kwargs)
@@ -309,14 +386,21 @@ class WithUnpacking(object):
             shutil.rmtree(dir)
 
     def unpack(self, zipname, destdir):
+        """Unpack the zip file *zipname* into *destdir*."""
         return unpack(zipname, destdir)
 
 
 class WithPgConfig(object):
+    """
+    Mixin to implement commands that should query :program:`pg_config`.
+    """
     @classmethod
-    def customize_parser(self, parser, subparsers, glb, **kwargs):
+    def customize_parser(self, parser, subparsers, **kwargs):
+        """
+        Add the ``--pg_config`` option to the options parser.
+        """
         subp = super(WithPgConfig, self).customize_parser(
-            parser, subparsers, glb, **kwargs)
+            parser, subparsers, **kwargs)
 
         subp.add_argument('--pg_config', metavar="PATH", default='pg_config',
             help = _("path to the pg_config executable to find the database"
@@ -325,6 +409,9 @@ class WithPgConfig(object):
         return subp
 
     def call_pg_config(self, what, _cache={}):
+        """
+        Call :program:`pg_config` and return its output.
+        """
         if what in _cache:
             return _cache[what]
 
@@ -343,6 +430,9 @@ class WithPgConfig(object):
 import shlex
 
 class WithMake(WithPgConfig, WithUnpacking):
+    """
+    Mixin to implement commands that should invoke :program:`make`.
+    """
     def run_make(self, cmd, dir, env=None, sudo=None):
         """Invoke make with the selected command.
 
@@ -372,10 +462,16 @@ class WithMake(WithPgConfig, WithUnpacking):
 
 
 class WithDatabase(object):
+    """
+    Mixin to implement commands that should communicate to a database.
+    """
     @classmethod
-    def customize_parser(self, parser, subparsers, glb, **kwargs):
+    def customize_parser(self, parser, subparsers, **kwargs):
+        """
+        Add the options related to database connections.
+        """
         subp = super(WithDatabase, self).customize_parser(
-            parser, subparsers, glb, **kwargs)
+            parser, subparsers, **kwargs)
 
         g = subp.add_argument_group(_("database connections options"))
 
@@ -388,7 +484,7 @@ class WithDatabase(object):
         g.add_argument('-U', '--username', metavar="NAME",
             help = _("database user name"))
 
-        subp.epilog += _("""
+        subp.epilog = (subp.epilog or "") + _("""
 The default database connection options depend on the value of environment
 variables PGDATABASE, PGHOST, PGPORT, PGUSER.
 """)
@@ -406,7 +502,9 @@ variables PGDATABASE, PGHOST, PGPORT, PGUSER.
         return rv
 
     def get_psql_env(self):
-        """Return a dict with env variables to connect to the specified db."""
+        """
+        Return a dict with env variables to connect to the specified db.
+        """
         rv = {}
         if self.opts.dbname: rv['PGDATABASE'] = self.opts.dbname
         if self.opts.host: rv['PGHOST'] = self.opts.host
