@@ -4,7 +4,7 @@
 # 
 # This file is part of the PGXN client
 
-.PHONY: env sdist upload
+.PHONY: env sdist upload docs
 
 PYTHON := python$(PYTHON_VERSION)
 PYTHON_VERSION ?= $(shell $(PYTHON) -c 'import sys; print ("%d.%d" % sys.version_info[:2])')
@@ -40,4 +40,7 @@ sdist:
 
 upload:
 	$(PYTHON) setup.py sdist --formats=gztar,zip upload
+
+docs:
+	$(MAKE) -C docs
 
