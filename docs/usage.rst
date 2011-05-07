@@ -179,7 +179,6 @@ For more informations see the `extensions documentation`__.
 .. __: http://www.postgresql.org/docs/9.1/static/extend-extensions.html
 
 .. todo:: Specify a schema
-.. todo:: Is pg_config really required here?
 
 The command is based on the `'provides' section`_ of the distribution's
 ``META.json``: if a SQL file is specified, that file will be used to load the
