@@ -12,7 +12,7 @@ from itertools import count
 
 from pgxnclient import __version__
 from pgxnclient.i18n import _
-from pgxnclient.errors import NetworkError, ResourceNotFound, BadRequestError
+from pgxnclient.errors import PgxnClientException, NetworkError, ResourceNotFound, BadRequestError
 
 import logging
 logger = logging.getLogger('pgxnclient.network')
@@ -56,7 +56,12 @@ def download(f, fn, rename=True):
                     break
 
     logger.info(_("saving %s"), fn)
-    fout = open(fn, "wb")
+    try:
+        fout = open(fn, "wb")
+    except Exception, e:
+        raise PgxnClientException(
+            _("cannot open target file: %s: %s")
+                % (e.__class__.__name__, e))
     try:
         while 1:
             data = f.read(8192)
