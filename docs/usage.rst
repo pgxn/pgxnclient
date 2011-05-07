@@ -318,7 +318,7 @@ The command output is a list of values obtained by the distribution's
     description: This library contains a single PostgreSQL extension,
     a key/value pair data type called “pair”, along with a convenience
     function for constructing key/value pairs.
-    maintainer: David E. Wheeler <david@justatheory.com>
+    maintainer: David E. Wheeler <david@j...y.com>
     license: postgresql
     release_status: stable
     version: 0.1.2
