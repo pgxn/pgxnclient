@@ -107,6 +107,32 @@ first found on the :envvar:`PATH`. A different instance can be specified using
 the option :samp:`--pg_config {PATH}`.
 
 
+.. _uninstall:
+
+``pgxn uninstall``
+------------------
+
+Remove a distribution from the system.
+
+Usage:
+
+.. parsed-literal::
+    :class: pgxn-uninstall
+
+    pgxn uninstall [--help] [--stable | --testing | --unstable]
+                   [--pg_config *PATH*] [--sudo *PROG* | --nosudo]
+                   *SPEC*
+
+The command does the opposite of the install_ command, removing a
+distribution's files from the system. It doesn't issue any command to the
+databases where distribution's extensions may have been loaded: you should
+first drop the extension e.g. using the unload_ command.
+
+The distribution should match what installed via the `install`_ command.
+
+See the install_ command for details about the command arguments.
+
+
 .. _load:
 
 ``pgxn load``
