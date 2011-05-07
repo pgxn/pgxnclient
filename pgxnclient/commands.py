@@ -343,7 +343,7 @@ class List(CommandWithSpec):
 
 class Info(CommandWithSpec):
     name = 'info'
-    description = N_("obtain informations about a distribution")
+    description = N_("print informations about a distribution")
 
     @classmethod
     def customize_parser(self, parser, subparsers, glb, **kwargs):

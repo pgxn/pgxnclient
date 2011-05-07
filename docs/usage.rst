@@ -282,3 +282,43 @@ alternatively the extensions (using the ``--ext`` option) or the documentation
 .. todo:: Add the context to the search output?
 
 
+.. _info:
+
+``pgxn info``
+-------------
+
+Print informations about a distribution obtained from PGXN.
+
+Usage:
+
+.. parsed-literal::
+    :class: pgxn-info
+
+    pgxn info [--help] [--stable | --testing | --unstable]
+              [--details | --meta | --readme]
+              *SPEC*
+
+The distribution is specified according to the `package specification`_.
+The command output is a list of values obtained by the distribution's
+``META.json`` file, for example:
+
+.. code-block:: console
+
+    $ pgxn info pair
+    INFO: best version: pair 0.1.2
+    name: pair
+    abstract: A key/value pair data type
+    description: This library contains a single PostgreSQL extension,
+    a key/value pair data type called “pair”, along with a convenience
+    function for constructing key/value pairs.
+    maintainer: David E. Wheeler <david@justatheory.com>
+    license: postgresql
+    release_status: stable
+    version: 0.1.2
+    date: 2011-04-20T23:47:22Z
+    sha1: 9988d7adb056b11f8576db44cca30f88a08bd652
+    provides: pair: 0.1.2
+
+Alternatively the raw ``META.json`` (using the ``--meta`` option) or the
+distribution README (using the ``--readme`` option) can be obtained.
+
