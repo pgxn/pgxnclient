@@ -576,9 +576,6 @@ class InstallUninstall(WithMake, CommandWithSpec):
 
         self.maybe_run_configure(pdir)
 
-        logger.info(_("building extension"))
-        self.run_make('all', dir=pdir)
-
         self._inun(pdir)
 
     def _inun(self, pdir):
@@ -604,6 +601,9 @@ class Install(InstallUninstall):
     description = N_("download, build and install a distribution")
 
     def _inun(self, pdir):
+        logger.info(_("building extension"))
+        self.run_make('all', dir=pdir)
+
         logger.info(_("installing extension"))
         self.run_make('install', dir=pdir, sudo=self.opts.sudo)
 
