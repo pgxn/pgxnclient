@@ -44,3 +44,7 @@ upload:
 docs:
 	$(MAKE) -C docs
 
+clean:
+	rm -rf build
+	$(MAKE) -C docs $@
+
