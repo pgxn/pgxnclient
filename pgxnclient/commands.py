@@ -259,7 +259,7 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
 
         return spec
 
-    def get_best_version(self, data, spec):
+    def get_best_version(self, data, spec, quiet=False):
         """Return the best version an user may want for a distribution.
         """
         drels = data['releases']
@@ -274,10 +274,11 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
 
         # Is there any result at the desired release status?
         want = [ v for lvl, v in enumerate(vers)
-            if lvl >= self.opts.status and v is not None ] 
+            if lvl >= self.opts.status and v is not None ]
         if want:
             ver = max(want)
-            logger.info(_("best version: %s %s"), spec.name, ver)
+            if not quiet:
+                logger.info(_("best version: %s %s"), spec.name, ver)
             return ver
 
         # Not found: is there any hint we can give?
@@ -316,31 +317,6 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
             return get_meta_from_zip(spec.filename)
 
 
-class List(CommandWithSpec):
-    # TODO: too generic name? rename to 'versions'?
-    name = 'list'
-    description = N_("list the available versions of a distribution")
-
-    @classmethod
-    def customize_parser(self, parser, subparsers, glb, **kwargs):
-        subp = super(List, self).customize_parser(parser, subparsers, glb,
-            with_status=False, **kwargs)
-
-        return subp
-
-    def run(self):
-        spec = self.get_spec()
-        data = self.api.dist(spec.name)
-        name = data['name']
-        vs = [ (SemVer(d['version']), s)
-            for s, ds in data['releases'].iteritems()
-            for d in ds ]
-        vs = [ (v, s) for v, s in vs if spec.accepted(v) ]
-        vs.sort(reverse=True)
-        for v, s in vs:
-            print name, v, s
-
-
 class Info(CommandWithSpec):
     name = 'info'
     description = N_("print informations about a distribution")
@@ -351,29 +327,38 @@ class Info(CommandWithSpec):
             parser, subparsers, glb, **kwargs)
 
         g = subp.add_mutually_exclusive_group()
-        g.add_argument('--details', dest='what', action='store_const',
-            const='details', default='details',
+        g.add_argument('--details', dest='what',
+            action='store_const', const='details', default='details',
             help=_("show details about the distribution [default]"))
-        g.add_argument('--meta', dest='what', action='store_const', const='meta',
+        g.add_argument('--meta', dest='what',
+            action='store_const', const='meta',
             help=_("show the distribution META.json"))
-        g.add_argument('--readme', dest='what', action='store_const', const='readme',
+        g.add_argument('--readme', dest='what',
+            action='store_const', const='readme',
             help=_("show the distribution README"))
+        g.add_argument('--versions', dest='what',
+            action='store_const', const='versions',
+            help=_("show the list of available versions"))
 
         return subp
 
     def run(self):
         spec = self.get_spec()
-        data = self.api.dist(spec.name)
-        ver = self.get_best_version(data, spec)
-        getattr(self, 'print_' + self.opts.what)(spec, ver)
+        getattr(self, 'print_' + self.opts.what)(spec)
 
-    def print_meta(self, spec, ver):
+    def print_meta(self, spec):
+        data = self.api.dist(spec.name)
+        ver = self.get_best_version(data, spec, quiet=True)
         print self.api.meta(spec.name, ver, as_json=False)
 
-    def print_readme(self, spec, ver):
+    def print_readme(self, spec):
+        data = self.api.dist(spec.name)
+        ver = self.get_best_version(data, spec, quiet=True)
         print self.api.readme(spec.name, ver)
-        
-    def print_details(self, spec, ver):
+
+    def print_details(self, spec):
+        data = self.api.dist(spec.name)
+        ver = self.get_best_version(data, spec, quiet=True)
         data = self.api.meta(spec.name, ver)
         for k in [u'name', u'abstract', u'description', u'maintainer', u'license',
                 u'release_status', u'version', u'date', u'sha1']:
@@ -403,7 +388,18 @@ class Info(CommandWithSpec):
                     for pkg, ver in pkgs.iteritems():
                         print "%s: %s: %s %s" % (phase, rel, pkg, ver)
 
- 
+    def print_versions(self, spec):
+        data = self.api.dist(spec.name)
+        name = data['name']
+        vs = [ (SemVer(d['version']), s)
+            for s, ds in data['releases'].iteritems()
+            for d in ds ]
+        vs = [ (v, s) for v, s in vs if spec.accepted(v) ]
+        vs.sort(reverse=True)
+        for v, s in vs:
+            print name, v, s
+
+
 from pgxnclient.utils import sha1
 from pgxnclient.errors import BadChecksum
 

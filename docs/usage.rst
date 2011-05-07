@@ -22,7 +22,7 @@ are `uninstall`_ and `unload`_. Use `download`_ to get a package from a mirror
 without installing it.
 
 There are also informative commands: `search`_ is used to search in the
-repository, `info`_ and `list`_ to get informations about a distribution.
+repository, `info`_ to get informations about a distribution.
 `mirror`_ can be used to get a list of mirrors.
 
 The program can accept a few basic options, to be listed before the command:
@@ -56,7 +56,7 @@ invoking any shell redirection command.
 
 Whenever a command takes a specification in input, it also accepts options
 ``--stable``, ``--testing`` and ``--unstable`` to specify the minimum release
-level accepted. The default is "stable".
+status accepted. The default is "stable".
 
 A few commands also allow specifying a local ``.zip`` package or a local
 directory containing a distribution: in this case the specification should
@@ -279,6 +279,15 @@ The prints on ``stdout`` a list of packages and version matching
 alternatively the extensions (using the ``--ext`` option) or the documentation
 (using the ``--docs`` option) can be searched.
 
+Example:
+
+.. code-block:: console
+
+    $ pgxn search integer
+    tinyint 0.1.1
+    check_updates 1.0.0
+    ssn 1.0.0
+
 .. todo:: Add the context to the search output?
 
 
@@ -295,7 +304,7 @@ Usage:
     :class: pgxn-info
 
     pgxn info [--help] [--stable | --testing | --unstable]
-              [--details | --meta | --readme]
+              [--details | --meta | --readme | --versions]
               *SPEC*
 
 The distribution is specified according to the `package specification`_.
@@ -305,7 +314,6 @@ The command output is a list of values obtained by the distribution's
 .. code-block:: console
 
     $ pgxn info pair
-    INFO: best version: pair 0.1.2
     name: pair
     abstract: A key/value pair data type
     description: This library contains a single PostgreSQL extension,
@@ -321,4 +329,15 @@ The command output is a list of values obtained by the distribution's
 
 Alternatively the raw ``META.json`` (using the ``--meta`` option) or the
 distribution README (using the ``--readme`` option) can be obtained.
+
+Using the ``--versions`` option, the command prints a list of available
+versions for the specified distribution, together with their release status.
+Only distributions respecting :samp:`{SPEC}` and the eventually specified
+release status options are printed, for example:
+
+.. code-block:: console
+
+    $ pgxn info --versions 'pair<0.1.2'
+    pair 0.1.1 stable
+    pair 0.1.0 stable
 

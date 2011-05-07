@@ -34,7 +34,7 @@ class ListTestCase(TestCase):
         return do()
 
     def test_list(self):
-        output = self._get_output(['list', 'foobar'])
+        output = self._get_output(['info', '--versions', 'foobar'])
         self.assertEqual(output, """\
 foobar 0.43.2b1 testing
 foobar 0.42.1 stable
@@ -42,14 +42,14 @@ foobar 0.42.0 stable
 """)
 
     def test_list_op(self):
-        output = self._get_output(['list', 'foobar>0.42.0'])
+        output = self._get_output(['info', '--versions', 'foobar>0.42.0'])
         self.assertEqual(output, """\
 foobar 0.43.2b1 testing
 foobar 0.42.1 stable
 """)
 
     def test_list_empty(self):
-        output = self._get_output(['list', 'foobar>=0.43.2'])
+        output = self._get_output(['info', '--versions', 'foobar>=0.43.2'])
         self.assertEqual(output, "")
 
 
