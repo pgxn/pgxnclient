@@ -8,7 +8,7 @@ Usage:
 .. parsed-literal::
     :class: pgxn
 
-    pgxn [--help] [--version] [--mirror URL] [--verbose] [--yes]
+    pgxn [--help] [--version] [--mirror *URL*] [--verbose] [--yes]
          *COMMAND* ...
 
 The script offers several commands, whose list can be obtained using ``pgxn
@@ -272,7 +272,7 @@ Usage:
 .. parsed-literal::
     :class: pgxn-search
 
-    pgxn search [--help] [--dist | --ext | --docs] QUERY
+    pgxn search [--help] [--dist | --ext | --docs] *QUERY*
 
 The prints on ``stdout`` a list of packages and version matching
 :samp:`{QUERY}`. By default the search is performed in the distributions:
@@ -354,7 +354,7 @@ Usage:
 .. parsed-literal::
     :class: pgxn-mirror
 
-    pgxn mirror [--help] [--detailed] [URI]
+    pgxn mirror [--help] [--detailed] [*URI*]
 
 If no :samp:`URI` is specified, print a list of known mirror URIs. Otherwise
 print details about the specified mirror. It is also possible to print details
