@@ -6,7 +6,7 @@ pgxnclient -- main package
 
 # This file is part of the PGXN client
 
-__version__ = '0.1a4'
+__version__ = '0.2dev0'
 
 
 import os
