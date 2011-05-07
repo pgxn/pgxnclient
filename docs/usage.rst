@@ -236,3 +236,49 @@ reverse order respect to the order in which they are specified in the
 
 See the load_ command for details about the command arguments.
 
+
+.. _download:
+
+``pgxn download``
+-----------------
+
+Download a distribution from the network.
+
+Usage:
+
+.. parsed-literal::
+    :class: pgxn-download
+
+    pgxn download [--help] [--stable | --testing | --unstable]
+                  [--target *PATH*]
+                  *SPEC*
+
+The distribution is specified according to the `package specification`_.  The
+file is saved in the current directory with name usually
+:samp:`{distribution}-{version}.zip`. If a file with the same name exists, a
+prefix ``-1``, ``-2`` etc. is added to the name, before the extension.  A
+different directory or name can be specified using the ``--target`` option.
+
+
+.. _search:
+
+``pgxn search``
+---------------
+
+Search in the extensions available on PGXN.
+
+Usage:
+
+.. parsed-literal::
+    :class: pgxn-search
+
+    pgxn search [--help] [--dist | --ext | --docs] QUERY
+
+The prints on ``stdout`` a list of packages and version matching
+:samp:`{QUERY}`. By default the search is performed in the distributions:
+alternatively the extensions (using the ``--ext`` option) or the documentation
+(using the ``--docs`` option) can be searched.
+
+.. todo:: Add the context to the search output?
+
+

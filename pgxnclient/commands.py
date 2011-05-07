@@ -191,7 +191,7 @@ class Search(Command):
         g.add_argument('--docs', dest='where', action='store_const',
             const='docs',
             help=_("search in documentation"))
-        subp.add_argument('query',
+        subp.add_argument('query', metavar='QUERY',
             help = _("the string to search"))
 
         return subp
