@@ -215,13 +215,11 @@ class Command(object):
 from pgxnclient.errors import BadSpecError
 from pgxnclient.utils.zip import get_meta_from_zip
 
-class CommandWithSpec(Command):
-    """Command subclass for commands taking a package specification.
+class WithSpec(Command):
+    """Mixin to implement commands taking a package specification.
 
     This class adds a positional argument SPEC to the parser and related
     options.
-
-    TODO: make this a mixin consistently with the other classes.
     """
     # TODO: the spec should possibly be a local file or a full url
     @classmethod
@@ -251,7 +249,7 @@ SPEC may also be a local zip file or unpacked directory, but in this case
 it should contain at least a '%s', for instance '.%spkgname.zip'.
 """) % (os.sep, os.sep)
 
-        subp = super(CommandWithSpec, self).customize_parser(
+        subp = super(WithSpec, self).customize_parser(
             parser, subparsers, epilog=epilog, **kwargs)
 
         subp.add_argument('spec', metavar='SPEC',

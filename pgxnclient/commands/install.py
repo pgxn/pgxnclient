@@ -16,13 +16,13 @@ from pgxnclient.i18n import _, N_
 from pgxnclient.utils import sha1
 from pgxnclient.errors import BadChecksum, PgxnClientException
 from pgxnclient.network import download
-from pgxnclient.commands import CommandWithSpec, WithDatabase, WithMake
+from pgxnclient.commands import Command, WithDatabase, WithMake, WithSpec
 from pgxnclient.commands import WithPgConfig
 
 logger = logging.getLogger('pgxnclient.commands')
 
 
-class Download(CommandWithSpec):
+class Download(WithSpec, Command):
     name = 'download'
     description = N_("download a distribution from the network")
 
@@ -82,7 +82,7 @@ class Download(CommandWithSpec):
         return os.path.abspath(fn)
 
 
-class InstallUninstall(WithMake, CommandWithSpec):
+class InstallUninstall(WithMake, WithSpec, Command):
     """
     Base class to implement the ``install`` and ``uninstall`` commands.
     """
@@ -159,7 +159,7 @@ class Uninstall(InstallUninstall):
         self.run_make('uninstall', dir=pdir, sudo=self.opts.sudo)
 
 
-class LoadUnload(WithPgConfig, WithDatabase, CommandWithSpec):
+class LoadUnload(WithPgConfig, WithDatabase, WithSpec, Command):
     """
     Base class to implement the ``load`` and ``unload`` commands.
     """
@@ -387,7 +387,7 @@ Do you want to execute it?""")
         self.load_sql(data=cmd)
 
 
-class Check(WithMake, WithDatabase, CommandWithSpec):
+class Check(WithMake, WithDatabase, WithSpec, Command):
     name = 'check'
     description = N_("run a distribution's test")
 

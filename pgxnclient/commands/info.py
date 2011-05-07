@@ -9,7 +9,7 @@ pgxnclient -- informative commands implementation
 from pgxnclient.i18n import _, N_
 from pgxnclient import SemVer
 from pgxnclient.errors import ResourceNotFound
-from pgxnclient.commands import Command, CommandWithSpec
+from pgxnclient.commands import Command, WithSpec
 
 import logging
 logger = logging.getLogger('pgxnclient.commands')
@@ -86,7 +86,7 @@ class Search(Command):
             print "%s %s" % (hit['dist'], hit['version'])
 
 
-class Info(CommandWithSpec):
+class Info(WithSpec, Command):
     name = 'info'
     description = N_("print informations about a distribution")
 
