@@ -341,3 +341,22 @@ release status options are printed, for example:
     pair 0.1.1 stable
     pair 0.1.0 stable
 
+
+.. _mirror:
+
+``pgxn mirror``
+---------------
+
+Return informations about the available mirrors.
+
+Usage:
+
+.. parsed-literal::
+    :class: pgxn-mirror
+
+    pgxn mirror [--help] [--detailed] [URI]
+
+If no :samp:`URI` is specified, print a list of known mirror URIs. Otherwise
+print details about the specified mirror. It is also possible to print details
+for all the known mirrors using the ``--detailed`` option.
+

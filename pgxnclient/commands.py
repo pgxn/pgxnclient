@@ -138,7 +138,7 @@ from pgxnclient.errors import ResourceNotFound
 
 class Mirror(Command):
     name = 'mirror'
-    description = N_("return info about the mirrors available")
+    description = N_("return informations about the available mirrors")
 
     @classmethod
     def customize_parser(self, parser, subparsers, glb, **kwargs):
