@@ -1,15 +1,24 @@
 Program usage
 =============
 
-The program entry point is the script called :program:`pgxn`. The script
-offers several commands, whose list can be obtained using ``pgxn --help``. The
-options available for each subcommand can be obtained using :samp:`pgxn
-{command} --help`.
+The program entry point is the script called :program:`pgxn`.
+
+Usage:
+
+.. parsed-literal::
+    :class: pgxn
+
+    pgxn [--help] [--version] [--mirror URL] [--verbose] [--yes]
+         *COMMAND*
+
+The script offers several commands, whose list can be obtained using ``pgxn
+--help``. The options available for each subcommand can be obtained using
+:samp:`pgxn {COMMAND} --help`.
 
 The main commands you may be interested in are `install`_ (to download, build
 and install a distribution extensions into the system) and `load`_ (to load an
 installed extension into a database). Commands to perform reverse operations
-are `uninstall`_ and `drop`_. Use `download`_ to get a package from a mirror
+are `uninstall`_ and `unload`_. Use `download`_ to get a package from a mirror
 without installing it.
 
 There are also informative commands: `search`_ is used to search in the
@@ -22,11 +31,11 @@ The program can accept a few basic options, to be listed before the command:
     Select a mirror to interact with. If not specified default to
     http://api.pgxn.org/.
 
-``--yes``
-    Assume affirmative answer to all questions. Useful for unattended scripts.
-
 ``--verbose``
     Print more informations during the process.
+
+``--yes``
+    Assume affirmative answer to all questions. Useful for unattended scripts.
 
 
 Package specification
@@ -43,7 +52,7 @@ package before the release 2.0. The version numbers are ordered according to
 the `Semantic Versioning specification <http://semver.org/>`__. Supported
 operators are ``=``, ``==`` (alias for ``=``), ``<``, ``<=``, ``>``, ``>=``.
 Note that you probably need to quote the string as in the example to avoid
-invoking some shell redirection commands.
+invoking any shell redirection command.
 
 Whenever a command takes a specification in input, it also accepts options
 ``--stable``, ``--testing`` and ``--unstable`` to specify the minimum release
@@ -61,6 +70,15 @@ for instance ``pgxn install ./foo.zip``.
 ----------------
 
 Download, build and install a distribution on the local system.
+
+Usage:
+
+.. parsed-literal::
+    :class: pgxn-install
+
+    pgxn install [--help] [--stable | --testing | --unstable]
+                 [--pg_config *PATH*] [--sudo *PROG* | --nosudo]
+                 *SPEC*
 
 The program takes a `package specification`_ identifying the distribution to
 work with.  The download phase is skipped if the distribution specification
@@ -97,6 +115,15 @@ the option :samp:`--pg_config {PATH}`.
 Load the extensions included in a distribution into a database. The
 distribution must be already installed in the system, e.g. via the `install`_
 command.
+
+Usage:
+
+.. parsed-literal::
+    :class: pgxn-load
+
+    pgxn load [--help] [--stable | --testing | --unstable] [-d *DBNAME*]
+              [-h *HOST*] [-p *PORT*] [-U *NAME*] [--pg_config *PATH*]
+              *SPEC*
 
 The distribution is specified according to the `package specification`_ and
 can refer to a local directory or file. No consistency check is performed
