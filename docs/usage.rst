@@ -181,14 +181,58 @@ For more informations see the `extensions documentation`__.
 .. todo:: Specify a schema
 .. todo:: Is pg_config really required here?
 
-The command is based on the `'provides' section`__ of the package META: if a
-SQL file is specified, that file will be used to load the extension. Note that
-loading is only attempted if the file extension is ``.sql``: if it's not, we
-assume that the extension is not really a PostgreSQL extension (it may be for
-instance a script). If no ``file`` is specified, a file named
-:samp:`{extension}.sql` will be looked for in a few directories under the
-PostgreSQL ``shared`` directory and it will be loaded after an user
+The command is based on the `'provides' section`_ of the distribution's
+``META.json``: if a SQL file is specified, that file will be used to load the
+extension. Note that loading is only attempted if the file extension is
+``.sql``: if it's not, we assume that the extension is not really a PostgreSQL
+extension (it may be for instance a script). If no ``file`` is specified, a
+file named :samp:`{extension}.sql` will be looked for in a few directories
+under the PostgreSQL ``shared`` directory and it will be loaded after an user
 confirmation.
 
-.. __: http://pgxn.org/spec/#provides
+If the distribution provides more than one extension, the extensions are
+loaded in the order in which they are specified in the ``provides`` section of
+the ``META.json`` file.
+
+
+.. _'provides' section: http://pgxn.org/spec/#provides
+
+.. todo:: Add options to specify what to load
+
+
+.. _unload:
+
+``pgxn unload``
+---------------
+
+Unload a distribution's extensions from a database.
+
+Usage:
+
+.. parsed-literal::
+    :class: pgxn-unload
+
+    pgxn unload [--help] [--stable | --testing | --unstable] [-d *DBNAME*]
+                [-h *HOST*] [-p *PORT*] [-U *NAME*] [--pg_config *PATH*]
+                *SPEC*
+
+The command does the opposite of the load_ command: it drops an extension from
+the specified database, either issuing a `DROP EXTENSION`_ command or running
+an uninstall script eventually provided.
+
+For every extension specified in the `'provides' section`_ of the
+distribution ``META.json``, the command will look for a file called
+:samp:`uninstall_{file.sql}` where :samp:`{file.sql}` is the ``file``
+specified. If no file is specified, :samp:`{extension}.sql` is assumed. If
+a file with extension different from ``.sql`` is specified, it is
+assumed that the extension is not a PostgreSQL extension so unload is not
+performed.
+
+If the distribution specifies more than one extension, they are unloaded in
+reverse order respect to the order in which they are specified in the
+``META.json`` file.
+
+.. _DROP EXTENSION: http://www.postgresql.org/docs/9.1/static/sql-dropextension.html
+
+See the load_ command for details about the command arguments.
 
