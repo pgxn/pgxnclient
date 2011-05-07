@@ -21,8 +21,8 @@ installed extension into a database). Commands to perform reverse operations
 are `uninstall`_ and `unload`_. Use `download`_ to get a package from a mirror
 without installing it.
 
-There are also informative commands: `search`_ is used to search in the
-repository, `info`_ to get informations about a distribution.
+There are also informative commands: `search <#pgxn-search>`_ is used to
+search in the repository, `info`_ to get informations about a distribution.
 `mirror`_ can be used to get a list of mirrors.
 
 The program can accept a few basic options, to be listed before the command:
@@ -260,7 +260,7 @@ prefix ``-1``, ``-2`` etc. is added to the name, before the extension.  A
 different directory or name can be specified using the ``--target`` option.
 
 
-.. _search:
+.. _pgxn-search:
 
 ``pgxn search``
 ---------------
