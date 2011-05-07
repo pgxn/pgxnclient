@@ -8,6 +8,7 @@ from urllib import quote
 
 from testutils import ifunlink, get_test_filename
 
+
 class FakeFile(file):
     url = None
     pass
@@ -140,7 +141,7 @@ class DownloadTestCase(TestCase):
 
     def test_version(self):
         from pgxnclient import Spec
-        from pgxnclient.commands import Download
+        from pgxnclient.commands.install import Download
         from pgxnclient.errors import ResourceNotFound
 
         opt = Mock()
@@ -414,7 +415,7 @@ class CheckTestCase(TestCase):
 
 class LoadTestCase(TestCase):
     def test_parse_version(self):
-        from pgxnclient.commands import Load
+        from pgxnclient.commands.install import Load
         cmd = Load(None)
         self.assertEquals((9,0,3), cmd.parse_pg_version(
             'PostgreSQL 9.0.3 on i686-pc-linux-gnu, compiled by GCC'
@@ -423,8 +424,8 @@ class LoadTestCase(TestCase):
             'PostgreSQL 9.1alpha5 on i686-pc-linux-gnu, compiled by GCC gcc'
             ' (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5, 32-bit '))
 
-    @patch('pgxnclient.commands.Load.is_extension')
-    @patch('pgxnclient.commands.Load.get_pg_version')
+    @patch('pgxnclient.commands.install.Load.is_extension')
+    @patch('pgxnclient.commands.install.Load.get_pg_version')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
     def test_check_psql_options(self,
@@ -454,8 +455,8 @@ class LoadTestCase(TestCase):
         args = mock_popen.call_args[0][0]
         self.assertEqual('somewhere', args[args.index('--host') + 1])
 
-    @patch('pgxnclient.commands.Load.is_extension')
-    @patch('pgxnclient.commands.Load.get_pg_version')
+    @patch('pgxnclient.commands.install.Load.is_extension')
+    @patch('pgxnclient.commands.install.Load.get_pg_version')
     @patch('pgxnclient.commands.unpack')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
@@ -479,8 +480,8 @@ class LoadTestCase(TestCase):
             'CREATE EXTENSION foobar;')
 
 
-    @patch('pgxnclient.commands.Load.is_extension')
-    @patch('pgxnclient.commands.Load.get_pg_version')
+    @patch('pgxnclient.commands.install.Load.is_extension')
+    @patch('pgxnclient.commands.install.Load.get_pg_version')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
     def test_load_local_dir(self, mock_get, mock_popen,
