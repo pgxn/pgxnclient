@@ -9,7 +9,7 @@ Usage:
     :class: pgxn
 
     pgxn [--help] [--version] [--mirror URL] [--verbose] [--yes]
-         *COMMAND*
+         *COMMAND* ...
 
 The script offers several commands, whose list can be obtained using ``pgxn
 --help``. The options available for each subcommand can be obtained using

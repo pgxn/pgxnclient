@@ -33,7 +33,8 @@ def get_option_parser():
     glb = parser.add_argument_group(_("global options"))
 
     subparsers = parser.add_subparsers(
-        title = _("COMMAND"),
+        title = _("available commands"),
+        metavar = 'COMMAND',
         help = _("the command to execute"))
 
     clss = [ cls for cls in CommandType.subclasses if cls.name ]
