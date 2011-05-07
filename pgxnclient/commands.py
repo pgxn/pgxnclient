@@ -99,12 +99,13 @@ class Command(object):
         raise NotImplementedError
 
     @classmethod
-    def _make_subparser(self, subparsers, epilog=None):
+    def _make_subparser(self, subparsers, description=None, epilog=None):
         # bail out if it is not a subclass being invoked
         if not self.name:
             return
         subp = subparsers.add_parser(self.name,
             help = gettext(self.description),
+            description = description or gettext(self.description),
             epilog = epilog)
         subp.set_defaults(cmd=self)
         return subp
