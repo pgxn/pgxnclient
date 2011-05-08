@@ -5,10 +5,7 @@ Prerequisites
 -------------
 
 The program is implemented in Python. Versions from Python 2.4 onwards are
-supported, included Python 3.0 and successive.
-
-.. todo::
-    Compatibility not verified yet: currently developing with Python 2.6.
+supported, including Python 3.0 and successive.
 
 PostgreSQL client-side development tools are required to build and install
 extensions.

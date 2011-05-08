@@ -213,7 +213,7 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
             raise PgxnClientException(
                 "psql returned %s running command" % (p.returncode))
 
-        return out
+        return out.decode('utf-8')
 
     def load_sql(self, filename=None, data=None):
         cmdline = [self.find_psql()]

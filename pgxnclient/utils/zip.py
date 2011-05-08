@@ -10,7 +10,7 @@ import os
 import stat
 from zipfile import ZipFile
 
-from pgxnclient.utils import json
+from pgxnclient.utils import b, json
 from pgxnclient.i18n import _
 from pgxnclient.errors import PgxnClientException
 
@@ -46,7 +46,7 @@ def unpack(zipname, destdir):
                 # In order to restore the executable bit, I haven't find
                 # anything that looks like an executable flag in the zipinfo,
                 # so look at the hashbangs...
-                isexec = data[:2] == '#!'
+                isexec = data[:2] == b('#!')
                 fout.write(data)
             finally:
                 fout.close()
@@ -70,7 +70,7 @@ def get_meta_from_zip(filename):
         # Return the first file with the expected name
         for fn in zf.namelist():
             if fn.endswith('META.json'):
-                return json.loads(zf.read(fn))
+                return json.loads(zf.read(fn).decode('utf8'))
         else:
             raise PgxnClientException(
                 _("file 'META.json' not found in archive '%s'") % filename)

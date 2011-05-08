@@ -22,3 +22,14 @@ if sys.version_info >= (2, 5):
     from hashlib import sha1
 else:
     from sha import new as sha1
+
+
+# For compatibility from Python 2.4 to 3.x
+# b('str') is equivalent to b'str' but works on Python < 2.6 too
+if sys.version_info < (3,):
+    def b(s):
+        return s
+else:
+    def b(s):
+        return s.encode('utf8')
+

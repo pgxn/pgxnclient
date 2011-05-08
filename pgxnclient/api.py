@@ -12,24 +12,28 @@ from pgxnclient.utils import json
 from pgxnclient.utils.uri import expand_template
 from pgxnclient.network import get_file
 
+def load_json(f):
+    data = f.read().decode('utf-8')
+    return json.loads(data)
+
 class Api(object):
     def __init__(self, mirror):
         self.mirror = mirror
 
     def dist(self, dist, version=''):
-        return json.load(self.call(
+        return load_json(self.call(
             version and 'meta' or 'dist',
             {'dist': dist, 'version': version}))
 
     def ext(self, ext):
-        return json.load(self.call('extension', {'extension': ext}))
+        return load_json(self.call('extension', {'extension': ext}))
 
     def meta(self, dist, version, as_json=True):
         f = self.call('meta', {'dist': dist, 'version': version})
         if as_json:
-            return json.load(f)
+            return load_json(f)
         else:
-            return f.read()
+            return f.read().decode('utf-8')
 
     def readme(self, dist, version):
         return self.call('readme', {'dist': dist, 'version': version}).read()
@@ -38,17 +42,17 @@ class Api(object):
         return self.call('download', {'dist': dist, 'version': version})
 
     def mirrors(self):
-        return json.load(self.call('mirrors'))
+        return load_json(self.call('mirrors'))
 
     def search(self, where, query):
-        return json.load(self.call('search', {'in': where},
+        return load_json(self.call('search', {'in': where},
             query={'q': query}))
 
     def stats(self, arg):
-        return json.load(self.call('stats', {'stats': arg}))
+        return load_json(self.call('stats', {'stats': arg}))
 
     def user(self, username):
-        return json.load(self.call('user', {'user': username}))
+        return load_json(self.call('user', {'user': username}))
 
     def call(self, meth, args=None, query=None):
         url = self.get_url(meth, args, query)
@@ -71,7 +75,7 @@ class Api(object):
     def get_index(self):
         if self._api_index is None:
             url = self.mirror.rstrip('/') + '/index.json'
-            self._api_index = json.load(get_file(url))
+            self._api_index = load_json(get_file(url))
 
         return self._api_index
 

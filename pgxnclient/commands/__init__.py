@@ -425,7 +425,8 @@ class WithPgConfig(object):
             raise PgxnClientException(
                 "%s returned %s" % (cmdline, p.returncode))
 
-        rv = _cache[what] = out.rstrip()
+        out = out.rstrip().decode('utf-8')
+        rv = _cache[what] = out
         return rv
 
 

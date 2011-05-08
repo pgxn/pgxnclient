@@ -40,7 +40,6 @@ elif sys.version_info < (2, 6):
 
 setup(
     name = 'pgxnclient',
-    version = version,
     description = 'A command line tool to interact with the PostgreSQL Extension Network.',
     author = 'Daniele Varrazzo',
     author_email = 'daniele.varrazzo@gmail.com',
@@ -50,6 +49,8 @@ setup(
     entry_points = {'console_scripts': ['pgxn = pgxnclient.cli:script']},
     zip_safe = False,   # because we dynamically look for commands
     install_requires = requires,
+    version = version,
+    use_2to3 = True,
 )
 
 # Note: I've not been able to include data files using 'package_data':
