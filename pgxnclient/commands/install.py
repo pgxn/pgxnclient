@@ -166,8 +166,10 @@ class Check(WithDatabase, InstallUninstall):
             for ext in ('out', 'diffs'):
                 fn = os.path.join(pdir, 'regression.' + ext)
                 if os.path.exists(fn):
-                    logger.info(_('copying regression.%s'), ext)
-                    shutil.copy(fn, './regression.' + ext)
+                    dest = './regression.' + ext
+                    if not os.path.exists(dest) or not os.path.samefile(fn, dest):
+                        logger.info(_('copying regression.%s'), ext)
+                        shutil.copy(fn, dest)
             raise
 
 
