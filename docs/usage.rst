@@ -123,14 +123,26 @@ Usage:
                [--pg_config *PATH*] [-d *DBNAME*] [-h *HOST*] [-p *PORT*] [-U *NAME*]
                *SPEC*
 
-The program takes a `package specification`_ identifying the distribution to
+The command takes a `package specification`_ identifying the distribution to
 work with, which can also be a local file or directory. The distribution is
-unpacked if required and the ``installcheck`` make target is run. The script
-exits with non-zero value in case of test failed.
+unpacked if required and the ``installcheck`` make target is run.
 
-If the unit test fails and files ``regression.diff`` and ``regression.out``
-are produced (as :program:`pg_regress` does), these files are copied to the
-local directory where the script is run.
+.. note::
+    The command doesn't run ``make all`` before ``installcheck``: if any file
+    required for testing is to be built, it should be listed as
+    ``installcheck`` prerequisite in the ``Makefile``, for instance:
+
+    .. code-block:: make
+
+        myext.sql: myext.sql.in
+            some_command
+
+        installcheck: myext.sql
+
+The script exits with non-zero value in case of test failed. In this case,
+if files ``regression.diff`` and ``regression.out`` are produced (as
+:program:`pg_regress` does), these files are copied to the local directory
+where the script is run.
 
 The database connection options are similar to the ones in load_, with the
 difference that the variable :envvar:`PGDATABASE` doesn't influence the
