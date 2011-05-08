@@ -108,10 +108,10 @@ def parse_expansion(expansion):
 def percent_encode(values):
     rv = {}
     for k, v in values.items():
-        if hasattr(v, "__iter__"):
-            rv[k] = [urllib.quote(s) for s in v]
-        else:
+        if isinstance(v, basestring):
             rv[k] = urllib.quote(v)
+        else:
+            rv[k] = [urllib.quote(s) for s in v]
     return rv
 
 #
@@ -125,7 +125,7 @@ class _operators(object):
     def opt(variables, arg, values):
         for k in variables.keys():
             v = values.get(k, None)
-            if v is None or (hasattr(v, "__iter__") and len(v) == 0):
+            if v is None or (not isinstance(v, basestring) and len(v) == 0):
                 continue
             else:
                 return arg
