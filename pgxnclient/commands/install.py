@@ -280,9 +280,16 @@ class Load(LoadUnload):
         dist = self.get_meta(spec)
 
         # TODO: probably unordered before Python 2.7 or something
-        for name, data in dist['provides'].items():
-            sql = data.get('file')
-            self.load_ext(name, sql)
+        if 'provides' in dist:
+            for name, data in dist['provides'].items():
+                sql = data.get('file')
+                self.load_ext(name, sql)
+        else:
+            # No 'provides' specified: assume a single extension named
+            # after the distribution. This is automatically done by PGXN,
+            # but we should do ourselves to deal with local META files
+            # not mangled by the PGXN upload script yet.
+            self.load_ext(dist['name'], None)
 
     def load_ext(self, name, sqlfile):
         logger.debug(_("loading extension '%s' with file: %s"),
@@ -342,11 +349,15 @@ class Unload(LoadUnload):
         dist = self.get_meta(spec)
 
         # TODO: ensure ordering
-        provs = dist['provides'].items()
-        provs.reverse()
-        for name, data in provs:
-            sql = data.get('file')
-            self.load_ext(name, sql)
+        if 'provides' in dist:
+            provs = dist['provides'].items()
+            provs.reverse()
+            for name, data in provs:
+                sql = data.get('file')
+                self.load_ext(name, sql)
+        else:
+            # Assume a single extension in the distribution - see Install
+            self.load_ext(dist['name'], None)
 
     def load_ext(self, name, sqlfile):
         logger.debug(_("unloading extension '%s' with file: %s"),
