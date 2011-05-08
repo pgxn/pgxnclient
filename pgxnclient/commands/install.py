@@ -155,9 +155,8 @@ class Check(WithDatabase, InstallUninstall):
         env = os.environ.copy()
         env.update(upenv)
 
-        # Can't manage to pass it to pg_regress via the env
         cmd = ['installcheck']
-        if 'PGDATABASE' in env:
+        if 'PGDATABASE' in upenv:
             cmd.append("CONTRIB_TESTDB=" +  env['PGDATABASE'])
 
         try:

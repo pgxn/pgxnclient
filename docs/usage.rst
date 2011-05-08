@@ -132,6 +132,10 @@ If the unit test fails and files ``regression.diff`` and ``regression.out``
 are produced (as :program:`pg_regress` does), these files are copied to the
 local directory where the script is run.
 
+The database connection options are similar to the ones in load_, with the
+difference that the variable :envvar:`PGDATABASE` doesn't influence the
+database name.
+
 .. warning::
     At the time of writing, :program:`pg_regress` on Debian and derivatives is
     affected by `bug #554166`__ which makes *HOST* selection impossible.
