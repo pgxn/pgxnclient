@@ -37,6 +37,17 @@ elif sys.version_info < (2, 6):
 # Note that testing also requires unittest2 and mock:
 # 'make env' can install them locally.
 
+classifiers = """
+Development Status :: 4 - Beta
+Environment :: Console
+Intended Audience :: Developers
+Intended Audience :: System Administrators
+License :: OSI Approved :: BSD License
+Operating System :: POSIX
+Programming Language :: Python :: 2
+Programming Language :: Python :: 3
+Topic :: Database
+"""
 
 setup(
     name = 'pgxnclient',
@@ -47,6 +58,7 @@ setup(
     license = 'BSD',
     packages = find_packages(exclude=["tests"]),
     entry_points = {'console_scripts': ['pgxn = pgxnclient.cli:script']},
+    classifiers = [x for x in classifiers.split('\n') if x],
     zip_safe = False,   # because we dynamically look for commands
     install_requires = requires,
     version = version,
