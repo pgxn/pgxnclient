@@ -156,7 +156,7 @@ class Command(object):
         superclass' `customize_parser()` via `super()` in order to call all
         the mixins methods. Also note that the method must be a classmethod.
         """
-        return self.__make_subparser(subparsers)
+        return self.__make_subparser(subparsers, **kwargs)
 
     def run(self):
         """The actions to take when the command is invoked."""
@@ -221,33 +221,19 @@ class WithSpec(Command):
     This class adds a positional argument SPEC to the parser and related
     options.
     """
-    # TODO: the spec should possibly be a local file or a full url
     @classmethod
     def customize_parser(self, parser, subparsers,
-        with_status=True, can_be_local=False, epilog=None, **kwargs):
+        with_status=True, epilog=None, **kwargs):
         """
         Add the SPEC related options to the parser.
-
-        If *can_be_local* is true, the spec also accepts a local file or
-        directory; otherwise only a name with optional version and operator is
-        accepted.
 
         If *with_status* is true, options ``--stable``, ``--testing``,
         ``--unstable`` are also handled.
         """
-        if epilog is not None:
-            raise NotImplementedError("find the best way to mix epilogs in")
-
-        epilog=_("""
+        epilog = _("""
 SPEC can either specify just a name or contain required versions
 indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
-""")
-
-        if can_be_local:
-            epilog += _("""
-SPEC may also be a local zip file or unpacked directory, but in this case
-it should contain at least a '%s', for instance '.%spkgname.zip'.
-""") % (os.sep, os.sep)
+""") + (epilog or "")
 
         subp = super(WithSpec, self).customize_parser(
             parser, subparsers, epilog=epilog, **kwargs)
@@ -269,14 +255,11 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
 
         return subp
 
-    def get_spec(self, can_be_local=False):
+    def get_spec(self, _can_be_local=False):
         """
         Return the package specification requested.
 
         Return a `Spec` instance.
-
-        *can_be_local* should be consistent with the value provided to
-        `customize_parser()`.
         """
         spec = self.opts.spec
 
@@ -286,7 +269,7 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
             self.parser.error(_("cannot parse package '%s': %s")
                 % (spec, e))
 
-        if not can_be_local and spec.is_local():
+        if not _can_be_local and spec.is_local():
             raise PgxnClientException(
                 _("you cannot use a local resource with this command"))
 
@@ -359,6 +342,27 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
         elif spec.is_file():
             # Get the metadata from a zip file
             return get_meta_from_zip(spec.filename)
+
+
+class WithSpecLocal(WithSpec):
+    """
+    Mixin to implement commands that can also refer to a local file or dir.
+    """
+
+    @classmethod
+    def customize_parser(self, parser, subparsers, epilog=None, **kwargs):
+        epilog = _("""
+SPEC may also be a local zip file or unpacked directory, but in this case
+it should contain at least a '%s', for instance '.%spkgname.zip'.
+""") % (os.sep, os.sep) + (epilog or "")
+
+        subp = super(WithSpecLocal, self).customize_parser(
+            parser, subparsers, epilog=epilog, **kwargs)
+
+        return subp
+
+    def get_spec(self):
+        return super(WithSpecLocal, self).get_spec(_can_be_local=True)
 
 
 import shutil
@@ -434,7 +438,7 @@ class WithMake(WithPgConfig, WithUnpacking):
     def run_make(self, cmd, dir, env=None, sudo=None):
         """Invoke make with the selected command.
 
-        :param cmd: the make target
+        :param cmd: the make target or list of options to pass make
         :param dir: the direcrory to run the command into
         :param env: variables to add to the make environment
         :param sudo: if set, use the provided command/arg to elevate
@@ -446,10 +450,11 @@ class WithMake(WithPgConfig, WithUnpacking):
             cmdline.extend(shlex.split(sudo))
 
         cmdline.extend(['make', 'PG_CONFIG=%s' % self.opts.pg_config])
-        if cmd == 'installcheck':
-            cmdline.append('PGUSER=postgres')
 
-        cmdline.append(cmd)
+        if isinstance(cmd, basestring):
+            cmdline.append(cmd)
+        else: # a list
+            cmdline.extend(cmd)
 
         logger.debug(_("running: %s"), cmdline)
         p = self.popen(cmdline, cwd=dir, shell=False, env=env, close_fds=True)
@@ -459,17 +464,41 @@ class WithMake(WithPgConfig, WithUnpacking):
                 _("command returned %s") % p.returncode)
 
 
+class WithSudo(object):
+    """
+    Mixin to implement commands that may invoke sudo.
+    """
+    @classmethod
+    def customize_parser(self, parser, subparsers, **kwargs):
+        subp = super(WithSudo, self).customize_parser(
+            parser, subparsers, **kwargs)
+
+        g = subp.add_mutually_exclusive_group()
+        g.add_argument('--sudo', metavar="PROG", default='sudo',
+            help = _("run PROG to elevate privileges when required"
+                " [default: %(default)s]"))
+        g.add_argument('--nosudo', dest='sudo', action='store_false',
+            help = _("never elevate privileges"))
+
+        return subp
+
+
 class WithDatabase(object):
     """
     Mixin to implement commands that should communicate to a database.
     """
     @classmethod
-    def customize_parser(self, parser, subparsers, **kwargs):
+    def customize_parser(self, parser, subparsers, epilog=None, **kwargs):
         """
         Add the options related to database connections.
         """
+        epilog =  _("""
+The default database connection options depend on the value of environment
+variables PGDATABASE, PGHOST, PGPORT, PGUSER.
+""") + (epilog or "")
+
         subp = super(WithDatabase, self).customize_parser(
-            parser, subparsers, **kwargs)
+            parser, subparsers, epilog=epilog, **kwargs)
 
         g = subp.add_argument_group(_("database connections options"))
 
@@ -482,10 +511,6 @@ class WithDatabase(object):
         g.add_argument('-U', '--username', metavar="NAME",
             help = _("database user name"))
 
-        subp.epilog = (subp.epilog or "") + _("""
-The default database connection options depend on the value of environment
-variables PGDATABASE, PGHOST, PGPORT, PGUSER.
-""")
         return subp
 
     def get_psql_options(self):
@@ -507,8 +532,6 @@ variables PGDATABASE, PGHOST, PGPORT, PGUSER.
         if self.opts.dbname: rv['PGDATABASE'] = self.opts.dbname
         if self.opts.host: rv['PGHOST'] = self.opts.host
         if self.opts.port: rv['PGPORT'] = str(self.opts.port)
-        # TODO: PGUSER doesn't get passed?
         if self.opts.username: rv['PGUSER'] = self.opts.username
         return rv
-
 

@@ -107,6 +107,38 @@ first found on the :envvar:`PATH`. A different instance can be specified using
 the option :samp:`--pg_config {PATH}`.
 
 
+.. _check:
+
+``pgxn check``
+--------------
+
+Run a distribution's unit test.
+
+Usage:
+
+.. parsed-literal::
+    :class: pgxn-check
+
+    pgxn check [--help] [--stable | --testing | --unstable]
+               [--pg_config *PATH*] [-d *DBNAME*] [-h *HOST*] [-p *PORT*] [-U *NAME*]
+               *SPEC*
+
+The program takes a `package specification`_ identifying the distribution to
+work with, which can also be a local file or directory. The distribution is
+unpacked if required and the ``installcheck`` make target is run. The script
+exits with non-zero value in case of test failed.
+
+If the unit test fails and files ``regression.diff`` and ``regression.out``
+are produced (as :program:`pg_regress` does), these files are copied to the
+local directory where the script is run.
+
+.. warning::
+    At the time of writing, :program:`pg_regress` on Debian and derivatives is
+    affected by `bug #554166`__ which makes *HOST* selection impossible.
+
+   .. __: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=554166
+
+
 .. _uninstall:
 
 ``pgxn uninstall``

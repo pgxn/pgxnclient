@@ -16,8 +16,8 @@ from pgxnclient.i18n import _, N_
 from pgxnclient.utils import sha1
 from pgxnclient.errors import BadChecksum, PgxnClientException
 from pgxnclient.network import download
-from pgxnclient.commands import Command, WithDatabase, WithMake, WithSpec
-from pgxnclient.commands import WithPgConfig
+from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
+from pgxnclient.commands import WithSpec, WithSpecLocal, WithSudo
 
 logger = logging.getLogger('pgxnclient.commands')
 
@@ -82,30 +82,15 @@ class Download(WithSpec, Command):
         return os.path.abspath(fn)
 
 
-class InstallUninstall(WithMake, WithSpec, Command):
+class InstallUninstall(WithMake, WithSpecLocal, Command):
     """
     Base class to implement the ``install`` and ``uninstall`` commands.
     """
-    @classmethod
-    def customize_parser(self, parser, subparsers, **kwargs):
-        subp = super(InstallUninstall, self).customize_parser(
-            parser, subparsers,
-            can_be_local=True, **kwargs)
-
-        g = subp.add_mutually_exclusive_group()
-        g.add_argument('--sudo', metavar="PROG", default='sudo',
-            help = _("run PROG to elevate privileges when required"
-                " [default: %(default)s]"))
-        g.add_argument('--nosudo', dest='sudo', action='store_false',
-            help = _("never elevate privileges"))
-
-        return subp
-
     def run(self):
         return self.call_with_temp_dir(self._run)
 
     def _run(self, dir):
-        spec = self.get_spec(can_be_local=True)
+        spec = self.get_spec()
         if spec.is_dir():
             pdir = spec.dirname
         elif spec.is_file():
@@ -138,7 +123,7 @@ class InstallUninstall(WithMake, WithSpec, Command):
                 _("configure failed with return code %s") % p.returncode)
 
 
-class Install(InstallUninstall):
+class Install(WithSudo, InstallUninstall):
     name = 'install'
     description = N_("download, build and install a distribution")
 
@@ -150,7 +135,7 @@ class Install(InstallUninstall):
         self.run_make('install', dir=pdir, sudo=self.opts.sudo)
 
 
-class Uninstall(InstallUninstall):
+class Uninstall(WithSudo, InstallUninstall):
     name = 'uninstall'
     description = N_("remove a distribution from the system")
 
@@ -159,18 +144,38 @@ class Uninstall(InstallUninstall):
         self.run_make('uninstall', dir=pdir, sudo=self.opts.sudo)
 
 
-class LoadUnload(WithPgConfig, WithDatabase, WithSpec, Command):
+class Check(WithDatabase, InstallUninstall):
+    name = 'check'
+    description = N_("run a distribution's test")
+
+    def _inun(self, pdir):
+        logger.info(_("checking extension"))
+        upenv = self.get_psql_env()
+        logger.debug("additional env: %s", upenv)
+        env = os.environ.copy()
+        env.update(upenv)
+
+        # Can't manage to pass it to pg_regress via the env
+        cmd = ['installcheck']
+        if 'PGDATABASE' in env:
+            cmd.append("CONTRIB_TESTDB=" +  env['PGDATABASE'])
+
+        try:
+            self.run_make(cmd, dir=pdir, env=env)
+        except PgxnClientException:
+            # if the test failed, copy locally the regression result
+            for ext in ('out', 'diffs'):
+                fn = os.path.join(pdir, 'regression.' + ext)
+                if os.path.exists(fn):
+                    logger.info(_('copying regression.%s'), ext)
+                    shutil.copy(fn, './regression.' + ext)
+            raise
+
+
+class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
     """
     Base class to implement the ``load`` and ``unload`` commands.
     """
-    @classmethod
-    def customize_parser(self, parser, subparsers, **kwargs):
-        subp = super(LoadUnload, self).customize_parser(
-            parser, subparsers,
-            can_be_local=True, **kwargs)
-
-        return subp
-
     def get_pg_version(self):
         """Return the version of the selected database."""
         data = self.call_psql('SELECT version();')
@@ -270,7 +275,7 @@ class Load(LoadUnload):
     description = N_("load a distribution's extensions into a database")
 
     def run(self):
-        spec = self.get_spec(can_be_local=True)
+        spec = self.get_spec()
         dist = self.get_meta(spec)
 
         # TODO: probably unordered before Python 2.7 or something
@@ -332,7 +337,7 @@ class Unload(LoadUnload):
     description = N_("unload a distribution's extensions from a database")
 
     def run(self):
-        spec = self.get_spec(can_be_local=True)
+        spec = self.get_spec()
         dist = self.get_meta(spec)
 
         # TODO: ensure ordering
@@ -385,32 +390,4 @@ Do you want to execute it?""")
         # TODO: cascade
         cmd = "DROP EXTENSION %s;" % Label(name)
         self.load_sql(data=cmd)
-
-
-class Check(WithMake, WithDatabase, WithSpec, Command):
-    name = 'check'
-    description = N_("run a distribution's test")
-
-    def run(self):
-        return self.call_with_temp_dir(self._run)
-
-    def _run(self, dir):
-        self.opts.target = dir
-        fn = Download(self.opts).run()
-        pdir = self.unpack(fn, dir)
-
-        logger.info(_("checking extension"))
-        env = os.environ.copy()
-        env.update(self.get_psql_env())
-        try:
-            self.run_make('installcheck', dir=pdir, env=env)
-        except PgxnClientException:
-            # if the test failed, copy locally the regression result
-            for ext in ('out', 'diffs'):
-                fn = os.path.join(pdir, 'regression.' + ext)
-                if os.path.exists(fn):
-                    logger.info(_('copying regression.%s'), ext)
-                    shutil.copy(fn, './regression.' + ext)
-            raise
-
 
