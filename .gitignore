@@ -1,5 +1,5 @@
-MANIFEST
 build
 dist
 env
 docs/html
+pgxnclient.egg-info

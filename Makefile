@@ -1,7 +1,7 @@
 # pgxnclient Makefile
 #
 # Copyright (C) 2011 Daniele Varrazzo
-# 
+#
 # This file is part of the PGXN client
 
 .PHONY: env sdist upload docs
@@ -41,8 +41,7 @@ ez_setup:
 	wget -O $(EZ_SETUP) http://peak.telecommunity.com/dist/ez_setup.py
 
 sdist:
-	$(PYTHON) setup.py sdist --manifest-only
-	$(PYTHON) setup.py sdist --force-manifest --formats=gztar,zip
+	$(PYTHON) setup.py sdist --formats=gztar,zip
 
 upload:
 	$(PYTHON) setup.py sdist --formats=gztar,zip upload
@@ -51,6 +50,6 @@ docs:
 	$(MAKE) -C docs
 
 clean:
-	rm -rf build
+	rm -rf build pgxnclient.egg-info
 	$(MAKE) -C docs $@
 

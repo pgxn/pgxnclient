@@ -1,5 +1,6 @@
-include CHANGES COPYING MANIFEST MANIFEST.in README setup.py Makefile
-include scripts/pgxn scripts/pgxncli.py
-recursive-include pgxn *.py
+include CHANGES COPYING MANIFEST.in README setup.py Makefile
+include scripts/pgxn
+recursive-include pgxnclient *.py
 recursive-include tests *.py
 recursive-include tests/data *
+include docs/conf.py docs/Makefile docs/*.rst
