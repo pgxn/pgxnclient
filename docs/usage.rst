@@ -321,7 +321,7 @@ Usage:
 
     pgxn search [--help] [--dist | --ext | --docs] *QUERY*
 
-The prints on ``stdout`` a list of packages and version matching
+The command prints on ``stdout`` a list of packages and version matching
 :samp:`{QUERY}`. By default the search is performed in the distributions:
 alternatively the extensions (using the ``--ext`` option) or the documentation
 (using the ``--docs`` option) can be searched.
