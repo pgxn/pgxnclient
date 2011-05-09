@@ -1,5 +1,8 @@
 build
 dist
-env
 docs/html
+docs/env
 pgxnclient.egg-info
+simplejson-*.egg
+mock-*.egg
+unittest2-*.egg

@@ -28,14 +28,17 @@ finally:
 
 # External dependencies, depending on the Python version
 requires = []
+tests_require = []
 
 if sys.version_info < (2, 5):
     requires.append('simplejson<=2.0.9')
 elif sys.version_info < (2, 6):
     requires.append('simplejson')
 
-# Note that testing also requires unittest2 and mock:
-# 'make env' can install them locally.
+tests_require.append('mock')
+if sys.version_info < (2, 7):
+    tests_require.append('unittest2')
+
 
 classifiers = """
 Development Status :: 4 - Beta
@@ -62,6 +65,7 @@ setup(
     classifiers = [x for x in classifiers.split('\n') if x],
     zip_safe = False,   # because we dynamically look for commands
     install_requires = requires,
+    tests_require = tests_require,
     version = version,
     use_2to3 = True,
 )
