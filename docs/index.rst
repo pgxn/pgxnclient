@@ -13,8 +13,10 @@ extensions in a PostgreSQL installation or database.
 
 - Home page: http://pgxnclient.projects.postgresql.org/
 - Downloads: http://pypi.python.org/pypi/pgxnclient/
+- Discussion group: http://groups.google.com/group/pgxn-users/
 - Source repository: https://github.com/dvarrazzo/pgxnclient/
 - PgFoundry project: http://pgfoundry.org/projects/pgxnclient/
+
 
 Contents:
 
