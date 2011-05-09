@@ -1,8 +1,8 @@
-from unittest2 import TestCase
+from pgxnclient.tests import unittest
 
 from pgxnclient import SemVer
 
-class SemVerTestCase(TestCase):
+class SemVerTestCase(unittest.TestCase):
     def test_ok(self):
         for s in [
             '1.2.2',

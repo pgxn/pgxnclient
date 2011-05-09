@@ -1,17 +1,21 @@
 from mock import patch, Mock
-from unittest2 import TestCase
 
 import os
 import tempfile
 import shutil
 from urllib import quote
 
-from testutils import ifunlink, get_test_filename
+from pgxnclient.utils import b
+from pgxnclient.tests import unittest
+from pgxnclient.tests.testutils import ifunlink, get_test_filename
 
+class FakeFile(object):
+    def __init__(self, *args):
+        self._f = open(*args)
+        self.url = None
 
-class FakeFile(file):
-    url = None
-    pass
+    def __getattr__(self, attr):
+        return getattr(self._f, attr)
 
 def fake_get_file(url, urlmap=None):
     if urlmap: url = urlmap.get(url, url)
@@ -21,7 +25,7 @@ def fake_get_file(url, urlmap=None):
     return f
 
 
-class ListTestCase(TestCase):
+class ListTestCase(unittest.TestCase):
     def _get_output(self, cmdline):
         @patch('sys.stdout')
         @patch('pgxnclient.api.get_file')
@@ -36,25 +40,25 @@ class ListTestCase(TestCase):
 
     def test_list(self):
         output = self._get_output(['info', '--versions', 'foobar'])
-        self.assertEqual(output, """\
+        self.assertEqual(output, b("""\
 foobar 0.43.2b1 testing
 foobar 0.42.1 stable
 foobar 0.42.0 stable
-""")
+"""))
 
     def test_list_op(self):
         output = self._get_output(['info', '--versions', 'foobar>0.42.0'])
-        self.assertEqual(output, """\
+        self.assertEqual(output, b("""\
 foobar 0.43.2b1 testing
 foobar 0.42.1 stable
-""")
+"""))
 
     def test_list_empty(self):
         output = self._get_output(['info', '--versions', 'foobar>=0.43.2'])
-        self.assertEqual(output, "")
+        self.assertEqual(output, b(""))
 
 
-class DownloadTestCase(TestCase):
+class DownloadTestCase(unittest.TestCase):
     @patch('pgxnclient.api.get_file')
     def test_download_latest(self, mock):
         mock.side_effect = fake_get_file
@@ -209,7 +213,7 @@ class DownloadTestCase(TestCase):
             self.assertEqual(res, cmd.get_best_version(data, spec))
 
 
-class InstallTestCase(TestCase):
+class InstallTestCase(unittest.TestCase):
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
     def test_install_latest(self, mock_get, mock_popen):
@@ -334,7 +338,7 @@ class InstallTestCase(TestCase):
         self.assertEquals(dir, mock_popen.call_args_list[1][1]['cwd'])
 
 
-class CheckTestCase(TestCase):
+class CheckTestCase(unittest.TestCase):
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
     def test_check_latest(self, mock_get, mock_popen):
@@ -413,7 +417,7 @@ class CheckTestCase(TestCase):
         self.assertEquals(mock_popen.call_count, 0)
 
 
-class LoadTestCase(TestCase):
+class LoadTestCase(unittest.TestCase):
     def test_parse_version(self):
         from pgxnclient.commands.install import Load
         cmd = Load(None)
@@ -433,7 +437,7 @@ class LoadTestCase(TestCase):
         mock_get.side_effect = fake_get_file
         pop = mock_popen.return_value
         pop.returncode = 0
-        pop.communicate.return_value = ('', '')
+        pop.communicate.return_value = (b(''), b(''))
         mock_pgver.return_value = (9,1,0)
         mock_isext.return_value = True
 

@@ -56,8 +56,9 @@ setup(
     author_email = 'daniele.varrazzo@gmail.com',
     url = 'http://pgxnclient.projects.postgresql.org/',
     license = 'BSD',
-    packages = find_packages(exclude=["tests"]),
+    packages = find_packages(),
     entry_points = {'console_scripts': ['pgxn = pgxnclient.cli:script']},
+    test_suite = 'pgxnclient.tests',
     classifiers = [x for x in classifiers.split('\n') if x],
     zip_safe = False,   # because we dynamically look for commands
     install_requires = requires,

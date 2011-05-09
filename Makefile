@@ -11,34 +11,33 @@ PYTHON_VERSION ?= $(shell $(PYTHON) -c 'import sys; print ("%d.%d" % sys.version
 ENV_DIR = $(shell pwd)/env/py-$(PYTHON_VERSION)
 ENV_BIN = $(ENV_DIR)/bin
 ENV_LIB = $(ENV_DIR)/lib
-EASY_INSTALL = PYTHONPATH=$(ENV_LIB) $(ENV_BIN)/easy_install-$(PYTHON_VERSION) -d $(ENV_LIB) -s $(ENV_BIN)
-EZ_SETUP = $(ENV_BIN)/ez_setup.py
-
-check:
-	PYTHONPATH=.:$(ENV_LIB) $(PYTHON) $(ENV_BIN)/unit2 discover
+BUILD_DIR = $(shell pwd)/build/lib.$(PYTHON_VERSION)
+EASY_INSTALL ?= easy_install-$(PYTHON_VERSION)
+EASY_INSTALL_CMD = PYTHONPATH=$(ENV_LIB) $(EASY_INSTALL) -d $(ENV_LIB) -s $(ENV_BIN)
 
 
 # Install development dependencies.
+# For python 3, use something like:
+#     make PYTHON=python3.1 EASY_INSTALL=easy_install3 env
+# still, unittest2 shouldn't be installed.
 
-env: easy_install
+build:
+	PYTHONPATH=$(ENV_LIB) $(PYTHON) setup.py build --build-lib $(BUILD_DIR)
+
+env:
 	mkdir -p $(ENV_BIN)
 	mkdir -p $(ENV_LIB)
-	$(EASY_INSTALL) unittest2
-	$(EASY_INSTALL) mock
+	$(EASY_INSTALL_CMD) unittest2
+	$(EASY_INSTALL_CMD) mock
 ifeq ($(PYTHON_VERSION),2.4)
-	$(EASY_INSTALL) "simplejson==2.0.9"
+	$(EASY_INSTALL_CMD) "simplejson==2.0.9"
 endif
 ifeq ($(PYTHON_VERSION),2.5)
-	$(EASY_INSTALL) simplejson
+	$(EASY_INSTALL_CMD) simplejson
 endif
 
-easy_install: ez_setup
-	PYTHONPATH=$(ENV_LIB) $(PYTHON) $(EZ_SETUP) -d $(ENV_LIB) -s $(ENV_BIN) setuptools
-
-ez_setup:
-	mkdir -p $(ENV_BIN)
-	mkdir -p $(ENV_LIB)
-	wget -O $(EZ_SETUP) http://peak.telecommunity.com/dist/ez_setup.py
+check: build
+	PYTHONPATH=$(BUILD_DIR):$(ENV_LIB) $(PYTHON) setup.py test
 
 sdist:
 	$(PYTHON) setup.py sdist --formats=gztar,zip

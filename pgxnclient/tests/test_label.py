@@ -1,8 +1,8 @@
-from unittest2 import TestCase
+from pgxnclient.tests import unittest
 
 from pgxnclient import Label
 
-class LabelTestCase(TestCase):
+class LabelTestCase(unittest.TestCase):
     def test_ok(self):
         for s in [
             'd',
