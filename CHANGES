@@ -1,5 +1,5 @@
-master
-======
+pgxnclient 0.2
+==============
 
 - Dropped list command (use info --versions instead).
 - Skip extension load/unload if the provided file is not sql.
