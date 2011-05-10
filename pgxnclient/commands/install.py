@@ -7,17 +7,19 @@ pgxnclient -- installation/loading commands implementation
 # This file is part of the PGXN client
 
 import os
+import re
 import shutil
 import logging
 from subprocess import PIPE
 
-from pgxnclient import Label, SemVer
+from pgxnclient import SemVer
 from pgxnclient.i18n import _, N_
 from pgxnclient.utils import sha1
 from pgxnclient.errors import BadChecksum, PgxnClientException
 from pgxnclient.network import download
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
 from pgxnclient.commands import WithSpec, WithSpecLocal, WithSudo
+from pgxnclient.utils.label import Label, Identifier
 
 logger = logging.getLogger('pgxnclient.commands')
 
@@ -177,6 +179,17 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
     """
     Base class to implement the ``load`` and ``unload`` commands.
     """
+    @classmethod
+    def customize_parser(self, parser, subparsers, **kwargs):
+        subp = super(LoadUnload, self).customize_parser(
+            parser, subparsers, **kwargs)
+
+        subp.add_argument('--schema', metavar="SCHEMA",
+            type=Identifier.parse_arg,
+            help=_("use SCHEMA instead of the default schema"))
+
+        return subp
+
     def get_pg_version(self):
         """Return the version of the selected database."""
         data = self.call_psql('SELECT version();')
@@ -185,7 +198,6 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
         return pgver
 
     def parse_pg_version(self, data):
-        import re
         m = re.match(r'\S+\s+(\d+)\.(\d+)(?:\.(\d+))?', data)
         if m is None:
             raise PgxnClientException(
@@ -335,8 +347,13 @@ Do you want to load it?""")
             self._register_loaded(fn)
 
     def create_extension(self, name):
-        # TODO: namespace etc.
-        cmd = "CREATE EXTENSION %s;" % Label(name)
+        name = Identifier(name)
+        schema = self.opts.schema
+        cmd = ["CREATE EXTENSION", name]
+        if schema:
+            cmd.extend(["SCHEMA", schema])
+
+        cmd = " ".join(cmd) + ';'
         self.load_sql(data=cmd)
 
 
