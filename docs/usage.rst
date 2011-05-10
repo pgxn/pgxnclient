@@ -16,13 +16,13 @@ The script offers several commands, whose list can be obtained using ``pgxn
 :samp:`pgxn {COMMAND} --help`.
 
 The main commands you may be interested in are `install`_ (to download, build
-and install a distribution extensions into the system) and `load`_ (to load an
+and install an extension distribution into the system) and `load`_ (to load an
 installed extension into a database). Commands to perform reverse operations
 are `uninstall`_ and `unload`_. Use `download`_ to get a package from a mirror
 without installing it.
 
 There are also informative commands: `search <#pgxn-search>`_ is used to
-search in the repository, `info`_ to get informations about a distribution.
+search the network, `info`_ to get information about a distribution.
 `mirror`_ can be used to get a list of mirrors.
 
 The program can accept a few basic options, to be listed before the command:
@@ -32,7 +32,7 @@ The program can accept a few basic options, to be listed before the command:
     http://api.pgxn.org/.
 
 ``--verbose``
-    Print more informations during the process.
+    Print more information during the process.
 
 ``--yes``
     Assume affirmative answer to all questions. Useful for unattended scripts.
@@ -44,15 +44,15 @@ Package specification
 Many commands such as install_ require a *package specification* to operate.
 In its simple form the specification is just the name of a distribution:
 ``pgxn install foo`` means "install the most recent stable release of the
-package ``foo``".
+``foo`` distribution".
 
 The specification allows specifying an operator and a version number, so that
 ``pgxn install 'foo<2.0'`` will install the most recent stable release of the
-package before the release 2.0. The version numbers are ordered according to
+distribution before the release 2.0. The version numbers are ordered according to
 the `Semantic Versioning specification <http://semver.org/>`__. Supported
 operators are ``=``, ``==`` (alias for ``=``), ``<``, ``<=``, ``>``, ``>=``.
 Note that you probably need to quote the string as in the example to avoid
-invoking any shell redirection command.
+invoking shell command redirection.
 
 Whenever a command takes a specification in input, it also accepts options
 ``--stable``, ``--testing`` and ``--unstable`` to specify the minimum release
@@ -69,7 +69,7 @@ for instance ``pgxn install ./foo.zip``.
 ``pgxn install``
 ----------------
 
-Download, build and install a distribution on the local system.
+Download, build, and install a distribution on the local system.
 
 Usage:
 
@@ -173,8 +173,8 @@ Usage:
 
 The command does the opposite of the install_ command, removing a
 distribution's files from the system. It doesn't issue any command to the
-databases where distribution's extensions may have been loaded: you should
-first drop the extension e.g. using the unload_ command.
+databases where the distribution's extensions may have been loaded: you should
+first drop the extension (the unload_ command can do this).
 
 The distribution should match what installed via the `install`_ command.
 
@@ -221,7 +221,7 @@ in the ``install`` command.
 If the specified database version is at least PostgreSQL 9.1, and if the
 extension specifies a ``.control`` file, it will be loaded using the `CREATE
 EXTENSION`_ command, otherwise it will be loaded as a loose set of objects.
-For more informations see the `extensions documentation`__.
+For more information see the `extensions documentation`__.
 
 .. _CREATE EXTENSION: http://www.postgresql.org/docs/9.1/static/sql-createextension.html
 .. __: http://www.postgresql.org/docs/9.1/static/extend-extensions.html
@@ -343,7 +343,7 @@ Example:
 ``pgxn info``
 -------------
 
-Print informations about a distribution obtained from PGXN.
+Print information about a distribution obtained from PGXN.
 
 Usage:
 
@@ -394,7 +394,7 @@ release status options are printed, for example:
 ``pgxn mirror``
 ---------------
 
-Return informations about the available mirrors.
+Return information about the available mirrors.
 
 Usage:
 
