@@ -38,6 +38,10 @@ def unpack(zipname, destdir):
                 os.makedirs(fname)
                 continue
 
+            # The directory is not always explicitly present in the archive
+            if not os.path.exists(os.path.dirname(fname)):
+                os.makedirs(os.path.dirname(fname))
+
             # Copy the file content
             logger.debug(_("saving: %s"), fname)
             fout = open(fname, "wb")
