@@ -9,8 +9,10 @@ pgxnclient -- client API stub
 from urllib import urlencode
 
 from pgxnclient.utils import json
-from pgxnclient.utils.uri import expand_template
+from pgxnclient.errors import NetworkError, NotFound, ResourceNotFound
 from pgxnclient.network import get_file
+from pgxnclient.utils.uri import expand_template
+
 
 def load_json(f):
     data = f.read().decode('utf-8')
@@ -21,9 +23,12 @@ class Api(object):
         self.mirror = mirror
 
     def dist(self, dist, version=''):
-        return load_json(self.call(
-            version and 'meta' or 'dist',
-            {'dist': dist, 'version': version}))
+        try:
+            return load_json(self.call(
+                version and 'meta' or 'dist',
+                {'dist': dist, 'version': version}))
+        except ResourceNotFound:
+            raise NotFound("distribution '%s' not found" % dist)
 
     def ext(self, ext):
         return load_json(self.call('extension', {'extension': ext}))
@@ -75,7 +80,10 @@ class Api(object):
     def get_index(self):
         if self._api_index is None:
             url = self.mirror.rstrip('/') + '/index.json'
-            self._api_index = load_json(get_file(url))
+            try:
+                self._api_index = load_json(get_file(url))
+            except ResourceNotFound:
+                raise NetworkError("API index not found at '%s'" % url)
 
         return self._api_index
 

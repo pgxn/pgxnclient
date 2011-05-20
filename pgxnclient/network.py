@@ -25,7 +25,7 @@ def get_file(url):
         return opener.open(url)
     except urllib2.HTTPError, e:
         if e.code == 404:
-            raise ResourceNotFound(_("resource not found"))
+            raise ResourceNotFound(_("resource not found: '%s'") % e.url)
         elif e.code == 400:
             raise BadRequestError(_("bad request on '%s'") % e.url)
         elif e.code == 500:
