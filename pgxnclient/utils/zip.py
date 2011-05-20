@@ -21,7 +21,6 @@ def unpack(zipname, destdir):
     logger.info(_("unpacking: %s"), zipname)
     destdir = os.path.abspath(destdir)
     zf = ZipFile(zipname, 'r')
-    dirout = None
     try:
         for fn in zf.namelist():
             fname = os.path.abspath(os.path.join(destdir, fn))
@@ -29,12 +28,9 @@ def unpack(zipname, destdir):
                 raise PgxnClientException(
                     _("archive file '%s' trying to escape!") % fname)
 
-            # TODO: is this the right way to check for dirs?
+            # Looks like checking for a trailing / is the only way to
+            # tell if the file is a directory.
             if fn.endswith('/'):
-                # Assume we will work in the first dir of the archive
-                if dirout is None:
-                    dirout = fname
-
                 os.makedirs(fname)
                 continue
 
@@ -61,7 +57,16 @@ def unpack(zipname, destdir):
     finally:
         zf.close()
 
-    return dirout or destdir
+    # Choose the directory where to work. Because we are mostly a wrapper for
+    # pgxs, let's look for a makefile. The zip should contain a single base
+    # directory, so return the first dir we found containing a Makefile,
+    # alternatively just return the unpacked dir
+    for dir in os.listdir(destdir):
+        for fn in ('Makefile', 'makefile', 'GNUmakefile'):
+            if os.path.exists(os.path.join(destdir, dir, fn)):
+                return os.path.join(destdir, dir)
+
+    return destdir
 
 def get_meta_from_zip(filename):
     try:
