@@ -31,7 +31,10 @@ class Api(object):
             raise NotFound("distribution '%s' not found" % dist)
 
     def ext(self, ext):
-        return load_json(self.call('extension', {'extension': ext}))
+        try:
+            return load_json(self.call('extension', {'extension': ext}))
+        except ResourceNotFound:
+            raise NotFound("extension '%s' not found" % ext)
 
     def meta(self, dist, version, as_json=True):
         f = self.call('meta', {'dist': dist, 'version': version})

@@ -3,6 +3,7 @@ pgxnclient 0.2.1
 
 - Lowercase search for distributions in the API (issue #3).
 - Fixed handling of zip files not containing entries for the directory.
+- More informative error messages when some item is not found on PGXN.
 
 
 pgxnclient 0.2

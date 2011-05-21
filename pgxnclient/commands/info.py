@@ -8,7 +8,7 @@ pgxnclient -- informative commands implementation
 
 from pgxnclient.i18n import _, N_
 from pgxnclient import SemVer
-from pgxnclient.errors import ResourceNotFound
+from pgxnclient.errors import NotFound, ResourceNotFound
 from pgxnclient.commands import Command, WithSpec
 
 import logging
@@ -116,17 +116,17 @@ class Info(WithSpec, Command):
         getattr(self, 'print_' + self.opts.what)(spec)
 
     def print_meta(self, spec):
-        data = self.api.dist(spec.name)
+        data = self._get_dist_data(spec.name)
         ver = self.get_best_version(data, spec, quiet=True)
         print self.api.meta(spec.name, ver, as_json=False)
 
     def print_readme(self, spec):
-        data = self.api.dist(spec.name)
+        data = self._get_dist_data(spec.name)
         ver = self.get_best_version(data, spec, quiet=True)
         print self.api.readme(spec.name, ver)
 
     def print_details(self, spec):
-        data = self.api.dist(spec.name)
+        data = self._get_dist_data(spec.name)
         ver = self.get_best_version(data, spec, quiet=True)
         data = self.api.meta(spec.name, ver)
         for k in [u'name', u'abstract', u'description', u'maintainer', u'license',
@@ -158,7 +158,7 @@ class Info(WithSpec, Command):
                         print "%s: %s: %s %s" % (phase, rel, pkg, ver)
 
     def print_versions(self, spec):
-        data = self.api.dist(spec.name)
+        data = self._get_dist_data(spec.name)
         name = data['name']
         vs = [ (SemVer(d['version']), s)
             for s, ds in data['releases'].iteritems()
@@ -168,4 +168,25 @@ class Info(WithSpec, Command):
         for v, s in vs:
             print name, v, s
 
+    def _get_dist_data(self, name):
+        try:
+            return self.api.dist(name)
+        except NotFound, e:
+            # maybe the user was looking for an extension instead?
+            try:
+                ext = self.api.ext(name)
+            except NotFound:
+                pass
+            else:
+                vs = ext.get('versions', {})
+                for extver, ds in vs.iteritems():
+                    for d in ds:
+                        if 'dist' not in d: continue
+                        dist = d['dist']
+                        distver = d.get('version', 'unknown')
+                        logger.info(
+                            _("extension %s %s found in distribution %s %s"),
+                            name, extver, dist, distver)
+
+            raise e
 
