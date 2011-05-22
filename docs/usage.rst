@@ -322,9 +322,9 @@ Usage:
     pgxn search [--help] [--dist | --ext | --docs] *TERM* [*TERM* ...]
 
 The command prints on ``stdout`` a list of packages and version matching
-:samp:`{TERM}`. By default the search is performed in the distributions:
-alternatively the extensions (using the ``--ext`` option) or the documentation
-(using the ``--docs`` option) can be searched.
+:samp:`{TERM}`. By default the search is performed in the documentation:
+alternatively the distributions (using the ``--dist`` option) or the
+extensions (using the ``--ext`` option) can be searched.
 
 Example:
 

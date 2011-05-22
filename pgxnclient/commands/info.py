@@ -65,15 +65,15 @@ class Search(Command):
             parser, subparsers, **kwargs)
 
         g = subp.add_mutually_exclusive_group()
+        g.add_argument('--docs', dest='where', action='store_const',
+            const='docs', default='docs',
+            help=_("search in documentation [default]"))
         g.add_argument('--dist', dest='where', action='store_const',
-            const="dists", default='dists',
-            help=_("search in distributions [default]"))
+            const="dists",
+            help=_("search in distributions"))
         g.add_argument('--ext', dest='where', action='store_const',
             const='extensions',
             help=_("search in extensions"))
-        g.add_argument('--docs', dest='where', action='store_const',
-            const='docs',
-            help=_("search in documentation"))
         subp.add_argument('query', metavar='TERM', nargs='+',
             help = _("a string to search"))
 
