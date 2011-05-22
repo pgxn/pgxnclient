@@ -55,6 +55,10 @@ class Mirror(Command):
                 print
 
 
+import re
+import textwrap
+import xml.sax.saxutils as saxutils
+
 class Search(Command):
     name = 'search'
     description = N_("search in the available extensions")
@@ -84,7 +88,36 @@ class Search(Command):
 
         for hit in data['hits']:
             print "%s %s" % (hit['dist'], hit['version'])
+            if 'excerpt' in hit:
+                excerpt = self.clean_excerpt(hit['excerpt'])
 
+                for line in textwrap.wrap(excerpt, 72):
+                    print "    " + line
+                print
+
+    def clean_excerpt(self, excerpt):
+        """Clean up the excerpt returned in the json result for output."""
+        # replace ellipsis with three dots, as there's no chance
+        # to have them printed on non-utf8 consoles.
+        # Also, they suck obscenely on fixed-width output.
+        excerpt = excerpt.replace('&#8230;', '...')
+
+        # TODO: this apparently misses a few entities
+        excerpt = saxutils.unescape(excerpt)
+        excerpt = excerpt.replace('&quot;', '"')
+
+        # Convert numerical entities
+        excerpt = re.sub(r'\&\#(\d+)\;',
+            lambda c: unichr(int(c.group(1))),
+            excerpt)
+
+        # Hilight found terms
+        # TODO: use proper highlight with escape chars?
+        excerpt = excerpt.replace('<strong></strong>', '')
+        excerpt = excerpt.replace('<strong>', '*')
+        excerpt = excerpt.replace('</strong>', '*')
+
+        return excerpt
 
 class Info(WithSpec, Command):
     name = 'info'

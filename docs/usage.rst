@@ -330,21 +330,43 @@ Example:
 
 .. code-block:: console
 
-    $ pgxn search integer
+    $ pgxn search --dist integer
     tinyint 0.1.1
+        Traditionally, PostgreSQL core has a policy not to have 1 byte *integer*
+        in it. With this module, you can define 1 byte *integer* column on your
+        tables, which will help query performances and...
+
     check_updates 1.0.0
+        ... test2 defined as: CREATE TABLE test2(a *INTEGER*, b *INTEGER*, c
+        *INTEGER*, d *INTEGER*); To make a trigger allowing updates only when c
+        becomes equal to 5: CREATE TRIGGER c_should_be_5 BEFORE UPDATE ON...
+
     ssn 1.0.0
+        INSERT INTO test VALUES('124659876'); The output is always represented
+        using the format with dashes, i.e: 123-45-6789 124-65-9876 Internals:
+        The type is stored as a 4 bytes *integer*.
 
 The search will return all the matches containing any of *TERM*. In order to
 search for items containing more than one word, join the word into a single
-token. For instance to search for "double precision" or "floating point" use:
+token. For instance to search for items containing the terms "double
+precision" or the terms "floating point" use:
 
 .. code-block:: console
 
     $ pgxn search "double precision" "floating point"
+    semver 0.2.2
+        ... to semver semver(12.0::real) 12.0.0semver(*double precision*) Cast
+        *double precision* to semver semver(9.2::*double precision*)
+        9.2.0semver(integer) Cast integer to semver semver(42::integer)...
 
+    saio 0.0.1
+        Defaults to true. saio_seed A *floating point* seed for the random
+        numbers generator. saio_equilibrium_factor Scaling factor for the query
+        size, determining the number of loops before equilibrium is...
 
-.. todo:: Add the context to the search output?
+    pgTAP 0.25.0
+        ... ) casts_are( casts[] ) SELECT casts_are( ARRAY[ 'integer AS *double
+        precision*', 'integer AS reltime', 'integer AS numeric', -- ...
 
 
 .. _info:
