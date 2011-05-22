@@ -23,7 +23,7 @@ without installing it.
 
 There are also informative commands: `search <#pgxn-search>`_ is used to
 search the network, `info`_ to get information about a distribution.
-`mirror`_ can be used to get a list of mirrors.
+The `mirror`_ command can be used to get a list of mirrors.
 
 The program can accept a few basic options, to be listed before the command:
 
@@ -303,7 +303,7 @@ Usage:
 The distribution is specified according to the `package specification`_.  The
 file is saved in the current directory with name usually
 :samp:`{distribution}-{version}.zip`. If a file with the same name exists, a
-prefix ``-1``, ``-2`` etc. is added to the name, before the extension.  A
+suffix ``-1``, ``-2`` etc. is added to the name, before the extension.  A
 different directory or name can be specified using the ``--target`` option.
 
 
