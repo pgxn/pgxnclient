@@ -53,8 +53,17 @@ class Api(object):
         return load_json(self.call('mirrors'))
 
     def search(self, where, query):
+        """Search into PGXN.
+
+        :param where: where to search. The server currently supports "docs",
+            "dists", "extensions"
+        :param query: list of strings to search
+        """
+        # convert the query list into a string
+        q = ' '.join([' ' in s and ('"%s"' % s) or s for s in query])
+
         return load_json(self.call('search', {'in': where},
-            query={'q': query}))
+            query={'q': q}))
 
     def stats(self, arg):
         return load_json(self.call('stats', {'stats': arg}))

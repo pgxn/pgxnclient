@@ -319,10 +319,10 @@ Usage:
 .. parsed-literal::
     :class: pgxn-search
 
-    pgxn search [--help] [--dist | --ext | --docs] *QUERY*
+    pgxn search [--help] [--dist | --ext | --docs] *TERM* [*TERM* ...]
 
 The command prints on ``stdout`` a list of packages and version matching
-:samp:`{QUERY}`. By default the search is performed in the distributions:
+:samp:`{TERM}`. By default the search is performed in the distributions:
 alternatively the extensions (using the ``--ext`` option) or the documentation
 (using the ``--docs`` option) can be searched.
 
@@ -334,6 +334,15 @@ Example:
     tinyint 0.1.1
     check_updates 1.0.0
     ssn 1.0.0
+
+The search will return all the matches containing any of *TERM*. In order to
+search for items containing more than one word, join the word into a single
+token. For instance to search for "double precision" or "floating point" use:
+
+.. code-block:: console
+
+    $ pgxn search "double precision" "floating point"
+
 
 .. todo:: Add the context to the search output?
 

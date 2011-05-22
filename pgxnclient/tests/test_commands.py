@@ -520,3 +520,11 @@ class LoadTestCase(unittest.TestCase):
         self.assertEquals(pop.communicate.call_args[0][0],
             'CREATE EXTENSION foobar;')
 
+
+class SearchTestCase(unittest.TestCase):
+    @patch('pgxnclient.api.get_file')
+    def test_search_quoting(self, mock_get):
+        mock_get.side_effect = fake_get_file
+        from pgxnclient.cli import main
+        main(['search', '--docs', 'foo bar', 'baz'])
+
