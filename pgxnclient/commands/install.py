@@ -9,6 +9,7 @@ pgxnclient -- installation/loading commands implementation
 import os
 import re
 import shutil
+import difflib
 import logging
 from subprocess import PIPE
 
@@ -273,6 +274,45 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
                 "cannot find sql file for extension '%s': '%s'"
                 % (name, sqlfile))
 
+    def patch_for_schema(self, fn):
+        """
+        Patch a sql file to set the schema where the commands are executed.
+
+        If no schema has been requested, return the data unchanged.
+        Else, ask for confirmation and return the data for a patched file.
+
+        The schema is only useful for PG < 9.1: for proper PG extensions there
+        is no need to patch the sql.
+        """
+        schema = self.opts.schema
+
+        f = open(fn)
+        try: data = f.read()
+        finally: f.close()
+
+        if not schema:
+            return data
+
+        self._check_schema_exists(schema)
+
+        re_path = re.compile(r'SET\s+search_path\s*(?:=|to)\s*([^;]+);', re.I)
+        m = re_path.search(data)
+        if m is None:
+            newdata = ("SET search_path = %s;\n\n" % schema) + data
+        else:
+            newdata = re_path.sub("SET search_path = %s;" % schema, data)
+
+        diff = ''.join(difflib.unified_diff(
+            [r + '\n' for r in data.splitlines()],
+            [r + '\n' for r in newdata.splitlines()],
+            fn, fn + ".schema"))
+        msg = _("""
+In order to operate in the schema %s, the following changes will be
+performed:\n\n%s\n\nDo you want to continue?""")
+        self.confirm(msg % (schema, diff))
+
+        return newdata
+
     def _register_loaded(self, fn):
         if not hasattr(self, '_loaded'):
             self._loaded = []
@@ -281,6 +321,16 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
 
     def _is_loaded(self, fn):
         return hasattr(self, '_loaded') and fn in self._loaded
+
+    def _check_schema_exists(self, schema):
+        cmdline = [self.find_psql()]
+        cmdline.extend(self.get_psql_options())
+        cmdline.extend(['-c', 'SET search_path=%s' % schema])
+        p = self.popen(cmdline, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        p.communicate()
+        if p.returncode:
+            raise PgxnClientException(
+                "schema %s does not exist" % schema)
 
 
 class Load(LoadUnload):
@@ -340,10 +390,13 @@ The extension '%s' doesn't specify a SQL file.
 Do you want to load it?""")
                 % (name, fn))
 
+        # TODO: is confirmation asked only once? Also, check for repetition
+        # in unload.
         if self._is_loaded(fn):
             logger.info(_("file %s already loaded"), fn)
         else:
-            self.load_sql(fn)
+            data = self.patch_for_schema(fn)
+            self.load_sql(data=data)
             self._register_loaded(fn)
 
     def create_extension(self, name):
@@ -412,10 +465,10 @@ to load the file '%s'.
 Do you want to execute it?""")
                 % (name, fn))
 
-        self.load_sql(fn)
+        data = self.patch_for_schema(fn)
+        self.load_sql(data=data)
 
     def drop_extension(self, name):
-        # TODO: namespace etc.
         # TODO: cascade
         cmd = "DROP EXTENSION %s;" % Label(name)
         self.load_sql(data=cmd)

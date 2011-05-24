@@ -197,6 +197,7 @@ Usage:
 
     pgxn load [--help] [--stable | --testing | --unstable] [-d *DBNAME*]
               [-h *HOST*] [-p *PORT*] [-U *NAME*] [--pg_config *PATH*]
+              [--schema *SCHEMA*]
               *SPEC*
 
 The distribution is specified according to the `package specification`_ and
@@ -226,8 +227,6 @@ For more information see the `extensions documentation`__.
 .. _CREATE EXTENSION: http://www.postgresql.org/docs/9.1/static/sql-createextension.html
 .. __: http://www.postgresql.org/docs/9.1/static/extend-extensions.html
 
-.. todo:: Specify a schema
-
 The command is based on the `'provides' section`_ of the distribution's
 ``META.json``: if a SQL file is specified, that file will be used to load the
 extension. Note that loading is only attempted if the file extension is
@@ -241,6 +240,10 @@ If the distribution provides more than one extension, the extensions are
 loaded in the order in which they are specified in the ``provides`` section of
 the ``META.json`` file.
 
+If a *SCHEMA* is specified, the extensions are loaded in the provided schema.
+Note that if ``CREATE EXTENSION`` is used, the schema is directly supported;
+otherwise the ``.sql`` script loaded will be patched to create the objects in
+the provided schema (a confirmation will be asked before attempting loading).
 
 .. _'provides' section: http://pgxn.org/spec/#provides
 
@@ -261,6 +264,7 @@ Usage:
 
     pgxn unload [--help] [--stable | --testing | --unstable] [-d *DBNAME*]
                 [-h *HOST*] [-p *PORT*] [-U *NAME*] [--pg_config *PATH*]
+                [--schema *SCHEMA*]
                 *SPEC*
 
 The command does the opposite of the load_ command: it drops an extension from
@@ -274,6 +278,11 @@ specified. If no file is specified, :samp:`{extension}.sql` is assumed. If
 a file with extension different from ``.sql`` is specified, it is
 assumed that the extension is not a PostgreSQL extension so unload is not
 performed.
+
+If a *SCHEMA* is specified, the uninstall script will be patched to drop the
+objects in the selected schema. However, if the extension was loaded via
+``CREATE EXTENSION``, the server will be able to figure out the correct schema
+itself, so the option will be ignored.
 
 If the distribution specifies more than one extension, they are unloaded in
 reverse order respect to the order in which they are specified in the
