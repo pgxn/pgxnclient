@@ -443,19 +443,19 @@ class LoadTestCase(unittest.TestCase):
 
         from pgxnclient.cli import main
 
-        main(['--yes', 'load', '--dbname', 'dbdb', 'foobar'])
+        main(['load', '--yes', '--dbname', 'dbdb', 'foobar'])
         args = mock_popen.call_args[0][0]
         self.assertEqual('dbdb', args[args.index('--dbname') + 1])
 
-        main(['--yes', 'load', '-U', 'meme', 'foobar'])
+        main(['load', '--yes', '-U', 'meme', 'foobar'])
         args = mock_popen.call_args[0][0]
         self.assertEqual('meme', args[args.index('--username') + 1])
 
-        main(['--yes', 'load', '--port', '666', 'foobar'])
+        main(['load', '--yes', '--port', '666', 'foobar'])
         args = mock_popen.call_args[0][0]
         self.assertEqual('666', args[args.index('--port') + 1])
 
-        main(['--yes', 'load', '-h', 'somewhere', 'foobar'])
+        main(['load', '--yes', '-h', 'somewhere', 'foobar'])
         args = mock_popen.call_args[0][0]
         self.assertEqual('somewhere', args[args.index('--host') + 1])
 
@@ -475,7 +475,7 @@ class LoadTestCase(unittest.TestCase):
         mock_isext.return_value = True
 
         from pgxnclient.cli import main
-        main(['--yes', 'load', get_test_filename('foobar-0.42.1.pgz')])
+        main(['load', '--yes', get_test_filename('foobar-0.42.1.pgz')])
 
         self.assertEquals(mock_unpack.call_count, 0)
         self.assertEquals(mock_popen.call_count, 1)
@@ -502,7 +502,7 @@ class LoadTestCase(unittest.TestCase):
             dir = unpack(get_test_filename('foobar-0.42.1.pgz'), tdir)
 
             from pgxnclient.cli import main
-            main(['--yes', 'load', dir])
+            main(['load', '--yes', dir])
 
         finally:
             shutil.rmtree(tdir)

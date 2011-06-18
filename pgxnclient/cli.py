@@ -6,6 +6,7 @@ pgxnclient -- command line entry point
 
 # This file is part of the PGXN client
 
+import os
 import sys
 
 from pgxnclient.i18n import _
@@ -28,6 +29,7 @@ def main(argv=None):
     opt = parser.parse_args(argv)
     run_command(opt, parser)
 
+
 def script():
     """
     Execute the program as a script.
@@ -43,9 +45,17 @@ def script():
         stream=sys.stdout)
     logger = logging.getLogger()
 
+    # Dispatch to the command according to the script name
+    script = sys.argv[0]
+    args = sys.argv[1:]
+    if os.path.basename(script).startswith('pgxn-'):
+        args.insert(0, os.path.basename(script)[5:])
+        # for help print
+        sys.argv[0] = os.path.join(os.path.dirname(script), 'pgxn')
+
     # Execute the script
     try:
-        main()
+        main(args)
 
     # Different ways to fail
     except UserAbort, e:

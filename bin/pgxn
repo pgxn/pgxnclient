@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+"""
+pgxnclient -- commands dispatcher
+
+The script dispatches commands based on the name, e.g. upon the command::
+
+    pgxn foo --arg blah ...
+
+a script called pgxn-foo is searched and executed with remaining arguments.
+
+The commands are looked for by default in the dir ``libexec/pgxnclient/``
+sibling of the directory containing this script, then are looked for in the
+``PATH`` directories.
+"""
+
+# Copyright (C) 2011 Daniele Varrazzo
+
+# This file is part of the PGXN client
+
+# Path where to find the command executables.
+# If relative, it's from the `pgxn` executable directory.
+LIBEXECDIR = '../libexec/pgxnclient/'
+
+import os
+import sys
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Assume the first arg after the option is the command to run
+    for icmd, cmd in enumerate(argv):
+        if not cmd.startswith('-'):
+            argv = [get_exec(cmd)] + argv[:icmd] + argv[icmd+1:]
+            break
+    else:
+        # No command specified: dispatch to the pgxnclient script
+        # to print basic help, main command etc.
+        argv = ([os.path.join(os.path.dirname(sys.argv[0]), 'pgxnclient')]
+            + argv)
+
+    os.execv(argv[0], argv)
+
+
+def get_exec(cmd):
+    fn = os.path.abspath(os.path.join(
+        os.path.dirname(sys.argv[0]), LIBEXECDIR, 'pgxn-' + cmd))
+
+    if not os.path.isfile(fn):
+        print >>sys.stderr, \
+            "pgxn: unknown command: '%s'. See 'pgxn --help'" % cmd
+        sys.exit(2)
+
+    return fn
+
+if __name__ == '__main__':
+    main()
+
