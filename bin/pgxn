@@ -17,12 +17,11 @@ sibling of the directory containing this script, then are looked for in the
 
 # This file is part of the PGXN client
 
-# Path where to find the command executables.
-# If relative, it's from the `pgxn` executable directory.
-LIBEXECDIR = '../libexec/pgxnclient/'
-
 import os
 import sys
+
+from pgxnclient import find_script
+
 
 def main(argv=None):
     if argv is None:
@@ -43,10 +42,8 @@ def main(argv=None):
 
 
 def get_exec(cmd):
-    fn = os.path.abspath(os.path.join(
-        os.path.dirname(sys.argv[0]), LIBEXECDIR, 'pgxn-' + cmd))
-
-    if not os.path.isfile(fn):
+    fn = find_script('pgxn-' + cmd)
+    if not fn:
         print >>sys.stderr, \
             "pgxn: unknown command: '%s'. See 'pgxn --help'" % cmd
         sys.exit(2)
