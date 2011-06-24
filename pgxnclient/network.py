@@ -35,6 +35,8 @@ def get_file(url):
         else:
             raise NetworkError(_("unexpected response %d for '%s'")
                 % (e.code, e.url))
+    except urllib2.URLError, e:
+        raise NetworkError(_("network error: %s") % e.reason)
 
 def download(f, fn, rename=True):
     """Download a file locally.
