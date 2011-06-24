@@ -16,10 +16,10 @@ check:
 	$(PYTHON) setup.py test
 
 sdist:
-	$(PYTHON) setup.py sdist --formats=gztar,zip
+	$(PYTHON) setup.py sdist --formats=gztar
 
 upload:
-	$(PYTHON) setup.py sdist --formats=gztar,zip upload
+	$(PYTHON) setup.py sdist --formats=gztar upload
 
 docs:
 	$(MAKE) -C docs
