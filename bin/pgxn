@@ -17,39 +17,6 @@ sibling of the directory containing this script, then are looked for in the
 
 # This file is part of the PGXN client
 
-import os
-import sys
-
-from pgxnclient import find_script
-
-
-def main(argv=None):
-    if argv is None:
-        argv = sys.argv[1:]
-
-    # Assume the first arg after the option is the command to run
-    for icmd, cmd in enumerate(argv):
-        if not cmd.startswith('-'):
-            argv = [get_exec(cmd)] + argv[:icmd] + argv[icmd+1:]
-            break
-    else:
-        # No command specified: dispatch to the pgxnclient script
-        # to print basic help, main command etc.
-        argv = ([os.path.join(os.path.dirname(sys.argv[0]), 'pgxnclient')]
-            + argv)
-
-    os.execv(argv[0], argv)
-
-
-def get_exec(cmd):
-    fn = find_script('pgxn-' + cmd)
-    if not fn:
-        print >>sys.stderr, \
-            "pgxn: unknown command: '%s'. See 'pgxn --help'" % cmd
-        sys.exit(2)
-
-    return fn
-
-if __name__ == '__main__':
-    main()
+from pgxnclient.cli import command_dispatch
+command_dispatch()
 

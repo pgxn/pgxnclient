@@ -60,7 +60,10 @@ setup(
     url = 'http://pgxnclient.projects.postgresql.org/',
     license = 'BSD',
     packages = find_packages(),
-    entry_points = {'console_scripts': ['pgxn = pgxnclient.cli:script']},
+    package_data = {'pgxnclient': ['libexec/pgxn-*']},
+    entry_points = {'console_scripts': [
+        'pgxn = pgxnclient.cli:command_dispatch',
+        'pgxnclient = pgxnclient.cli:script', ]},
     test_suite = 'pgxnclient.tests',
     classifiers = [x for x in classifiers.split('\n') if x],
     zip_safe = False,   # because we dynamically look for commands
@@ -69,7 +72,4 @@ setup(
     version = version,
     use_2to3 = True,
 )
-
-# Note: I've not been able to include data files using 'package_data':
-# using MANIFEST.in for the purpose.
 

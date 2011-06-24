@@ -9,6 +9,7 @@ pgxnclient -- command line entry point
 import os
 import sys
 
+from pgxnclient import find_script
 from pgxnclient.i18n import _
 from pgxnclient.errors import PgxnException, UserAbort
 from pgxnclient.commands import get_option_parser, load_commands, run_command
@@ -81,4 +82,43 @@ def script():
         # ctrl-c
         sys.exit(1)
 
+
+
+def command_dispatch(argv=None):
+    """
+    Entry point for a script to dispatch commands to external scripts.
+
+    Upon invocation of a command ``pgxn cmd --arg``, locate pgxn-cmd and
+    execute it with --arg arguments.
+    """
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Assume the first arg after the option is the command to run
+    for icmd, cmd in enumerate(argv):
+        if not cmd.startswith('-'):
+            argv = [_get_exec(cmd)] + argv[:icmd] + argv[icmd+1:]
+            break
+    else:
+        # No command specified: dispatch to the pgxnclient script
+        # to print basic help, main command etc.
+        argv = ([os.path.join(os.path.dirname(sys.argv[0]), 'pgxnclient')]
+            + argv)
+
+    if not os.access(argv[0], os.X_OK):
+        # This is our friend setuptools' job: the script have lost the
+        # executable flag. We assume the script is a Python one and run it
+        # through the current executable.
+        argv.insert(0, sys.executable)
+
+    os.execv(argv[0], argv)
+
+def _get_exec(cmd):
+    fn = find_script('pgxn-' + cmd)
+    if not fn:
+        print >>sys.stderr, \
+            "pgxn: unknown command: '%s'. See 'pgxn --help'" % cmd
+        sys.exit(2)
+
+    return fn
 
