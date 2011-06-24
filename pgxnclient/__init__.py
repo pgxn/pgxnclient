@@ -36,7 +36,7 @@ class Spec(object):
 
     def __init__(self, name=None, op=None, ver=None,
             dirname=None, filename=None):
-        self.name = name
+        self.name = name and name.lower()
         self.op = op
         self.ver = ver
 

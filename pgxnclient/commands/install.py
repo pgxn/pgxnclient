@@ -456,7 +456,8 @@ Do you want to continue?""")
         if not sqlfile:
             sqlfile = name + '.sql'
 
-        sqlfile = 'uninstall_' + sqlfile
+        tmp = os.path.split(sqlfile)
+        sqlfile = os.path.join(tmp[0], 'uninstall_' + tmp[1])
 
         fn = self.find_sql_file(name, sqlfile)
         self.confirm(_("""\

@@ -25,7 +25,7 @@ def fake_get_file(url, urlmap=None):
     return f
 
 
-class ListTestCase(unittest.TestCase):
+class InfoTestCase(unittest.TestCase):
     def _get_output(self, cmdline):
         @patch('sys.stdout')
         @patch('pgxnclient.api.get_file')
@@ -38,7 +38,7 @@ class ListTestCase(unittest.TestCase):
 
         return do()
 
-    def test_list(self):
+    def test_info(self):
         output = self._get_output(['info', '--versions', 'foobar'])
         self.assertEqual(output, b("""\
 foobar 0.43.2b1 testing
@@ -46,16 +46,24 @@ foobar 0.42.1 stable
 foobar 0.42.0 stable
 """))
 
-    def test_list_op(self):
+    def test_info_op(self):
         output = self._get_output(['info', '--versions', 'foobar>0.42.0'])
         self.assertEqual(output, b("""\
 foobar 0.43.2b1 testing
 foobar 0.42.1 stable
 """))
 
-    def test_list_empty(self):
+    def test_info_empty(self):
         output = self._get_output(['info', '--versions', 'foobar>=0.43.2'])
         self.assertEqual(output, b(""))
+
+    def test_info_case_insensitive(self):
+        output = self._get_output(['info', '--versions', 'Foobar'])
+        self.assertEqual(output, b("""\
+foobar 0.43.2b1 testing
+foobar 0.42.1 stable
+foobar 0.42.0 stable
+"""))
 
 
 class DownloadTestCase(unittest.TestCase):
@@ -511,4 +519,12 @@ class LoadTestCase(unittest.TestCase):
         self.assert_('psql' in mock_popen.call_args[0][0][0])
         self.assertEquals(pop.communicate.call_args[0][0],
             'CREATE EXTENSION foobar;')
+
+
+class SearchTestCase(unittest.TestCase):
+    @patch('pgxnclient.api.get_file')
+    def test_search_quoting(self, mock_get):
+        mock_get.side_effect = fake_get_file
+        from pgxnclient.cli import main
+        main(['search', '--docs', 'foo bar', 'baz'])
 

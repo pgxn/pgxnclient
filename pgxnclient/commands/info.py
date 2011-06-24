@@ -8,7 +8,7 @@ pgxnclient -- informative commands implementation
 
 from pgxnclient.i18n import _, N_
 from pgxnclient import SemVer
-from pgxnclient.errors import ResourceNotFound
+from pgxnclient.errors import NotFound, ResourceNotFound
 from pgxnclient.commands import Command, WithSpec
 
 import logging
@@ -55,6 +55,10 @@ class Mirror(Command):
                 print
 
 
+import re
+import textwrap
+import xml.sax.saxutils as saxutils
+
 class Search(Command):
     name = 'search'
     description = N_("search in the available extensions")
@@ -65,17 +69,17 @@ class Search(Command):
             parser, subparsers, **kwargs)
 
         g = subp.add_mutually_exclusive_group()
+        g.add_argument('--docs', dest='where', action='store_const',
+            const='docs', default='docs',
+            help=_("search in documentation [default]"))
         g.add_argument('--dist', dest='where', action='store_const',
-            const="dists", default='dists',
-            help=_("search in distributions [default]"))
+            const="dists",
+            help=_("search in distributions"))
         g.add_argument('--ext', dest='where', action='store_const',
             const='extensions',
             help=_("search in extensions"))
-        g.add_argument('--docs', dest='where', action='store_const',
-            const='docs',
-            help=_("search in documentation"))
-        subp.add_argument('query', metavar='QUERY',
-            help = _("the string to search"))
+        subp.add_argument('query', metavar='TERM', nargs='+',
+            help = _("a string to search"))
 
         return subp
 
@@ -84,7 +88,36 @@ class Search(Command):
 
         for hit in data['hits']:
             print "%s %s" % (hit['dist'], hit['version'])
+            if 'excerpt' in hit:
+                excerpt = self.clean_excerpt(hit['excerpt'])
 
+                for line in textwrap.wrap(excerpt, 72):
+                    print "    " + line
+                print
+
+    def clean_excerpt(self, excerpt):
+        """Clean up the excerpt returned in the json result for output."""
+        # replace ellipsis with three dots, as there's no chance
+        # to have them printed on non-utf8 consoles.
+        # Also, they suck obscenely on fixed-width output.
+        excerpt = excerpt.replace('&#8230;', '...')
+
+        # TODO: this apparently misses a few entities
+        excerpt = saxutils.unescape(excerpt)
+        excerpt = excerpt.replace('&quot;', '"')
+
+        # Convert numerical entities
+        excerpt = re.sub(r'\&\#(\d+)\;',
+            lambda c: unichr(int(c.group(1))),
+            excerpt)
+
+        # Hilight found terms
+        # TODO: use proper highlight with escape chars?
+        excerpt = excerpt.replace('<strong></strong>', '')
+        excerpt = excerpt.replace('<strong>', '*')
+        excerpt = excerpt.replace('</strong>', '*')
+
+        return excerpt
 
 class Info(WithSpec, Command):
     name = 'info'
@@ -116,17 +149,17 @@ class Info(WithSpec, Command):
         getattr(self, 'print_' + self.opts.what)(spec)
 
     def print_meta(self, spec):
-        data = self.api.dist(spec.name)
+        data = self._get_dist_data(spec.name)
         ver = self.get_best_version(data, spec, quiet=True)
         print self.api.meta(spec.name, ver, as_json=False)
 
     def print_readme(self, spec):
-        data = self.api.dist(spec.name)
+        data = self._get_dist_data(spec.name)
         ver = self.get_best_version(data, spec, quiet=True)
         print self.api.readme(spec.name, ver)
 
     def print_details(self, spec):
-        data = self.api.dist(spec.name)
+        data = self._get_dist_data(spec.name)
         ver = self.get_best_version(data, spec, quiet=True)
         data = self.api.meta(spec.name, ver)
         for k in [u'name', u'abstract', u'description', u'maintainer', u'license',
@@ -158,7 +191,7 @@ class Info(WithSpec, Command):
                         print "%s: %s: %s %s" % (phase, rel, pkg, ver)
 
     def print_versions(self, spec):
-        data = self.api.dist(spec.name)
+        data = self._get_dist_data(spec.name)
         name = data['name']
         vs = [ (SemVer(d['version']), s)
             for s, ds in data['releases'].iteritems()
@@ -168,4 +201,25 @@ class Info(WithSpec, Command):
         for v, s in vs:
             print name, v, s
 
+    def _get_dist_data(self, name):
+        try:
+            return self.api.dist(name)
+        except NotFound, e:
+            # maybe the user was looking for an extension instead?
+            try:
+                ext = self.api.ext(name)
+            except NotFound:
+                pass
+            else:
+                vs = ext.get('versions', {})
+                for extver, ds in vs.iteritems():
+                    for d in ds:
+                        if 'dist' not in d: continue
+                        dist = d['dist']
+                        distver = d.get('version', 'unknown')
+                        logger.info(
+                            _("extension %s %s found in distribution %s %s"),
+                            name, extver, dist, distver)
+
+            raise e
 
