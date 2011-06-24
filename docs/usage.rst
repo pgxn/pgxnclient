@@ -416,3 +416,25 @@ If no :samp:`URI` is specified, print a list of known mirror URIs. Otherwise
 print details about the specified mirror. It is also possible to print details
 for all the known mirrors using the ``--detailed`` option.
 
+
+.. _help:
+
+``pgxn help``
+-------------
+
+Display help and other program informations.
+
+Usage:
+
+.. parsed-literal::
+    :class: pgxn-help
+
+    pgxn help [--help] [--all | --libexec]
+
+Without options show the same informations obtained by ``pgxn --help``, which
+includes a list of builtin commands. With the ``--all`` option print the
+complete list of commands installed in the system.
+
+The option ``--libexec`` prints the path of the directory containing the
+command script: see :ref:`extending` for more informations.
+
