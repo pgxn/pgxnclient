@@ -1,0 +1,15 @@
+This directory contains the commands available to pgxn.
+
+Builtin commands are normally implemented as links to the bin/pgxnclient
+script. External commands can be added too: if you have written a pgxn
+subcommand in any language you can add a symlink here ``pgxn-foo`` to have
+your script invoked via ``pgxn foo``.
+
+Note that setuptools doesn't do a perfect job and replaces the links with the
+script content, dropping the executable flag. If you are packaging pgxnclient
+for a distribution, you may use soft/hard links instead. The location of this
+directory may also be changed if your distribution policies prefer a better
+location (e.g.  ``/usr/lib/pgxnclient/libexec``...): in this case change the
+`LIBEXECDIR` constant in ``pgxnclient/__init__.py`` with the absolute path of
+the scripts directory.
+

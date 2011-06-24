@@ -1,3 +1,12 @@
+pgxnclient 0.3
+==============
+
+- 'pgxn' script converted into a generic dispatcher in order to allow
+  additional commands to be implemented in external scripts and in any
+  language.
+- Added 'help' command to get informations about program and commands.
+
+
 pgxnclient 0.2.1
 ================
 

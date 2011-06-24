@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+"""
+pgxnclient -- commands dispatcher
+
+The script dispatches commands based on the name, e.g. upon the command::
+
+    pgxn foo --arg blah ...
+
+a script called pgxn-foo is searched and executed with remaining arguments.
+
+The commands are looked for by default in the dir ``libexec/pgxnclient/``
+sibling of the directory containing this script, then are looked for in the
+``PATH`` directories.
+"""
+
+# Copyright (C) 2011 Daniele Varrazzo
+
+# This file is part of the PGXN client
+
+from pgxnclient.cli import command_dispatch
+command_dispatch()
+

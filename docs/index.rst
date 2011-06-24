@@ -25,6 +25,7 @@ Contents:
 
     install
     usage
+    ext
 
 Indices and tables
 ==================

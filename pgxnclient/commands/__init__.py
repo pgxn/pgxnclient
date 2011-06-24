@@ -45,21 +45,12 @@ def get_option_parser():
         version="%%(prog)s %s" % __version__,
         help = _("print the version number and exit"))
 
-    # Populate the parser global options
-    glb = parser.add_argument_group(_("global options"))
-    glb.add_argument("--mirror", metavar="URL",
-        default = 'http://api.pgxn.org/',
-        help = _("the mirror to interact with [default: %(default)s]"))
-    glb.add_argument("--verbose", action='store_true',
-        help = _("print more informations"))
-    glb.add_argument("--yes", action='store_true',
-        help = _("assume affirmative answer to all questions"))
-
-    # Populate the parser subcommands
     subparsers = parser.add_subparsers(
         title = _("available commands"),
         metavar = 'COMMAND',
-        help = _("the command to execute"))
+        help = _("the command to execute."
+            " The complete list is available using `pgxn help --all`."
+            " Builtin commands are:"))
 
     clss = [ cls for cls in CommandType.subclasses if cls.name ]
     clss.sort(key=lambda c: c.name)
@@ -156,20 +147,31 @@ class Command(object):
         superclass' `customize_parser()` via `super()` in order to call all
         the mixins methods. Also note that the method must be a classmethod.
         """
-        return self.__make_subparser(subparsers, **kwargs)
+        return self.__make_subparser(parser, subparsers, **kwargs)
 
     def run(self):
         """The actions to take when the command is invoked."""
         raise NotImplementedError
 
     @classmethod
-    def __make_subparser(self, subparsers, description=None, epilog=None):
+    def __make_subparser(self, parser, subparsers,
+            description=None, epilog=None):
         """Create a new subparser with help populated."""
         subp = subparsers.add_parser(self.name,
             help = gettext(self.description),
             description = description or gettext(self.description),
             epilog = epilog)
         subp.set_defaults(cmd=self)
+
+        glb = subp.add_argument_group(_("global options"))
+        glb.add_argument("--mirror", metavar="URL",
+            default = 'http://api.pgxn.org/',
+            help = _("the mirror to interact with [default: %(default)s]"))
+        glb.add_argument("--verbose", action='store_true',
+            help = _("print more informations"))
+        glb.add_argument("--yes", action='store_true',
+            help = _("assume affirmative answer to all questions"))
+
         return subp
 
     @property

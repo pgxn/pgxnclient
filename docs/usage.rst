@@ -8,8 +8,8 @@ Usage:
 .. parsed-literal::
     :class: pgxn
 
-    pgxn [--help] [--version] [--mirror *URL*] [--verbose] [--yes]
-         *COMMAND* ...
+    pgxn [--help] [--version] *COMMAND*
+        [--mirror *URL*] [--verbose] [--yes] ...
 
 The script offers several commands, whose list can be obtained using ``pgxn
 --help``. The options available for each subcommand can be obtained using
@@ -25,11 +25,11 @@ There are also informative commands: `search <#pgxn-search>`_ is used to
 search the network, `info`_ to get information about a distribution.
 The `mirror`_ command can be used to get a list of mirrors.
 
-The program can accept a few basic options, to be listed before the command:
+A few options are available to all the commands:
 
 :samp:`--mirror {URL}`
-    Select a mirror to interact with. If not specified default to
-    http://api.pgxn.org/.
+    Select a mirror to interact with. If not specified the default is
+    ``http://api.pgxn.org/``.
 
 ``--verbose``
     Print more information during the process.
@@ -446,4 +446,26 @@ Usage:
 If no :samp:`URI` is specified, print a list of known mirror URIs. Otherwise
 print details about the specified mirror. It is also possible to print details
 for all the known mirrors using the ``--detailed`` option.
+
+
+.. _help:
+
+``pgxn help``
+-------------
+
+Display help and other program informations.
+
+Usage:
+
+.. parsed-literal::
+    :class: pgxn-help
+
+    pgxn help [--help] [--all | --libexec]
+
+Without options show the same informations obtained by ``pgxn --help``, which
+includes a list of builtin commands. With the ``--all`` option print the
+complete list of commands installed in the system.
+
+The option ``--libexec`` prints the path of the directory containing the
+command script: see :ref:`extending` for more informations.
 
