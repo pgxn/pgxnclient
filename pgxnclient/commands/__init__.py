@@ -48,7 +48,9 @@ def get_option_parser():
     subparsers = parser.add_subparsers(
         title = _("available commands"),
         metavar = 'COMMAND',
-        help = _("the command to execute"))
+        help = _("the command to execute."
+            " The complete list is available using `pgxn help --all`."
+            " Builtin commands are:"))
 
     clss = [ cls for cls in CommandType.subclasses if cls.name ]
     clss.sort(key=lambda c: c.name)
