@@ -60,7 +60,7 @@ setup(
     url = 'http://pgxnclient.projects.postgresql.org/',
     license = 'BSD',
     packages = find_packages(),
-    package_data = {'pgxnclient': ['libexec/pgxn-*']},
+    package_data = {'pgxnclient': ['libexec/*']},
     entry_points = {'console_scripts': [
         'pgxn = pgxnclient.cli:command_dispatch',
         'pgxnclient = pgxnclient.cli:script', ]},
