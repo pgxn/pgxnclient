@@ -15,7 +15,7 @@ from pgxnclient.i18n import _
 from pgxnclient.errors import BadSpecError, ResourceNotFound
 
 from pgxnclient.utils.semver import SemVer
-from pgxnclient.utils.label import Label
+from pgxnclient.utils.strings import Label
 
 
 class Spec(object):

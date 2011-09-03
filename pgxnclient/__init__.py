@@ -23,7 +23,7 @@ import os
 
 from pgxnclient.spec import Spec
 from pgxnclient.utils.semver import SemVer
-from pgxnclient.utils.label import Label, Term, Identifier
+from pgxnclient.utils.strings import Label, Term, Identifier
 
 
 def get_scripts_dir():

@@ -1,5 +1,5 @@
 """
-Label -- a valid RFC 1034 identifier
+Strings -- implementation of a few specific string subclasses.
 """
 
 # Copyright (C) 2011 Daniele Varrazzo
@@ -44,9 +44,9 @@ class CIStr(str):
 
 class Label(CIStr):
     """A string following the rules in RFC 1034.
-    
+
     Labels can then be used as host names in domains.
-    
+
     http://tools.ietf.org/html/rfc1034
 
     "The labels must follow the rules for ARPANET host names. They must
@@ -56,11 +56,11 @@ class Label(CIStr):
 
     """
     def __new__(cls, value):
-        if not Label.re_label.match(value):
+        if not Label._re_chk.match(value):
             raise ValueError(_("bad label: '%s'") % value)
         return CIStr.__new__(cls, value)
 
-    re_label = re.compile(
+    _re_chk = re.compile(
         # TODO: quick hack - remove the _ from here!!!
         # I assumed the packages were Label but they aren't
         r'^[a-z]([-a-z0-9_]{0,61}[a-z0-9_])?$',
@@ -87,11 +87,11 @@ class Identifier(CIStr):
     A string modeling a PostgreSQL identifier.
     """
     def __new__(cls, value):
-        if not Identifier.re_label.match(value):
+        if not Identifier._re_chk.match(value):
             raise ValueError(_("bad identifier: '%s'") % value)
         return CIStr.__new__(cls, value)
 
-    re_label = re.compile(
+    _re_chk = re.compile(
         r'^[a-z_][a-z0-9_\$]{0,62}',
         re.IGNORECASE)
 
