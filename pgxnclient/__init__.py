@@ -16,14 +16,14 @@ LIBEXECDIR = './libexec/'
 
 
 __all__ = [
-    'Spec', 'SemVer', 'Label', 'Identifier',
+    'Spec', 'SemVer', 'Label', 'Term', 'Identifier',
     'get_scripts_dir', 'find_script' ]
 
 import os
 
 from pgxnclient.spec import Spec
 from pgxnclient.utils.semver import SemVer
-from pgxnclient.utils.label import Label, Identifier
+from pgxnclient.utils.label import Label, Term, Identifier
 
 
 def get_scripts_dir():

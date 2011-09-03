@@ -67,6 +67,21 @@ class Label(CIStr):
         re.IGNORECASE)
 
 
+class Term(CIStr):
+    """
+    A Term is a subtype of String that must be at least two characters long
+    contain no slash (/), backslash (\), control, or space characters.
+
+    See http://pgxn.org/spec#Term
+    """
+    def __new__(cls, value):
+        if not Term._re_chk.match(value) or min(map(ord, value)) < 32:
+            raise ValueError(_("not a valid term term: '%s'") % value)
+        return CIStr.__new__(cls, value)
+
+    _re_chk = re.compile( r'^[^\s/\\]{2,}$')
+
+
 class Identifier(CIStr):
     """
     A string modeling a PostgreSQL identifier.

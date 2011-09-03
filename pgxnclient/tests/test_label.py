@@ -1,6 +1,6 @@
 from pgxnclient.tests import unittest
 
-from pgxnclient import Label
+from pgxnclient import Label, Term
 
 class LabelTestCase(unittest.TestCase):
     def test_ok(self):
@@ -43,4 +43,30 @@ class LabelTestCase(unittest.TestCase):
         self.assert_(Label('C') > Label('b') > Label('A'))
         self.assert_(Label('c') >= Label('B') >= Label('a'))
         self.assert_(Label('C') >= Label('b') >= Label('A'))
+
+
+class TermTestCase(unittest.TestCase):
+    def test_ok(self):
+        for s in [
+            'aa'
+            'adfkjh"()', ]:
+            self.assertEqual(Term(s), s)
+            self.assertEqual(Term(s), Term(s))
+            self.assert_(Term(s) <= Term(s))
+            self.assert_(Term(s) >= Term(s))
+
+    def test_bad(self):
+        def ar(s):
+            try: Term(s)
+            except ValueError: pass
+            else: self.fail("ValueError not raised: '%s'" % s)
+
+        for s in [
+            'a',
+            'aa ',
+            'a/a',
+            'a\\a',
+            'a\ta',
+            'aa\x01' ]:
+            ar(s)
 
