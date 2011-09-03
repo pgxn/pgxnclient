@@ -61,9 +61,7 @@ class Label(CIStr):
         return CIStr.__new__(cls, value)
 
     _re_chk = re.compile(
-        # TODO: quick hack - remove the _ from here!!!
-        # I assumed the packages were Label but they aren't
-        r'^[a-z]([-a-z0-9_]{0,61}[a-z0-9_])?$',
+        r'^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$',
         re.IGNORECASE)
 
 
