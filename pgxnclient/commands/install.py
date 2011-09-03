@@ -471,6 +471,6 @@ Do you want to execute it?""")
 
     def drop_extension(self, name):
         # TODO: cascade
-        cmd = "DROP EXTENSION %s;" % Label(name)
+        cmd = "DROP EXTENSION %s;" % Identifier(name)
         self.load_sql(data=cmd)
 

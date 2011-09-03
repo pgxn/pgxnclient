@@ -15,7 +15,7 @@ from pgxnclient.i18n import _
 from pgxnclient.errors import BadSpecError, ResourceNotFound
 
 from pgxnclient.utils.semver import SemVer
-from pgxnclient.utils.strings import Label
+from pgxnclient.utils.strings import Term
 
 
 class Spec(object):
@@ -78,7 +78,7 @@ class Spec(object):
             raise BadSpecError(
                 _("bad format for version specification: '%s'"), spec)
 
-        name = Label(m.group(1))
+        name = Term(m.group(1))
         op = m.group(2)
         if op == '=':
             op = '=='
