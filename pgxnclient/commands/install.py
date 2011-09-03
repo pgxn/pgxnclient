@@ -20,7 +20,7 @@ from pgxnclient.errors import BadChecksum, PgxnClientException
 from pgxnclient.network import download
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
 from pgxnclient.commands import WithSpec, WithSpecLocal, WithSudo
-from pgxnclient.utils.strings import Label, Identifier
+from pgxnclient.utils.strings import Identifier
 
 logger = logging.getLogger('pgxnclient.commands')
 
