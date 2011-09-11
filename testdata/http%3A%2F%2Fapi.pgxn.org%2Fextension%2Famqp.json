@@ -1,0 +1,20 @@
+{
+   "extension": "amqp",
+   "latest": "stable",
+   "stable": {
+      "abstract": "AMQP protocol support for PostgreSQL",
+      "dist": "pg_amqp",
+      "docpath": "doc/amqp",
+      "sha1": "4c7112a28584ecd2ac9607cf62274a0ec9d586cf",
+      "version": "0.3.0"
+   },
+   "versions": {
+      "0.3.0": [
+         {
+            "date": "2011-05-19T21:47:12Z",
+            "dist": "pg_amqp",
+            "version": "0.3.0"
+         }
+      ]
+   }
+}

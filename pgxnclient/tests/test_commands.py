@@ -6,6 +6,7 @@ import shutil
 from urllib import quote
 
 from pgxnclient.utils import b
+from pgxnclient.errors import ResourceNotFound
 from pgxnclient.tests import unittest
 from pgxnclient.tests.testutils import ifunlink, get_test_filename
 
@@ -20,6 +21,8 @@ class FakeFile(object):
 def fake_get_file(url, urlmap=None):
     if urlmap: url = urlmap.get(url, url)
     fn = get_test_filename(quote(url, safe=""))
+    if not os.path.exists(fn):
+        raise ResourceNotFound(fn)
     f = FakeFile(fn, 'rb')
     f.url = url
     return f
@@ -91,6 +94,20 @@ class DownloadTestCase(unittest.TestCase):
         from pgxnclient.cli import main
         try:
             main(['download', '--testing', 'foobar'])
+            self.assert_(os.path.exists(fn))
+        finally:
+            ifunlink(fn)
+
+    @patch('pgxnclient.api.get_file')
+    def test_download_ext(self, mock):
+        mock.side_effect = fake_get_file
+
+        fn = 'pg_amqp-0.3.0.zip'
+        self.assert_(not os.path.exists(fn))
+
+        from pgxnclient.cli import main
+        try:
+            main(['download', 'amqp'])
             self.assert_(os.path.exists(fn))
         finally:
             ifunlink(fn)

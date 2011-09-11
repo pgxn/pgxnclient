@@ -22,7 +22,7 @@ from pgxnclient import __version__
 from pgxnclient import Spec, SemVer
 from pgxnclient.api import Api
 from pgxnclient.i18n import _, gettext
-from pgxnclient.errors import PgxnClientException, ResourceNotFound, UserAbort
+from pgxnclient.errors import NotFound, PgxnClientException, ResourceNotFound, UserAbort
 
 logger = logging.getLogger('pgxnclient.commands')
 
@@ -291,11 +291,37 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         # Get the maximum version for each release status satisfying the spec
         vers = [ None ] * len(Spec.STATUS)
         for n, d in drels.iteritems():
-            lvl = Spec.STATUS[n]
             vs = filter(spec.accepted, [SemVer(r['version']) for r in d])
             if vs:
                 vers[Spec.STATUS[n]] = max(vs)
 
+        return self._get_best_version(vers, spec, quiet)
+
+    def get_best_version_from_ext(self, data, spec):
+        """
+        Return the best distribution version from an extension's data
+        """
+        # Get the maximum version for each release status satisfying the spec
+        vers = [ [] for i in xrange(len(Spec.STATUS)) ]
+        vmap = {} # ext_version -> (dist_name, dist_version)
+        for ev, dists in data.get('versions', {}).iteritems():
+            ev = SemVer(ev)
+            if not spec.accepted(ev):
+                continue
+            for dist in dists:
+                dv = SemVer(dist['version'])
+                ds = dist.get('status', 'stable')
+                vers[Spec.STATUS[ds]].append(ev)
+                vmap[ev] = (dist['dist'], dv)
+
+        # for each rel status only take the max one.
+        for i in xrange(len(vers)):
+            vers[i] = vers[i] and max(vers[i]) or None
+
+        ev = self._get_best_version(vers, spec, quiet=False)
+        return vmap[ev]
+
+    def _get_best_version(self, vers, spec, quiet):
         # Is there any result at the desired release status?
         want = [ v for lvl, v in enumerate(vers)
             if lvl >= self.opts.status and v is not None ]
@@ -327,9 +353,16 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         """
         if not spec.is_local():
             # Get the metadata from the API
-            data = self.api.dist(spec.name)
-            ver = self.get_best_version(data, spec)
-            return self.api.meta(spec.name, ver)
+            try:
+                data = self.api.dist(spec.name)
+            except NotFound:
+                # Distro not found: maybe it's an extension?
+                ext = self.api.ext(spec.name)
+                name, ver = self.get_best_version_from_ext(ext, spec)
+                return self.api.meta(name, ver)
+            else:
+                ver = self.get_best_version(data, spec)
+                return self.api.meta(spec.name, ver)
 
         elif spec.is_dir():
             # Get the metadata from a directory

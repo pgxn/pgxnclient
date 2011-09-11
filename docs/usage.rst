@@ -44,7 +44,9 @@ Package specification
 Many commands such as install_ require a *package specification* to operate.
 In its simple form the specification is just the name of a distribution:
 ``pgxn install foo`` means "install the most recent stable release of the
-``foo`` distribution".
+``foo`` distribution". If a distribution with given name is not found, many
+commands will look for an *extension* with the given name, and will work on
+it.
 
 The specification allows specifying an operator and a version number, so that
 ``pgxn install 'foo<2.0'`` will install the most recent stable release of the

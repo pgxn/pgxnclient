@@ -48,7 +48,7 @@ class Download(WithSpec, Command):
             raise PgxnClientException(
                 "sha1 missing from the distribution meta")
 
-        fin = self.api.download(spec.name, SemVer(data['version']))
+        fin = self.api.download(data['name'], SemVer(data['version']))
         fn = self._get_local_file_name(fin.url)
         fn = download(fin, fn, rename=True)
         self.verify_checksum(fn, chk)
