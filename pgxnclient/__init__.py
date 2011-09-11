@@ -6,7 +6,7 @@ pgxnclient -- main package
 
 # This file is part of the PGXN client
 
-__version__ = '0.3dev0'
+__version__ = '0.3b1'
 
 # Path where to find the command executables.
 # If relative, it's from the `pgxnclient` package directory.
