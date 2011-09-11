@@ -71,7 +71,7 @@ class DownloadTestCase(unittest.TestCase):
     def test_download_latest(self, mock):
         mock.side_effect = fake_get_file
 
-        fn = 'foobar-0.42.1.pgz'
+        fn = 'foobar-0.42.1.zip'
         self.assert_(not os.path.exists(fn))
 
         from pgxnclient.cli import main
@@ -85,7 +85,7 @@ class DownloadTestCase(unittest.TestCase):
     def test_download_testing(self, mock):
         mock.side_effect = fake_get_file
 
-        fn = 'foobar-0.43.2b1.pgz'
+        fn = 'foobar-0.43.2b1.zip'
         self.assert_(not os.path.exists(fn))
 
         from pgxnclient.cli import main
@@ -99,9 +99,9 @@ class DownloadTestCase(unittest.TestCase):
     def test_download_rename(self, mock):
         mock.side_effect = fake_get_file
 
-        fn = 'foobar-0.42.1.pgz'
-        fn1= 'foobar-0.42.1-1.pgz'
-        fn2= 'foobar-0.42.1-2.pgz'
+        fn = 'foobar-0.42.1.zip'
+        fn1= 'foobar-0.42.1-1.zip'
+        fn2= 'foobar-0.42.1-2.zip'
 
         for tmp in (fn, fn1, fn2):
             self.assert_(not os.path.exists(tmp))
@@ -137,7 +137,7 @@ class DownloadTestCase(unittest.TestCase):
 
         mock.side_effect = fakefake
 
-        fn = 'foobar-0.42.1.pgz'
+        fn = 'foobar-0.42.1.zip'
         self.assert_(not os.path.exists(fn))
 
         try:
@@ -307,7 +307,7 @@ class InstallTestCase(unittest.TestCase):
         mock_unpack.side_effect = unpack
 
         from pgxnclient.cli import main
-        main(['install', get_test_filename('foobar-0.42.1.pgz')])
+        main(['install', get_test_filename('foobar-0.42.1.zip')])
 
         self.assertEquals(mock_popen.call_count, 2)
         self.assertEquals(['make'], mock_popen.call_args_list[0][0][0][:1])
@@ -317,7 +317,7 @@ class InstallTestCase(unittest.TestCase):
 
         self.assertEquals(mock_unpack.call_count, 1)
         zipname, tmpdir = mock_unpack.call_args[0]
-        self.assertEqual(zipname, get_test_filename('foobar-0.42.1.pgz'))
+        self.assertEqual(zipname, get_test_filename('foobar-0.42.1.zip'))
         self.assertEqual(make_cwd, os.path.join(tmpdir, 'foobar-0.42.1'))
 
     @patch('pgxnclient.commands.Popen')
@@ -330,7 +330,7 @@ class InstallTestCase(unittest.TestCase):
         tdir = tempfile.mkdtemp()
         try:
             from pgxnclient.utils.zip import unpack
-            dir = unpack(get_test_filename('foobar-0.42.1.pgz'), tdir)
+            dir = unpack(get_test_filename('foobar-0.42.1.zip'), tdir)
 
             from pgxnclient.cli import main
             main(['install', dir])
@@ -483,7 +483,7 @@ class LoadTestCase(unittest.TestCase):
         mock_isext.return_value = True
 
         from pgxnclient.cli import main
-        main(['load', '--yes', get_test_filename('foobar-0.42.1.pgz')])
+        main(['load', '--yes', get_test_filename('foobar-0.42.1.zip')])
 
         self.assertEquals(mock_unpack.call_count, 0)
         self.assertEquals(mock_popen.call_count, 1)
@@ -507,7 +507,7 @@ class LoadTestCase(unittest.TestCase):
         tdir = tempfile.mkdtemp()
         try:
             from pgxnclient.utils.zip import unpack
-            dir = unpack(get_test_filename('foobar-0.42.1.pgz'), tdir)
+            dir = unpack(get_test_filename('foobar-0.42.1.zip'), tdir)
 
             from pgxnclient.cli import main
             main(['load', '--yes', dir])

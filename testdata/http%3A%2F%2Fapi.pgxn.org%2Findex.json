@@ -1,6 +1,6 @@
 {
    "dist": "/dist/{dist}.json",
-   "download": "/dist/{dist}/{version}/{dist}-{version}.pgz",
+   "download": "/dist/{dist}/{version}/{dist}-{version}.zip",
    "extension": "/extension/{extension}.json",
    "htmldoc": "/dist/{dist}/{version}/{+docpath}.html",
    "meta": "/dist/{dist}/{version}/META.json",
