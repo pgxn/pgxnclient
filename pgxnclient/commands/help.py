@@ -8,7 +8,7 @@ pgxnclient -- help commands implementation
 
 import os
 
-from pgxnclient import get_scripts_dir
+from pgxnclient import get_scripts_dirs
 from pgxnclient.i18n import _, N_
 from pgxnclient.commands import Command
 
@@ -52,8 +52,10 @@ class Help(Command):
     def find_all_commands(self):
         rv = []
         path = os.environ.get('PATH', '').split(os.pathsep)
-        path.insert(0, get_scripts_dir())
+        path[0:0] = get_scripts_dirs()
         for p in path:
+            if not os.path.isdir(p):
+                continue
             for fn in os.listdir(p):
                 if fn.startswith('pgxn-'):
                     rv.append(fn[5:])
@@ -62,5 +64,5 @@ class Help(Command):
         return rv
 
     def print_libexec(self):
-        print get_scripts_dir()
+        print '\n'.join(get_scripts_dirs())
 

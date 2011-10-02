@@ -8,16 +8,18 @@ pgxnclient -- main package
 
 __version__ = '0.3b2'
 
-# Path where to find the command executables.
+# Paths where to find the command executables.
 # If relative, it's from the `pgxnclient` package directory.
-# Distribution packagers may move it to a different directory
-# (eventually specifying an absolute path).
-LIBEXECDIR = './libexec/'
+# Distribution packagers may move them around if they wish.
+LIBEXECDIRS = [
+    './libexec/',
+    '/usr/local/libexec/pgxnclient/',
+    ]
 
 
 __all__ = [
     'Spec', 'SemVer', 'Label', 'Term', 'Identifier',
-    'get_scripts_dir', 'find_script' ]
+    'get_scripts_dirs', 'find_script' ]
 
 import os
 
@@ -26,12 +28,13 @@ from pgxnclient.utils.semver import SemVer
 from pgxnclient.utils.strings import Label, Term, Identifier
 
 
-def get_scripts_dir():
+def get_scripts_dirs():
     """
-    Return the absolute path of the directory containing the client scripts.
+    Return the absolute path of the directories containing the client scripts.
     """
-    return os.path.normpath(os.path.join(
-        os.path.dirname(__file__), LIBEXECDIR))
+    return [ os.path.normpath(os.path.join(
+            os.path.dirname(__file__), p))
+        for p in LIBEXECDIRS ]
 
 def find_script(name):
     """Return the absoulute path of a pgxn script.
@@ -42,7 +45,7 @@ def find_script(name):
     Return `None` if the script is not found.
     """
     path = os.environ.get('PATH', '').split(os.pathsep)
-    path.insert(0, get_scripts_dir())
+    path[0:0] = get_scripts_dirs()
     for p in path:
         fn = os.path.join(p, name)
         if os.path.isfile(fn):
