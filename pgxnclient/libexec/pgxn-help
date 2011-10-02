@@ -1,1 +1,11 @@
-../../bin/pgxnclient
+#!/usr/bin/env python
+"""
+pgxnclient -- command line interface
+"""
+
+# Copyright (C) 2011 Daniele Varrazzo
+
+# This file is part of the PGXN client
+
+from pgxnclient.cli import script
+script()
