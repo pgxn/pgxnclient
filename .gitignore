@@ -6,3 +6,5 @@ pgxnclient.egg-info
 simplejson-*.egg
 mock-*.egg
 unittest2-*.egg
+dbtest/regression.*
+dbtest/postgresql-*/*

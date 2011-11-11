@@ -1,0 +1,8 @@
+This directory contain test files for high level testing.
+
+Currently you should run:
+
+- make_env.sh (will compile postgres and create a cluster)
+- pg_ctl.sh start (will start the test cluster on port 15432)
+- test_WHAT.sh (will install, test, uninstall the extension WHAT)
+- pg_ctl.sh stop (guess what)
