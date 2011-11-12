@@ -1,10 +1,10 @@
-source env.sh
-
 echo "INSTALL"
-${PGXN} install --nosudo ${EXTENSION} || exit
+${PGXN} install --nosudo ${LEVEL} ${EXTENSION} || exit
+
 echo "CHECK"
-${PGXN} check -p ${PG_PORT} ${EXTENSION} || exit
-dropdb -p ${PG_PORT} contrib_regression
+${PGXN} check ${TEST_DSN} ${LEVEL} ${EXTENSION}
+
 echo "UNINSTALL"
-${PGXN} uninstall --nosudo ${EXTENSION} || exit
+dropdb -p ${PG_PORT} ${TEST_DB}
+${PGXN} uninstall --nosudo ${LEVEL} ${EXTENSION} || exit
 

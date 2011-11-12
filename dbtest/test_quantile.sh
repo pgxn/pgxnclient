@@ -1,4 +1,5 @@
 #!/bin/bash
 source env.sh
-export EXTENSION=pair
+export EXTENSION=quantile
+export LEVEL=--testing
 source _test_template.sh
