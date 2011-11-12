@@ -545,3 +545,6 @@ class SearchTestCase(unittest.TestCase):
         from pgxnclient.cli import main
         main(['search', '--docs', 'foo bar', 'baz'])
 
+
+if __name__ == '__main__':
+    unittest.main()

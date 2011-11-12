@@ -128,3 +128,6 @@ class SemVerTestCase(unittest.TestCase):
            '1.2000000000000000.3.4',]:
             ar(s)
 
+
+if __name__ == '__main__':
+    unittest.main()
