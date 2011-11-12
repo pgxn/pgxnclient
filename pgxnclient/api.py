@@ -47,6 +47,8 @@ class Api(object):
         return self.call('readme', {'dist': dist, 'version': version}).read()
 
     def download(self, dist, version):
+        dist = dist.lower()
+        version = version.lower()
         return self.call('download', {'dist': dist, 'version': version})
 
     def mirrors(self):

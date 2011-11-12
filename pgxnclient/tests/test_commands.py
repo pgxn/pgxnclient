@@ -168,6 +168,26 @@ class DownloadTestCase(unittest.TestCase):
         finally:
             ifunlink(fn)
 
+    @patch('pgxnclient.api.get_file')
+    def test_download_case_insensitive(self, mock):
+        mock.side_effect = fake_get_file
+
+        fn = 'pyrseas-0.4.1.zip'
+        self.assert_(not os.path.exists(fn))
+
+        from pgxnclient.cli import main
+        try:
+            main(['download', 'pyrseas'])
+            self.assert_(os.path.exists(fn))
+        finally:
+            ifunlink(fn)
+
+        try:
+            main(['download', 'Pyrseas'])
+            self.assert_(os.path.exists(fn))
+        finally:
+            ifunlink(fn)
+
     def test_version(self):
         from pgxnclient import Spec
         from pgxnclient.commands.install import Download

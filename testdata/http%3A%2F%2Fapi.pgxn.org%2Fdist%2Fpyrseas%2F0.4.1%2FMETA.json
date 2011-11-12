@@ -1,0 +1,99 @@
+{
+   "abstract": "Framework and utilities to upgrade and maintain databases",
+   "date": "2011-10-27T16:43:33Z",
+   "description": "Pyrseas provides a framework and utilities to upgrade and maintain a PostgreSQL database.  Its utilities output a database schema in YAML format suitable for committing to a version control system and read this format to generate SQL to sync to another database.  Supports PostgreSQL 8.4, 9.0 and 9.1.",
+   "docs": {
+      "README": {
+         "title": "README"
+      },
+      "docs/dbtoyaml": {
+         "abstract": "Output PostgreSQL schemas in YAML format",
+         "title": "dbtoyaml"
+      },
+      "docs/yamltodb": {
+         "abstract": "Generate SQL to sync a database with a YAML schema spec",
+         "title": "yamltodb"
+      }
+   },
+   "license": "bsd",
+   "maintainer": "Joe Abbate <jma@freedomcircle.com>",
+   "name": "Pyrseas",
+   "prereqs": {
+      "runtime": {
+         "requires": {
+            "PostgreSQL": "8.4.0"
+         }
+      }
+   },
+   "provides": {
+      "dbtoyaml": {
+         "abstract": "Output PostgreSQL schemas in YAML format",
+         "docfile": "docs/dbtoyaml.rst",
+         "docpath": "docs/dbtoyaml",
+         "file": "pyrseas/dbtoyaml.py",
+         "version": "0.4.1"
+      },
+      "yamltodb": {
+         "abstract": "Generate SQL to sync a database with a YAML schema spec",
+         "docfile": "docs/yamltodb.rst",
+         "docpath": "docs/yamltodb",
+         "file": "pyrseas/yamltodb.py",
+         "version": "0.4.1"
+      }
+   },
+   "release_status": "stable",
+   "releases": {
+      "stable": [
+         {
+            "date": "2011-10-27T16:43:33Z",
+            "version": "0.4.1"
+         },
+         {
+            "date": "2011-09-27T01:35:22Z",
+            "version": "0.4.0"
+         },
+         {
+            "date": "2011-08-26T17:15:44Z",
+            "version": "0.3.1"
+         },
+         {
+            "date": "2011-06-30T15:31:05Z",
+            "version": "0.3.0"
+         },
+         {
+            "date": "2011-06-07T20:41:39Z",
+            "version": "0.2.1"
+         },
+         {
+            "date": "2011-05-19T18:43:06Z",
+            "version": "0.2.0"
+         }
+      ]
+   },
+   "resources": {
+      "bugtracker": {
+         "web": "https://github.com/jmafc/Pyrseas/issues"
+      },
+      "homepage": "http://pyrseas.org/",
+      "repository": {
+         "type": "git",
+         "url": "git://github.com/jmafc/Pyrseas.git",
+         "web": "https://github.com/jmafc/Pyrseas"
+      }
+   },
+   "sha1": "6ae083946254210f6bfc9c5b2cae538bbaf59142",
+   "special_files": [
+      "README",
+      "META.json",
+      "Makefile",
+      "MANIFEST.in"
+   ],
+   "tags": [
+      "version control",
+      "yaml",
+      "database version control",
+      "schema versioning"
+   ],
+   "user": "jma",
+   "version": "0.4.1"
+}
