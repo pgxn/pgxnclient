@@ -17,10 +17,12 @@ builtin simple commands, such as the ones in ``info.py``.
 If you are not into Python and want to add commands written in other
 languages, you can provide a link (either soft or hard) to your command under
 one of the ``libexec`` directories.  The exact location of the directories
-depend on the client installation: distribution packagers may decide to move
-them according to their own policies.  In order to know the current location
-of the directories use the command ``pgxn help --libexec``. Links are also
-looked for in the :envvar:`PATH` directories.
+depends on the client installation: distribution packagers may decide to move
+them according to their own policies.  The location of one of the directories,
+which can be considered the "public" one, can alway be known using the command
+``pgxn help --libexec``. Note that this directory may not exists: in this case
+the command being installed is responsible to create it. Links are also looked
+for in the :envvar:`PATH` directories.
 
 In order to implement the command :samp:`pgxn {foo}`, the link should be named
 :samp:`pgxn-{foo}`. The :program:`pgxn` script will dispatch the command and

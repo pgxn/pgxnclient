@@ -1,9 +1,7 @@
-This directory contains the commands available to pgxn.
-
-Builtin commands are normally implemented as links to the bin/pgxnclient
-script. External commands can be added too: if you have written a pgxn
-subcommand in any language you can add a symlink here ``pgxn-foo`` to have
-your script invoked via ``pgxn foo``.
+This directory contains the PGXN Client builtin commands. If you want to
+extend the client with your own command, please use the directory returned by
+``pgxn help --libexec``. See the documentation for further informations about
+how to create new commands.
 
 Note that setuptools doesn't do a perfect job and replaces the links with the
 script content, dropping the executable flag. If you are packaging pgxnclient

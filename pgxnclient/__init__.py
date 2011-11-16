@@ -11,15 +11,22 @@ __version__ = '0.3b3.dev0'
 # Paths where to find the command executables.
 # If relative, it's from the `pgxnclient` package directory.
 # Distribution packagers may move them around if they wish.
+#
+# Only one of the paths should be marked as "public": it will be returned by
+# pgxn help --libexec
 LIBEXECDIRS = [
-    './libexec/',
-    '/usr/local/libexec/pgxnclient/',
+    # public, path
+    (False, './libexec/'),
+    (True,  '/usr/local/libexec/pgxnclient/'),
     ]
 
 
+assert len([x for x in LIBEXECDIRS if x[0]]) == 1, \
+    "only one libexec directory should be public"
+
 __all__ = [
     'Spec', 'SemVer', 'Label', 'Term', 'Identifier',
-    'get_scripts_dirs', 'find_script' ]
+    'get_scripts_dirs', 'get_public_script_dir', 'find_script' ]
 
 import os
 
@@ -34,7 +41,15 @@ def get_scripts_dirs():
     """
     return [ os.path.normpath(os.path.join(
             os.path.dirname(__file__), p))
-        for p in LIBEXECDIRS ]
+        for (_, p) in LIBEXECDIRS ]
+
+def get_public_scripts_dir():
+    """
+    Return the absolute path of the public directory for the client scripts.
+    """
+    return [ os.path.normpath(os.path.join(
+            os.path.dirname(__file__), p))
+        for (public, p) in LIBEXECDIRS if public ][0]
 
 def find_script(name):
     """Return the absoulute path of a pgxn script.
