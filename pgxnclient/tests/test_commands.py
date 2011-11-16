@@ -559,8 +559,9 @@ class LoadTestCase(unittest.TestCase):
 
 
 class SearchTestCase(unittest.TestCase):
+    @patch('sys.stdout')
     @patch('pgxnclient.api.get_file')
-    def test_search_quoting(self, mock_get):
+    def test_search_quoting(self, mock_get, stdout):
         mock_get.side_effect = fake_get_file
         from pgxnclient.cli import main
         main(['search', '--docs', 'foo bar', 'baz'])
