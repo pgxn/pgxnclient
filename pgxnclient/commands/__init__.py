@@ -485,7 +485,13 @@ class WithMake(WithPgConfig, WithUnpacking):
         if sudo:
             cmdline.extend(shlex.split(sudo))
 
-        cmdline.extend(['make', 'PG_CONFIG=%s' % self.opts.pg_config])
+        # convert to absolute path for makefile, or else it may miss it
+        # if the cwd is changed during execution
+        pg_config = self.opts.pg_config
+        if os.path.split(pg_config)[0]:
+            pg_config = os.path.abspath(pg_config)
+
+        cmdline.extend(['make', 'PG_CONFIG=%s' % pg_config])
 
         if isinstance(cmd, basestring):
             cmdline.append(cmd)
