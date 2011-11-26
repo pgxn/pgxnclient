@@ -52,10 +52,11 @@ class Spec(object):
         return self.is_dir() or self.is_file()
 
     def __str__(self):
+        name = self.name or self.filename or self.dirname or "???"
         if self.op is None:
-            return self.name
+            return name
         else:
-            return "%s%s%s" % (self.name, self.op, self.ver)
+            return "%s%s%s" % (name, self.op, self.ver)
 
     @classmethod
     def parse(self, spec):
