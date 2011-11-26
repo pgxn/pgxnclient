@@ -15,7 +15,7 @@ import sys
 import logging
 from subprocess import Popen, PIPE
 
-from pgxnclient.utils import json
+from pgxnclient.utils import load_json
 from pgxnclient.utils import argparse
 
 from pgxnclient import __version__
@@ -372,7 +372,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
                 raise PgxnClientException(
                     _("file 'META.json' not found in '%s'") % dir)
 
-            return json.load(open(fn))
+            return load_json(open(fn))
 
         elif spec.is_file():
             # Get the metadata from a zip file

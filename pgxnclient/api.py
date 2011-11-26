@@ -8,15 +8,11 @@ pgxnclient -- client API stub
 
 from urllib import urlencode
 
-from pgxnclient.utils import json
+from pgxnclient.utils import load_json
 from pgxnclient.errors import NetworkError, NotFound, ResourceNotFound
 from pgxnclient.network import get_file
 from pgxnclient.utils.uri import expand_template
 
-
-def load_json(f):
-    data = f.read().decode('utf-8')
-    return json.loads(data)
 
 class Api(object):
     def __init__(self, mirror):

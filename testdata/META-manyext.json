@@ -1,0 +1,52 @@
+{
+   "name": "foobar",
+   "abstract": "A mock extension",
+   "description": "This library doesn't exist.",
+   "version": "0.42.1",
+   "maintainer": [
+      "Daniele Varrazzo <piro@example.com>"
+   ],
+   "license": "postgresql",
+   "provides": {
+      "foo": {
+         "abstract": "A non existing extension",
+         "file": "sql/foo.sql",
+         "version": "0.42.1"
+      },
+      "bar": {
+         "abstract": "A non existing extension",
+         "file": "sql/bar.sql",
+         "version": "0.42.1"
+      },
+      "baz": {
+         "abstract": "A non existing extension",
+         "file": "sql/baz.sql",
+         "version": "0.42.1"
+      },
+      "qux": {
+         "abstract": "A non existing extension",
+         "file": "sql/qux.sql",
+         "version": "0.42.1"
+      }
+   },
+   "resources": {
+      "bugtracker": {
+         "web": "http://github.com/piro/foobar/issues/"
+      },
+      "repository": {
+        "url":  "git://github.com/piro/foobar.git",
+        "web":  "http://github.com/piro/foobar/",
+        "type": "git"
+      }
+   },
+   "generated_by": "Daniele Varrazzo",
+   "meta-spec": {
+      "version": "1.0.0",
+      "url": "http://pgxn.org/meta/spec.txt"
+   },
+   "tags": [
+      "foo",
+      "bar",
+      "testing"
+   ]
+}

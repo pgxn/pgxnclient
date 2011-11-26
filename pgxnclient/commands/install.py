@@ -8,6 +8,7 @@ pgxnclient -- installation/loading commands implementation
 
 import os
 import re
+import sys
 import shutil
 import difflib
 import logging
@@ -340,8 +341,10 @@ class Load(LoadUnload):
         spec = self.get_spec()
         dist = self.get_meta(spec)
 
-        # TODO: probably unordered before Python 2.7 or something
         if 'provides' in dist:
+            if len(dist['provides']) > 1 and sys.version_info < (2, 5):
+                logger.warn(_("can't guarantee extensions load order "
+                    "with Python < 2.5"))
             for name, data in dist['provides'].items():
                 sql = data.get('file')
                 self.load_ext(name, sql)
@@ -417,8 +420,10 @@ class Unload(LoadUnload):
         spec = self.get_spec()
         dist = self.get_meta(spec)
 
-        # TODO: ensure ordering
         if 'provides' in dist:
+            if len(dist['provides']) > 1 and sys.version_info < (2, 5):
+                logger.warn(_("can't guarantee extensions load order "
+                    "with Python < 2.5"))
             provs = dist['provides'].items()
             provs.reverse()
             for name, data in provs:

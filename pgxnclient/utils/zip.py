@@ -10,7 +10,7 @@ import os
 import stat
 from zipfile import ZipFile
 
-from pgxnclient.utils import b, json
+from pgxnclient.utils import b, load_jsons
 from pgxnclient.i18n import _
 from pgxnclient.errors import PgxnClientException
 
@@ -79,7 +79,7 @@ def get_meta_from_zip(filename):
         # Return the first file with the expected name
         for fn in zf.namelist():
             if fn.endswith('META.json'):
-                return json.loads(zf.read(fn).decode('utf8'))
+                return load_jsons(zf.read(fn).decode('utf8'))
         else:
             raise PgxnClientException(
                 _("file 'META.json' not found in archive '%s'") % filename)

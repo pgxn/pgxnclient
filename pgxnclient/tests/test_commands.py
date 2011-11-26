@@ -528,7 +528,6 @@ class LoadTestCase(unittest.TestCase):
         self.assertEquals(pop.communicate.call_args[0][0],
             'CREATE EXTENSION foobar;')
 
-
     @patch('pgxnclient.commands.install.Load.is_extension')
     @patch('pgxnclient.commands.install.Load.get_pg_version')
     @patch('pgxnclient.commands.Popen')
@@ -556,6 +555,74 @@ class LoadTestCase(unittest.TestCase):
         self.assert_('psql' in mock_popen.call_args[0][0][0])
         self.assertEquals(pop.communicate.call_args[0][0],
             'CREATE EXTENSION foobar;')
+
+    @patch('pgxnclient.commands.install.Load.is_extension')
+    @patch('pgxnclient.commands.install.Load.get_pg_version')
+    @patch('pgxnclient.commands.Popen')
+    def test_load_extensions_order(self, mock_popen, mock_pgver, mock_isext):
+        pop = mock_popen.return_value
+        pop.returncode = 0
+        mock_pgver.return_value = (9,1,0)
+        mock_isext.return_value = True
+
+        tdir = tempfile.mkdtemp()
+        try:
+            from pgxnclient.utils.zip import unpack
+            dir = unpack(get_test_filename('foobar-0.42.1.zip'), tdir)
+            shutil.copyfile(
+                get_test_filename('META-manyext.json'),
+                os.path.join(dir, 'META.json'))
+
+            from pgxnclient.cli import main
+            main(['load', '--yes', dir])
+
+        finally:
+            shutil.rmtree(tdir)
+
+        self.assertEquals(mock_popen.call_count, 4)
+        self.assert_('psql' in mock_popen.call_args[0][0][0])
+        self.assertEquals(pop.communicate.call_args_list[0][0][0],
+            'CREATE EXTENSION foo;')
+        self.assertEquals(pop.communicate.call_args_list[1][0][0],
+            'CREATE EXTENSION bar;')
+        self.assertEquals(pop.communicate.call_args_list[2][0][0],
+            'CREATE EXTENSION baz;')
+        self.assertEquals(pop.communicate.call_args_list[3][0][0],
+            'CREATE EXTENSION qux;')
+
+    @patch('pgxnclient.commands.install.Unload.is_extension')
+    @patch('pgxnclient.commands.install.Unload.get_pg_version')
+    @patch('pgxnclient.commands.Popen')
+    def test_unload_extensions_order(self, mock_popen, mock_pgver, mock_isext):
+        pop = mock_popen.return_value
+        pop.returncode = 0
+        mock_pgver.return_value = (9,1,0)
+        mock_isext.return_value = True
+
+        tdir = tempfile.mkdtemp()
+        try:
+            from pgxnclient.utils.zip import unpack
+            dir = unpack(get_test_filename('foobar-0.42.1.zip'), tdir)
+            shutil.copyfile(
+                get_test_filename('META-manyext.json'),
+                os.path.join(dir, 'META.json'))
+
+            from pgxnclient.cli import main
+            main(['unload', '--yes', dir])
+
+        finally:
+            shutil.rmtree(tdir)
+
+        self.assertEquals(mock_popen.call_count, 4)
+        self.assert_('psql' in mock_popen.call_args[0][0][0])
+        self.assertEquals(pop.communicate.call_args_list[0][0][0],
+            'DROP EXTENSION qux;')
+        self.assertEquals(pop.communicate.call_args_list[1][0][0],
+            'DROP EXTENSION baz;')
+        self.assertEquals(pop.communicate.call_args_list[2][0][0],
+            'DROP EXTENSION bar;')
+        self.assertEquals(pop.communicate.call_args_list[3][0][0],
+            'DROP EXTENSION foo;')
 
 
 class SearchTestCase(unittest.TestCase):
