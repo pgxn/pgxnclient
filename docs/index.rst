@@ -36,8 +36,9 @@ Indices and tables
 ..
     * :ref:`modindex`
 
-To do
-=====
+..
+    To do
+    =====
 
-.. todolist::
+    .. todolist::
 
