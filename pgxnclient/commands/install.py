@@ -114,7 +114,6 @@ class InstallUninstall(WithMake, WithSpecLocal, Command):
     def maybe_run_configure(self, dir):
         fn = os.path.join(dir, 'configure')
         logger.debug("checking '%s'", fn)
-        # TODO: probably not portable
         if not os.path.exists(fn):
             return
 
