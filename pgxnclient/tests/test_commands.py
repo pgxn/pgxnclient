@@ -6,7 +6,7 @@ import shutil
 from urllib import quote
 
 from pgxnclient.utils import b
-from pgxnclient.errors import ResourceNotFound
+from pgxnclient.errors import PgxnClientException, ResourceNotFound
 from pgxnclient.tests import unittest
 from pgxnclient.tests.testutils import ifunlink, get_test_filename
 
@@ -281,8 +281,6 @@ class InstallTestCase(unittest.TestCase):
         pop.returncode = 1
 
         from pgxnclient.cli import main
-        from pgxnclient.errors import PgxnClientException
-
         self.assertRaises(PgxnClientException, main, ['install', 'foobar'])
 
         self.assertEquals(mock_popen.call_count, 1)
@@ -405,7 +403,6 @@ class CheckTestCase(unittest.TestCase):
         pop.returncode = 1
 
         from pgxnclient.cli import main
-        from pgxnclient.errors import PgxnClientException
 
         self.assertRaises(PgxnClientException, main, ['check', 'foobar'])
 
@@ -432,7 +429,6 @@ class CheckTestCase(unittest.TestCase):
             "Please remove temp file 'regression.diffs' from current dir")
 
         from pgxnclient.cli import main
-        from pgxnclient.errors import PgxnClientException
 
         try:
             self.assertRaises(PgxnClientException, main, ['check', 'foobar'])
@@ -623,6 +619,118 @@ class LoadTestCase(unittest.TestCase):
             'DROP EXTENSION bar;')
         self.assertEquals(pop.communicate.call_args_list[3][0][0],
             'DROP EXTENSION foo;')
+
+    @patch('pgxnclient.commands.install.Load.is_extension')
+    @patch('pgxnclient.commands.install.Load.get_pg_version')
+    @patch('pgxnclient.commands.Popen')
+    def test_load_list(self, mock_popen, mock_pgver, mock_isext):
+        pop = mock_popen.return_value
+        pop.returncode = 0
+        mock_pgver.return_value = (9,1,0)
+        mock_isext.return_value = True
+
+        tdir = tempfile.mkdtemp()
+        try:
+            from pgxnclient.utils.zip import unpack
+            dir = unpack(get_test_filename('foobar-0.42.1.zip'), tdir)
+            shutil.copyfile(
+                get_test_filename('META-manyext.json'),
+                os.path.join(dir, 'META.json'))
+
+            from pgxnclient.cli import main
+            main(['load', '--yes', dir, 'baz', 'foo'])
+
+        finally:
+            shutil.rmtree(tdir)
+
+        self.assertEquals(mock_popen.call_count, 2)
+        self.assert_('psql' in mock_popen.call_args[0][0][0])
+        self.assertEquals(pop.communicate.call_args_list[0][0][0],
+            'CREATE EXTENSION baz;')
+        self.assertEquals(pop.communicate.call_args_list[1][0][0],
+            'CREATE EXTENSION foo;')
+
+    @patch('pgxnclient.commands.install.Unload.is_extension')
+    @patch('pgxnclient.commands.install.Unload.get_pg_version')
+    @patch('pgxnclient.commands.Popen')
+    def test_unload_list(self, mock_popen, mock_pgver, mock_isext):
+        pop = mock_popen.return_value
+        pop.returncode = 0
+        mock_pgver.return_value = (9,1,0)
+        mock_isext.return_value = True
+
+        tdir = tempfile.mkdtemp()
+        try:
+            from pgxnclient.utils.zip import unpack
+            dir = unpack(get_test_filename('foobar-0.42.1.zip'), tdir)
+            shutil.copyfile(
+                get_test_filename('META-manyext.json'),
+                os.path.join(dir, 'META.json'))
+
+            from pgxnclient.cli import main
+            main(['unload', '--yes', dir, 'baz', 'foo'])
+
+        finally:
+            shutil.rmtree(tdir)
+
+        self.assertEquals(mock_popen.call_count, 2)
+        self.assert_('psql' in mock_popen.call_args[0][0][0])
+        self.assertEquals(pop.communicate.call_args_list[0][0][0],
+            'DROP EXTENSION baz;')
+        self.assertEquals(pop.communicate.call_args_list[1][0][0],
+            'DROP EXTENSION foo;')
+
+    @patch('pgxnclient.commands.install.Load.is_extension')
+    @patch('pgxnclient.commands.install.Load.get_pg_version')
+    @patch('pgxnclient.commands.Popen')
+    def test_load_missing(self, mock_popen, mock_pgver, mock_isext):
+        pop = mock_popen.return_value
+        pop.returncode = 0
+        mock_pgver.return_value = (9,1,0)
+        mock_isext.return_value = True
+
+        tdir = tempfile.mkdtemp()
+        try:
+            from pgxnclient.utils.zip import unpack
+            dir = unpack(get_test_filename('foobar-0.42.1.zip'), tdir)
+            shutil.copyfile(
+                get_test_filename('META-manyext.json'),
+                os.path.join(dir, 'META.json'))
+
+            from pgxnclient.cli import main
+            self.assertRaises(PgxnClientException, main,
+                ['load', '--yes', dir, 'foo', 'ach'])
+
+        finally:
+            shutil.rmtree(tdir)
+
+        self.assertEquals(mock_popen.call_count, 0)
+
+    @patch('pgxnclient.commands.install.Unload.is_extension')
+    @patch('pgxnclient.commands.install.Unload.get_pg_version')
+    @patch('pgxnclient.commands.Popen')
+    def test_unload_missing(self, mock_popen, mock_pgver, mock_isext):
+        pop = mock_popen.return_value
+        pop.returncode = 0
+        mock_pgver.return_value = (9,1,0)
+        mock_isext.return_value = True
+
+        tdir = tempfile.mkdtemp()
+        try:
+            from pgxnclient.utils.zip import unpack
+            dir = unpack(get_test_filename('foobar-0.42.1.zip'), tdir)
+            shutil.copyfile(
+                get_test_filename('META-manyext.json'),
+                os.path.join(dir, 'META.json'))
+
+            from pgxnclient.cli import main
+            self.assertRaises(PgxnClientException, main,
+                ['unload', '--yes', dir, 'foo', 'ach'])
+
+        finally:
+            shutil.rmtree(tdir)
+
+        self.assertEquals(mock_popen.call_count, 0)
 
 
 class SearchTestCase(unittest.TestCase):

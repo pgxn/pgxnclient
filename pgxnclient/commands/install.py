@@ -189,6 +189,9 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
             type=Identifier.parse_arg,
             help=_("use SCHEMA instead of the default schema"))
 
+        subp.add_argument('extensions', metavar='EXT', nargs='*',
+            help = _("only specified extensions [default: all]"))
+
         return subp
 
     def get_pg_version(self):
@@ -332,28 +335,60 @@ performed:\n\n%s\n\nDo you want to continue?""")
             raise PgxnClientException(
                 "schema %s does not exist" % schema)
 
+    def _get_extensions(self):
+        """
+        Return a list of pairs (name, sql file) to be loaded/unloaded.
+
+        Items are in loading order.
+        """
+        spec = self.get_spec()
+        dist = self.get_meta(spec)
+
+        if 'provides' not in dist:
+            # No 'provides' specified: assume a single extension named
+            # after the distribution. This is automatically done by PGXN,
+            # but we should do ourselves to deal with local META files
+            # not mangled by the PGXN upload script yet.
+            name = dist['name']
+            for ext in self.opts.extensions:
+                if ext <> name:
+                    raise PgxnClientException(
+                        "can't find extension '%s' in the distribution '%s'"
+                            % (name, spec))
+
+            return [ (name, None) ]
+
+        rv = []
+
+        if not self.opts.extensions:
+            # All the extensions, in the order specified
+            if len(dist['provides']) > 1 and sys.version_info < (2, 5):
+                logger.warn(_("can't guarantee extensions load order "
+                    "with Python < 2.5"))
+            for name, data in dist['provides'].items():
+                rv.append((name, data.get('file')))
+        else:
+            # Only the specified extensions
+            for name in self.opts.extensions:
+                try:
+                    data = dist['provides'][name]
+                except KeyError:
+                    raise PgxnClientException(
+                        "can't find extension '%s' in the distribution '%s'"
+                            % (name, spec))
+                rv.append((name, data.get('file')))
+
+        return rv
+
 
 class Load(LoadUnload):
     name = 'load'
     description = N_("load a distribution's extensions into a database")
 
     def run(self):
-        spec = self.get_spec()
-        dist = self.get_meta(spec)
-
-        if 'provides' in dist:
-            if len(dist['provides']) > 1 and sys.version_info < (2, 5):
-                logger.warn(_("can't guarantee extensions load order "
-                    "with Python < 2.5"))
-            for name, data in dist['provides'].items():
-                sql = data.get('file')
-                self.load_ext(name, sql)
-        else:
-            # No 'provides' specified: assume a single extension named
-            # after the distribution. This is automatically done by PGXN,
-            # but we should do ourselves to deal with local META files
-            # not mangled by the PGXN upload script yet.
-            self.load_ext(dist['name'], None)
+        items = self._get_extensions()
+        for (name, sql) in items:
+            self.load_ext(name, sql)
 
     def load_ext(self, name, sqlfile):
         logger.debug(_("loading extension '%s' with file: %s"),
@@ -417,23 +452,15 @@ class Unload(LoadUnload):
     description = N_("unload a distribution's extensions from a database")
 
     def run(self):
-        spec = self.get_spec()
-        dist = self.get_meta(spec)
+        items = self._get_extensions()
 
-        if 'provides' in dist:
-            if len(dist['provides']) > 1 and sys.version_info < (2, 5):
-                logger.warn(_("can't guarantee extensions load order "
-                    "with Python < 2.5"))
-            provs = dist['provides'].items()
-            provs.reverse()
-            for name, data in provs:
-                sql = data.get('file')
-                self.load_ext(name, sql)
-        else:
-            # Assume a single extension in the distribution - see Install
-            self.load_ext(dist['name'], None)
+        if not self.opts.extensions:
+            items.reverse()
 
-    def load_ext(self, name, sqlfile):
+        for (name, sql) in items:
+            self.unload_ext(name, sql)
+
+    def unload_ext(self, name, sqlfile):
         logger.debug(_("unloading extension '%s' with file: %s"),
             name, sqlfile)
 

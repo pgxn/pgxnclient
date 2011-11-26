@@ -200,7 +200,7 @@ Usage:
     pgxn load [--help] [--stable | --testing | --unstable] [-d *DBNAME*]
               [-h *HOST*] [-p *PORT*] [-U *NAME*] [--pg_config *PATH*]
               [--schema *SCHEMA*]
-              *SPEC*
+              *SPEC* [*EXT* [*EXT* ...]]
 
 The distribution is specified according to the `package specification`_ and
 can refer to a local directory or file. No consistency check is performed
@@ -240,7 +240,9 @@ confirmation.
 
 If the distribution provides more than one extension, the extensions are
 loaded in the order in which they are specified in the ``provides`` section of
-the ``META.json`` file.
+the ``META.json`` file. It is also possilbe to load only a few of the
+extensions provided, specifying them after *SPEC*: the extensions will be
+loaded in the order specified.
 
 If a *SCHEMA* is specified, the extensions are loaded in the provided schema.
 Note that if ``CREATE EXTENSION`` is used, the schema is directly supported;
@@ -248,8 +250,6 @@ otherwise the ``.sql`` script loaded will be patched to create the objects in
 the provided schema (a confirmation will be asked before attempting loading).
 
 .. _'provides' section: http://pgxn.org/spec/#provides
-
-.. todo:: Add options to specify what to load
 
 
 .. _unload:
@@ -267,11 +267,11 @@ Usage:
     pgxn unload [--help] [--stable | --testing | --unstable] [-d *DBNAME*]
                 [-h *HOST*] [-p *PORT*] [-U *NAME*] [--pg_config *PATH*]
                 [--schema *SCHEMA*]
-                *SPEC*
+                *SPEC* [*EXT* [*EXT* ...]]
 
-The command does the opposite of the load_ command: it drops an extension from
-the specified database, either issuing a `DROP EXTENSION`_ command or running
-an uninstall script eventually provided.
+The command does the opposite of the load_ command: it drops a distribution
+extensions from the specified database, either issuing `DROP EXTENSION`_
+commands or running uninstall scripts eventually provided.
 
 For every extension specified in the `'provides' section`_ of the
 distribution ``META.json``, the command will look for a file called
@@ -288,7 +288,9 @@ itself, so the option will be ignored.
 
 If the distribution specifies more than one extension, they are unloaded in
 reverse order respect to the order in which they are specified in the
-``META.json`` file.
+``META.json`` file.  It is also possilbe to unload only a few of the
+extensions provided, specifying them after *SPEC*: the extensions will be
+unloaded in the order specified.
 
 .. _DROP EXTENSION: http://www.postgresql.org/docs/9.1/static/sql-dropextension.html
 
