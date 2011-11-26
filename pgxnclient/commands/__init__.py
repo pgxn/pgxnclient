@@ -480,6 +480,14 @@ class WithMake(WithPgConfig, WithUnpacking):
         :param sudo: if set, use the provided command/arg to elevate
             privileges
         """
+        # check if the directory contains a makefile
+        for fn in ('GNUmakefile', 'makefile', 'Makefile'):
+            if os.path.exists(os.path.join(dir, fn)):
+                break
+        else:
+            raise PgxnClientException(
+                _("no Makefile found in the extension root"))
+
         cmdline = []
 
         if sudo:
