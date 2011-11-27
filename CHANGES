@@ -1,3 +1,12 @@
+pgxnclient 1.0
+==============
+
+- Extensions to load/unload from a distribution can be specified on the
+  command line.
+- 'pgxn help --libexec' returns a single variable, possibly independent
+  from the client version.
+
+
 pgxnclient 0.3
 ==============
 
