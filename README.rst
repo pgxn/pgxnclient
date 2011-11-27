@@ -1,5 +1,8 @@
-PGXN Client's documentation
-===========================
+=====================================================================
+                            PGXN Client
+=====================================================================
+A command line tool to interact with the PostgreSQL Extension Network
+=====================================================================
 
 The `PGXN Client <http://pgxnclient.projects.postgresql.org/>`__ is a command
 line tool designed to interact with the `PostgreSQL Extension Network
@@ -30,29 +33,4 @@ degrade gracefully in presence of any package hosted on PGXN.
 - Discussion group: http://groups.google.com/group/pgxn-users/
 - Source repository: https://github.com/dvarrazzo/pgxnclient/
 - PgFoundry project: http://pgfoundry.org/projects/pgxnclient/
-
-
-Contents:
-
-.. toctree::
-    :maxdepth: 2
-
-    install
-    usage
-    ext
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
-
-..
-    * :ref:`modindex`
-
-..
-    To do
-    =====
-
-    .. todolist::
 
