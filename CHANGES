@@ -1,3 +1,9 @@
+pgxnclient 1.0.1
+================
+
+- Fixed simplejson dependency on Python 2.6 (ticket #8)
+
+
 pgxnclient 1.0
 ==============
 

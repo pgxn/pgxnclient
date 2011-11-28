@@ -22,7 +22,10 @@ else:
 # Import the proper JSON library
 # dependencies note: simplejson is certified for Python 2.5, and supports
 # Python 2.4 up to version 2.0.9. After that the package is in the stdlib
-if sys.version_info >= (2, 6):
+#
+# We use json only from 2.7 as it supports ordered dicts. For Python 2.6
+# simplejson >= 2.1 should be used.
+if sys.version_info >= (2, 7):
     import json
 else:
     import simplejson as json

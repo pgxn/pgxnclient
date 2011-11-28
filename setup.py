@@ -32,8 +32,8 @@ tests_require = []
 
 if sys.version_info < (2, 5):
     requires.append('simplejson<=2.0.9')
-elif sys.version_info < (2, 6):
-    requires.append('simplejson')
+elif sys.version_info < (2, 7):
+    requires.append('simplejson>=2.1')
 
 tests_require.append('mock')
 if sys.version_info < (2, 7):
