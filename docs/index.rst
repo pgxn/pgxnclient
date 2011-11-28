@@ -1,5 +1,5 @@
-PGXN Client's documentation
-===========================
+PGXN Client Project
+===================
 
 The `PGXN Client <http://pgxnclient.projects.postgresql.org/>`__ is a command
 line tool designed to interact with the `PostgreSQL Extension Network
