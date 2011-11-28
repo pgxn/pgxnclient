@@ -464,7 +464,7 @@ Usage:
 .. parsed-literal::
     :class: pgxn-help
 
-    pgxn help [--help] [--all | --libexec]
+    pgxn help [--help] [--all | --libexec | *CMD*]
 
 Without options show the same informations obtained by ``pgxn --help``, which
 includes a list of builtin commands. With the ``--all`` option print the
@@ -472,4 +472,6 @@ complete list of commands installed in the system.
 
 The option ``--libexec`` prints the list of directories containing
 the command scripts: see :ref:`extending` for more informations.
+
+:samp:`pgxn help {CMD}` is an alias for :samp:`pgxn {CMD} --help`.
 
