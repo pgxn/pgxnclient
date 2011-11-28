@@ -46,6 +46,7 @@ class SemVerTestCase(unittest.TestCase):
             ('0.1.2beta3', '0.1.2beta3'),
             ('1.0.0rc-1', '1.0.0RC-1'), ]:
             self.assertEqual(SemVer(s1), SemVer(s2))
+            self.assertEqual(hash(SemVer(s1)), hash(SemVer(s2)))
             self.assert_(SemVer(s1) <= SemVer(s2),
                 "%s <= %s failed" % (s1, s2))
             self.assert_(SemVer(s1) >= SemVer(s2),
@@ -62,6 +63,7 @@ class SemVerTestCase(unittest.TestCase):
             ('1.2.3a', '1.2.3b'),
             ('1.2.3aaaaaaa1', '1.2.3aaaaaaa2'), ]:
             self.assertNotEqual(SemVer(s1), SemVer(s2))
+            self.assertNotEqual(hash(SemVer(s1)), hash(SemVer(s2)))
 
     def test_dis(self):
         for s1, s2 in [

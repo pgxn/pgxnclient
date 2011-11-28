@@ -58,6 +58,9 @@ class SemVer(str):
     def __ne__(self, other):
         return not self == other
 
+    def __hash__(self):
+        return hash(self.tuple[:3] + (self.tuple[3].lower(),))
+
     def _ltgt(self, other, op):
         if isinstance(other, SemVer):
             t1 = self.tuple[:3]
