@@ -26,6 +26,8 @@ class Help(Command):
             help = _("list all the available commands"))
         g.add_argument('--libexec', action="store_true",
             help = _("print the location of the scripts directory"))
+        g.add_argument('command', metavar='CMD', nargs='?',
+            help = _("the command to get help about"))
 
         # To print the basic help
         self._parser = parser
@@ -33,7 +35,10 @@ class Help(Command):
         return subp
 
     def run(self):
-        if self.opts.all:
+        if self.opts.command:
+            from pgxnclient.cli import main
+            main([self.opts.command, '--help'])
+        elif self.opts.all:
             self.print_all_commands()
         elif self.opts.libexec:
             self.print_libexec()
