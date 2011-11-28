@@ -31,7 +31,10 @@ else:
     import simplejson as json
 
 def load_json(f):
-    return load_jsons(f.read().decode('utf-8'))
+    data = f.read()
+    if not isinstance(data, unicode):
+        data = data.decode('utf-8')
+    return load_jsons(data)
 
 def load_jsons(data):
     # order required to keep "provides" extensions in order.
