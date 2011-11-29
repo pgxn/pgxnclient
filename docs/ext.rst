@@ -20,7 +20,7 @@ one of the ``libexec`` directories.  The exact location of the directories
 depends on the client installation: distribution packagers may decide to move
 them according to their own policies.  The location of one of the directories,
 which can be considered the "public" one, can always be known using the command
-``pgxn help --libexec``. Note that this directory may not exists: in this case
+``pgxn help --libexec``. Note that this directory may not exist: in this case
 the command being installed is responsible to create it. Links are also looked
 for in the :envvar:`PATH` directories.
 
