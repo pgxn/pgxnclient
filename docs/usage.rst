@@ -470,8 +470,8 @@ Without options show the same informations obtained by ``pgxn --help``, which
 includes a list of builtin commands. With the ``--all`` option print the
 complete list of commands installed in the system.
 
-The option ``--libexec`` prints the list of directories containing
-the command scripts: see :ref:`extending` for more informations.
+The option ``--libexec`` prints the full path of the directory containing
+the external commands scripts: see :ref:`extending` for more informations.
 
 :samp:`pgxn help {CMD}` is an alias for :samp:`pgxn {CMD} --help`.
 
