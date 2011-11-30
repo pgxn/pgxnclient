@@ -11,7 +11,7 @@ In order to add new builtin commands, add a Python module into the
 ``pgxnclient/commands`` containing your command or a set of logically-related
 commands. The commands are implemented by subclassing the `!Command` class.
 Your commands will benefit of all the infrastructure available for the other
-commands. For up-to-date informations take a look at the implementation of
+commands. For up-to-date information take a look at the implementation of
 builtin simple commands, such as the ones in ``info.py``.
 
 If you are not into Python and want to add commands written in other

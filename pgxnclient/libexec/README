@@ -1,6 +1,6 @@
 This directory contains the PGXN Client builtin commands. If you want to
 extend the client with your own command, please use the directory returned by
-``pgxn help --libexec``. See the documentation for further informations about
+``pgxn help --libexec``. See the documentation for further information about
 how to create new commands.
 
 Note that setuptools doesn't do a perfect job and replaces the links with the
