@@ -168,7 +168,7 @@ class Command(object):
             default = 'http://api.pgxn.org/',
             help = _("the mirror to interact with [default: %(default)s]"))
         glb.add_argument("--verbose", action='store_true',
-            help = _("print more informations"))
+            help = _("print more information"))
         glb.add_argument("--yes", action='store_true',
             help = _("assume affirmative answer to all questions"))
 
