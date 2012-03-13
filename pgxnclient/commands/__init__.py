@@ -22,7 +22,7 @@ from pgxnclient import __version__
 from pgxnclient import Spec, SemVer
 from pgxnclient.api import Api
 from pgxnclient.i18n import _, gettext
-from pgxnclient.errors import NotFound, PgxnClientException, ResourceNotFound, UserAbort
+from pgxnclient.errors import NotFound, PgxnClientException, ProcessError, ResourceNotFound, UserAbort
 
 logger = logging.getLogger('pgxnclient.commands')
 
@@ -204,14 +204,20 @@ class Command(object):
             else:
                 prompt = _("Please answer yes or no")
 
-    def popen(self, *args, **kwargs):
+    def popen(self, cmd, *args, **kwargs):
         """
         Excecute subprocess.Popen.
 
         Commands should use this method instead of importing subprocess.Popen:
         this allows replacement with a mock in the test suite.
         """
-        return Popen(*args, **kwargs)
+        try:
+            return Popen(cmd, *args, **kwargs)
+        except OSError, e:
+            if not isinstance(cmd, basestring):
+                cmd = ' '.join(cmd)
+            msg = _("%s running command: %s") % (e, cmd)
+            raise ProcessError(msg)
 
 
 from pgxnclient.errors import BadSpecError

@@ -69,6 +69,14 @@ foobar 0.42.0 stable
 """))
 
 
+class CommandTestCase(unittest.TestCase):
+    def test_popen_raises(self):
+        from pgxnclient.commands import Command
+        c = Command([])
+        self.assertRaises(PgxnClientException,
+            c.popen, "this-script-doesnt-exist")
+
+
 class DownloadTestCase(unittest.TestCase):
     @patch('pgxnclient.api.get_file')
     def test_download_latest(self, mock):
