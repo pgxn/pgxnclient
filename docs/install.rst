@@ -21,8 +21,13 @@ with::
 
     $ sudo easy_install pgxnclient
 
-The documentation of the tools will also show how to perform a local
-installation.
+To upgrade from a previous version to the most recent available you may run
+instead::
+
+    $ sudo easy_install -U pgxnclient
+
+The documentation of the installation tool of your choice will also show how
+to perform a local installation.
 
 .. __: http://pypi.python.org/pypi/pgxnclient
 .. _easy_install: http://peak.telecommunity.com/DevCenter/EasyInstall
