@@ -22,6 +22,9 @@ class UserAbort(PgxnClientException):
 class BadSpecError(PgxnClientException):
     """A bad package specification."""
 
+class ProcessError(PgxnClientException):
+    """An error raised calling an external program."""
+
 class NotFound(PgxnException):
     """Something requested by the user not found on PGXN"""
 

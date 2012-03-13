@@ -41,11 +41,18 @@ Contents:
     usage
     ext
 
+.. toctree::
+    :hidden:
+
+    changes
+
+
 Indices and tables
 ==================
 
-* :ref:`genindex`
+* :ref:`Changes Log <changes>`
 * :ref:`search`
+* :ref:`genindex`
 
 ..
     * :ref:`modindex`

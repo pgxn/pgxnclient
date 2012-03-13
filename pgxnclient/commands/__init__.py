@@ -22,7 +22,7 @@ from pgxnclient import __version__
 from pgxnclient import Spec, SemVer
 from pgxnclient.api import Api
 from pgxnclient.i18n import _, gettext
-from pgxnclient.errors import NotFound, PgxnClientException, ResourceNotFound, UserAbort
+from pgxnclient.errors import NotFound, PgxnClientException, ProcessError, ResourceNotFound, UserAbort
 
 logger = logging.getLogger('pgxnclient.commands')
 
@@ -168,7 +168,7 @@ class Command(object):
             default = 'http://api.pgxn.org/',
             help = _("the mirror to interact with [default: %(default)s]"))
         glb.add_argument("--verbose", action='store_true',
-            help = _("print more informations"))
+            help = _("print more information"))
         glb.add_argument("--yes", action='store_true',
             help = _("assume affirmative answer to all questions"))
 
@@ -204,14 +204,20 @@ class Command(object):
             else:
                 prompt = _("Please answer yes or no")
 
-    def popen(self, *args, **kwargs):
+    def popen(self, cmd, *args, **kwargs):
         """
         Excecute subprocess.Popen.
 
         Commands should use this method instead of importing subprocess.Popen:
         this allows replacement with a mock in the test suite.
         """
-        return Popen(*args, **kwargs)
+        try:
+            return Popen(cmd, *args, **kwargs)
+        except OSError, e:
+            if not isinstance(cmd, basestring):
+                cmd = ' '.join(cmd)
+            msg = _("%s running command: %s") % (e, cmd)
+            raise ProcessError(msg)
 
 
 from pgxnclient.errors import BadSpecError
@@ -457,8 +463,8 @@ class WithPgConfig(object):
         p = self.popen(cmdline, stdout=PIPE, shell=True)
         out, err = p.communicate()
         if p.returncode:
-            raise PgxnClientException(
-                "%s returned %s" % (cmdline, p.returncode))
+            raise ProcessError(_("command returned %s: %s")
+                % (p.returncode, cmdline))
 
         out = out.rstrip().decode('utf-8')
         rv = _cache[what] = out
@@ -510,8 +516,8 @@ class WithMake(WithPgConfig, WithUnpacking):
         p = self.popen(cmdline, cwd=dir, shell=False, env=env, close_fds=True)
         p.communicate()
         if p.returncode:
-            raise PgxnClientException(
-                _("command returned %s") % p.returncode)
+            raise ProcessError(_("command returned %s: %s")
+                % (p.returncode, ' '.join(cmdline)))
 
 
 class WithSudo(object):

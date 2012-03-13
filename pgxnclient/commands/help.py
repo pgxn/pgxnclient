@@ -14,7 +14,7 @@ from pgxnclient.commands import Command
 
 class Help(Command):
     name = 'help'
-    description = N_("display help and other program informations")
+    description = N_("display help and other program information")
 
     @classmethod
     def customize_parser(self, parser, subparsers, **kwargs):

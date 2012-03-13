@@ -17,7 +17,7 @@ logger = logging.getLogger('pgxnclient.commands')
 
 class Mirror(Command):
     name = 'mirror'
-    description = N_("return informations about the available mirrors")
+    description = N_("return information about the available mirrors")
 
     @classmethod
     def customize_parser(self, parser, subparsers, **kwargs):
@@ -121,7 +121,7 @@ class Search(Command):
 
 class Info(WithSpec, Command):
     name = 'info'
-    description = N_("print informations about a distribution")
+    description = N_("print information about a distribution")
 
     @classmethod
     def customize_parser(self, parser, subparsers, **kwargs):

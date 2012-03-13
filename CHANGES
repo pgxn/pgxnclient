@@ -1,8 +1,21 @@
+.. _changes:
+
+PGXN Client changes log
+-----------------------
+
+pgxnclient 1.0.2
+================
+
+- Correctly handle PostgreSQL identifiers to be quoted (ticket #10).
+- Don't crash with a traceback if some external command is not found
+  (ticket #11).
+
+
 pgxnclient 1.0.1
 ================
 
 - Fixed simplejson dependency on Python 2.6 (ticket #8).
-- Added 'pgxn help CMD' as synonim for 'pgxn CMD --help' (ticket #7).
+- Added ``pgxn help CMD`` as synonim for ``pgxn CMD --help`` (ticket #7).
 - Fixed a few compatibility problems with Python 3.
 
 
@@ -11,18 +24,18 @@ pgxnclient 1.0
 
 - Extensions to load/unload from a distribution can be specified on the
   command line.
-- 'pgxn help --libexec' returns a single variable, possibly independent
+- ``pgxn help --libexec`` returns a single directory, possibly independent
   from the client version.
 
 
 pgxnclient 0.3
 ==============
 
-- 'pgxn' script converted into a generic dispatcher in order to allow
+- ``pgxn`` script converted into a generic dispatcher in order to allow
   additional commands to be implemented in external scripts and in any
   language.
 - commands accept extension names too, not only specs.
-- Added 'help' command to get informations about program and commands.
+- Added ``help`` command to get information about program and commands.
 
 
 pgxnclient 0.2.1
@@ -36,16 +49,16 @@ pgxnclient 0.2.1
 pgxnclient 0.2
 ==============
 
-- Dropped list command (use info --versions instead).
+- Dropped ``list`` command (use ``info --versions`` instead).
 - Skip extension load/unload if the provided file is not sql.
 
 
 pgxnclient 0.1a4
 ================
 
-- The spec can point to a local file/directory for install
-- Read the sha1 from the META.json as it may be different from the one
-  in the dist.json
+- The spec can point to a local file/directory for install.
+- Read the sha1 from the ``META.json`` as it may be different from the one
+  in the ``dist.json``.
 - Run sudo in the installation phase of the install command.
 
 
@@ -53,13 +66,13 @@ pgxn.client 0.1a3
 =================
 
 - Fixed executable mode for scripts unpacked from the zip files.
-- Added 'list' and 'info' commands.
+- Added ``list`` and ``info`` commands.
 
 
 pgxn.client 0.1a2
 =================
 
-- Added database connection parameters for the 'check' command.
+- Added database connection parameters for the ``check`` command.
 
 
 pgxn.client 0.1a1
