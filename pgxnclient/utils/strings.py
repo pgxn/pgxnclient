@@ -85,12 +85,15 @@ class Identifier(CIStr):
     A string modeling a PostgreSQL identifier.
     """
     def __new__(cls, value):
+        if not value:
+            raise ValueError("PostgreSQL identifiers cannot be blank")
         if not Identifier._re_chk.match(value):
-            raise ValueError(_("bad identifier: '%s'") % value)
+            value = '"%s"' % value.replace('"', '""')
+        # TODO: identifier are actually case sensitive if quoted
         return CIStr.__new__(cls, value)
 
     _re_chk = re.compile(
-        r'^[a-z_][a-z0-9_\$]{0,62}',
+        r'^[a-z_][a-z0-9_\$]*$',
         re.IGNORECASE)
 
     @classmethod
@@ -101,5 +104,6 @@ class Identifier(CIStr):
         try:
             return Identifier(s)
         except ValueError, e:
+            # shouldn't happen anymore as we quote invalid identifiers
             raise ArgumentTypeError(e)
 

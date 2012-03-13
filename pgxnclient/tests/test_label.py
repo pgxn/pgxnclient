@@ -1,6 +1,6 @@
 from pgxnclient.tests import unittest
 
-from pgxnclient import Label, Term
+from pgxnclient import Label, Term, Identifier
 
 class LabelTestCase(unittest.TestCase):
     def test_ok(self):
@@ -70,6 +70,26 @@ class TermTestCase(unittest.TestCase):
             'a\ta',
             'aa\x01' ]:
             ar(s)
+
+
+class TestIdentifier(unittest.TestCase):
+    def test_nonblank(self):
+        self.assertRaises(ValueError, Identifier, "")
+
+    def test_unquoted(self):
+        for s in [
+            'x',
+            'xxxxx',
+            'abcxyz_0189',
+            'ABCXYZ_0189', ]:
+            self.assertEqual(Identifier(s), s)
+
+    def test_quoted(self):
+        for s, q in [
+            ('x-y', '"x-y"'),
+            (' ', '" "'),
+            ('x"y', '"x""y"')]:
+            self.assertEqual(Identifier(s), q)
 
 
 if __name__ == '__main__':

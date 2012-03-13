@@ -6,6 +6,7 @@ PGXN Client changes log
 pgxnclient 1.0.2
 ================
 
+- Correctly handle PostgreSQL identifiers to be quoted (ticket #10).
 - Don't crash with a traceback if some external command is not found
   (ticket #11).
 
