@@ -463,8 +463,8 @@ class WithPgConfig(object):
         p = self.popen(cmdline, stdout=PIPE, shell=True)
         out, err = p.communicate()
         if p.returncode:
-            raise PgxnClientException(
-                "%s returned %s" % (cmdline, p.returncode))
+            raise ProcessError(_("command returned %s: %s")
+                % (p.returncode, cmdline))
 
         out = out.rstrip().decode('utf-8')
         rv = _cache[what] = out
@@ -516,8 +516,8 @@ class WithMake(WithPgConfig, WithUnpacking):
         p = self.popen(cmdline, cwd=dir, shell=False, env=env, close_fds=True)
         p.communicate()
         if p.returncode:
-            raise PgxnClientException(
-                _("command returned %s") % p.returncode)
+            raise ProcessError(_("command returned %s: %s")
+                % (p.returncode, ' '.join(cmdline)))
 
 
 class WithSudo(object):
