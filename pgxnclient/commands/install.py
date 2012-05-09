@@ -96,7 +96,7 @@ class InstallUninstall(WithMake, WithSpecLocal, Command):
     def _run(self, dir):
         spec = self.get_spec()
         if spec.is_dir():
-            pdir = spec.dirname
+            pdir = os.path.abspath(spec.dirname)
         elif spec.is_file():
             pdir = self.unpack(spec.filename, dir)
         else:   # download

@@ -62,7 +62,7 @@ def unpack(zipname, destdir):
     # directory, so return the first dir we found containing a Makefile,
     # alternatively just return the unpacked dir
     for dir in os.listdir(destdir):
-        for fn in ('Makefile', 'makefile', 'GNUmakefile'):
+        for fn in ('Makefile', 'makefile', 'GNUmakefile', 'configure'):
             if os.path.exists(os.path.join(destdir, dir, fn)):
                 return os.path.join(destdir, dir)
 
