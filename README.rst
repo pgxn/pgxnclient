@@ -34,3 +34,6 @@ degrade gracefully in presence of any package hosted on PGXN.
 - Source repository: https://github.com/dvarrazzo/pgxnclient/
 - PgFoundry project: http://pgfoundry.org/projects/pgxnclient/
 
+Please refer to the files in the ``docs`` directory for instructions about
+the program installation and usage.
+

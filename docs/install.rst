@@ -21,8 +21,13 @@ with::
 
     $ sudo easy_install pgxnclient
 
-The documentation of the tools will also show how to perform a local
-installation.
+To upgrade from a previous version to the most recent available you may run
+instead::
+
+    $ sudo easy_install -U pgxnclient
+
+The documentation of the installation tool of your choice will also show how
+to perform a local installation.
 
 .. __: http://pypi.python.org/pypi/pgxnclient
 .. _easy_install: http://peak.telecommunity.com/DevCenter/EasyInstall
@@ -33,10 +38,31 @@ installation.
 Installation from source
 ------------------------
 
-The program can be also installed from the source, either from the git
-repository or from a source package: in this case you can install the program
-using::
+The program can also be installed from the source, either from a `source
+package`__ or from the `source repository`__: in this case you can install the
+program using::
 
     $ python setup.py install
 
+.. __: http://pypi.python.org/pypi/pgxnclient/
+.. __: https://github.com/dvarrazzo/pgxnclient/
+
+
+Running from the project directory
+----------------------------------
+
+You can also run PGXN Client directly from the project directory, either
+unpacked from a `source package`__, or cloned from the `source repository`__,
+without performing any installation.
+
+Just make sure that the project directory is in the :envvar:`PYTHONPATH` and
+run the :program:`bin/pgxn` script::
+
+    $ cd /path/to/pgxnclient
+    $ export PYTHONPATH=`pwd`
+    $ ./bin/pgxn --version
+    pgxnclient 1.0.3.dev0   # just an example
+
+.. __: http://pypi.python.org/pypi/pgxnclient/
+.. __: https://github.com/dvarrazzo/pgxnclient/
 

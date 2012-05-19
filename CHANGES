@@ -3,6 +3,14 @@
 PGXN Client changes log
 -----------------------
 
+pgxnclient 1.0.3
+================
+
+- Can deal with extensions whose ``Makefile`` is created by ``configure``
+  and with makefile not in the package root. Patch provided by Hithoshi
+  Harada (ticket #12).
+
+
 pgxnclient 1.0.2
 ================
 

@@ -211,6 +211,7 @@ class Command(object):
         Commands should use this method instead of importing subprocess.Popen:
         this allows replacement with a mock in the test suite.
         """
+        logger.debug("running command: %s", cmd)
         try:
             return Popen(cmd, *args, **kwargs)
         except OSError, e:
@@ -458,9 +459,9 @@ class WithPgConfig(object):
         if what in _cache:
             return _cache[what]
 
-        cmdline = "%s --%s" % (self.opts.pg_config, what)
-        logger.debug("running pg_config with: %s", cmdline)
-        p = self.popen(cmdline, stdout=PIPE, shell=True)
+        logger.debug("running pg_config --%s", what)
+        cmdline = [self.opts.pg_config, "--%s" % what]
+        p = self.popen(cmdline, stdout=PIPE)
         out, err = p.communicate()
         if p.returncode:
             raise ProcessError(_("command returned %s: %s")

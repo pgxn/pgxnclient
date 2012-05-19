@@ -96,7 +96,7 @@ class InstallUninstall(WithMake, WithSpecLocal, Command):
     def _run(self, dir):
         spec = self.get_spec()
         if spec.is_dir():
-            pdir = spec.dirname
+            pdir = os.path.abspath(spec.dirname)
         elif spec.is_file():
             pdir = self.unpack(spec.filename, dir)
         else:   # download
@@ -236,10 +236,16 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
         cmdline.extend(self.get_psql_options())
         # load via pipe to enable psql commands in the file
         if not data:
+            logger.debug("loading sql from %s", filename)
             fin = open(filename, 'r')
             p = self.popen(cmdline, stdin=fin)
             p.communicate()
         else:
+            if len(data) > 105:
+                tdata = data[:100] + "..."
+            else:
+                tdata = data
+            logger.debug('running sql command: "%s"', tdata)
             p = self.popen(cmdline, stdin=PIPE)
             p.communicate(data)
 
