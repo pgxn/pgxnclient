@@ -211,6 +211,7 @@ class Command(object):
         Commands should use this method instead of importing subprocess.Popen:
         this allows replacement with a mock in the test suite.
         """
+        logger.debug("running command: %s", cmd)
         try:
             return Popen(cmd, *args, **kwargs)
         except OSError, e:
