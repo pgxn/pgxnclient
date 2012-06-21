@@ -89,7 +89,7 @@ refers to a local directory or package.
 Note that the built extension is not loaded in any database: use the command
 `load`_ for this purpose.
 
-The command will run the ``./configure`` script if available in the package,
+The command will run the ``configure`` script if available in the package,
 then will perform ``make all`` and ``make install``. It is assumed that the
 ``Makefile`` provided by the distribution uses PGXS_ to build the extension,
 but this is not enforced: you may provide any Makefile as long as the expected
