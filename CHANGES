@@ -3,6 +3,13 @@
 PGXN Client changes log
 -----------------------
 
+pgxnclient 1.0.4
+================
+
+- Make sure the same ``pg_config`` is used both by the current user and by
+  sudo (ticket #13).
+
+
 pgxnclient 1.0.3
 ================
 
