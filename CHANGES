@@ -3,12 +3,14 @@
 PGXN Client changes log
 -----------------------
 
-pgxnclient 1.0.4
-================
+pgxnclient 1.1
+==============
 
+- ``sudo`` is not invoked automatically: the ``--sudo`` option must be
+  specified if the user has not permission to write into PostgreSQL's libdir
+  (ticket #13). The ``--sudo`` option can also be invoked without argument.
 - Make sure the same ``pg_config`` is used both by the current user and by
-  sudo (ticket #13).
-- Don't run ``sudo`` if not required (e.g. lib directory is writable).
+  sudo.
 
 
 pgxnclient 1.0.3

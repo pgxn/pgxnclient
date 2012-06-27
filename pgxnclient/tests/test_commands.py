@@ -6,7 +6,7 @@ import shutil
 from urllib import quote
 
 from pgxnclient.utils import b
-from pgxnclient.errors import PgxnClientException, ResourceNotFound
+from pgxnclient.errors import PgxnClientException, ResourceNotFound, InsufficientPrivileges
 from pgxnclient.tests import unittest
 from pgxnclient.tests.testutils import ifunlink, get_test_filename
 
@@ -293,14 +293,31 @@ class InstallTestCase(unittest.TestCase):
 
     def test_install_latest(self):
         from pgxnclient.cli import main
-        main(['install', 'foobar'])
+        main(['install', '--sudo', '--', 'foobar'])
 
         self.assertEquals(self.mock_popen.call_count, 2)
         self.assertEquals(['make'], self.mock_popen.call_args_list[0][0][0][:1])
         self.assertEquals(['sudo', 'make'], self.mock_popen.call_args_list[1][0][0][:2])
 
+    def test_install_missing_sudo(self):
+        from pgxnclient.cli import main
+        self.assertRaises(InsufficientPrivileges, main, ['install', 'foobar'])
+
+    def test_install_local(self):
+        self.mock_pgconfig.side_effect = fake_pg_config(
+            libdir=os.environ['HOME'], bindir='/')
+
+        from pgxnclient.cli import main
+        main(['install', 'foobar'])
+
+        self.assertEquals(self.mock_popen.call_count, 2)
+        self.assertEquals(['make'], self.mock_popen.call_args_list[0][0][0][:1])
+        self.assertEquals(['make'], self.mock_popen.call_args_list[1][0][0][:1])
+
     def test_install_fails(self):
         self.mock_popen.return_value.returncode = 1
+        self.mock_pgconfig.side_effect = fake_pg_config(
+            libdir=os.environ['HOME'], bindir='/')
 
         from pgxnclient.cli import main
         self.assertRaises(PgxnClientException, main, ['install', 'foobar'])
@@ -318,7 +335,7 @@ class InstallTestCase(unittest.TestCase):
         from pgxnclient.cli import main
         from pgxnclient.errors import BadChecksum
         self.assertRaises(BadChecksum,
-            main, ['install', 'foobar'])
+            main, ['install', '--sudo', '--', 'foobar'])
 
     def test_install_nosudo(self):
         self.mock_pgconfig.side_effect = fake_pg_config(libdir=os.environ['HOME'])
@@ -345,7 +362,7 @@ class InstallTestCase(unittest.TestCase):
         mock_unpack.side_effect = unpack
 
         from pgxnclient.cli import main
-        main(['install', get_test_filename('foobar-0.42.1.zip')])
+        main(['install', '--sudo', '--', get_test_filename('foobar-0.42.1.zip')])
 
         self.assertEquals(self.mock_popen.call_count, 2)
         self.assertEquals(['make'], self.mock_popen.call_args_list[0][0][0][:1])
@@ -367,7 +384,7 @@ class InstallTestCase(unittest.TestCase):
             dir = unpack(get_test_filename('foobar-0.42.1.zip'), tdir)
 
             from pgxnclient.cli import main
-            main(['install', dir])
+            main(['install', '--sudo', '--', dir])
 
         finally:
             shutil.rmtree(tdir)

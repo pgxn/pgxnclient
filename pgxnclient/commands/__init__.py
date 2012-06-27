@@ -544,11 +544,12 @@ class WithSudo(object):
             parser, subparsers, **kwargs)
 
         g = subp.add_mutually_exclusive_group()
-        g.add_argument('--sudo', metavar="PROG", default='sudo',
+        g.add_argument('--sudo', metavar="PROG", const='sudo', nargs="?",
             help = _("run PROG to elevate privileges when required"
-                " [default: %(default)s]"))
+                " [default: %(const)s]"))
         g.add_argument('--nosudo', dest='sudo', action='store_false',
-            help = _("never elevate privileges"))
+            help = _("never elevate privileges "
+                "(no more needed: for backward compatibility)"))
 
         return subp
 

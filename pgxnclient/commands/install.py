@@ -18,7 +18,7 @@ from subprocess import PIPE
 from pgxnclient import SemVer
 from pgxnclient.i18n import _, N_
 from pgxnclient.utils import sha1
-from pgxnclient.errors import BadChecksum, PgxnClientException
+from pgxnclient.errors import BadChecksum, PgxnClientException, InsufficientPrivileges
 from pgxnclient.network import download
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
 from pgxnclient.commands import WithSpec, WithSpecLocal, WithSudo
@@ -134,7 +134,7 @@ class SudoInstallUninstall(WithSudo, InstallUninstall):
     def run(self):
         if not self.is_libdir_writable() and not self.opts.sudo:
             dir = self.call_pg_config('libdir')
-            raise PgxnClientException(_(
+            raise InsufficientPrivileges(_(
                 "PostgreSQL library directory (%s) not writable: "
                 "you should run the program as superuser, or specify "
                 "a 'sudo' program") % dir)
