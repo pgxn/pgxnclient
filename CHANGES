@@ -8,6 +8,7 @@ pgxnclient 1.0.4
 
 - Make sure the same ``pg_config`` is used both by the current user and by
   sudo (ticket #13).
+- Don't run ``sudo`` if not required (e.g. lib directory is writable).
 
 
 pgxnclient 1.0.3

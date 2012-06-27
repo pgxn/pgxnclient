@@ -27,6 +27,11 @@ def fake_get_file(url, urlmap=None):
     f.url = url
     return f
 
+def fake_pg_config(**map):
+    def f(what):
+        return map[what]
+
+    return f
 
 class InfoTestCase(unittest.TestCase):
     def _get_output(self, cmdline):
@@ -267,12 +272,13 @@ class DownloadTestCase(unittest.TestCase):
 
 
 class InstallTestCase(unittest.TestCase):
+    @patch('pgxnclient.commands.WithPgConfig.call_pg_config')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
-    def test_install_latest(self, mock_get, mock_popen):
+    def test_install_latest(self, mock_get, mock_popen, mock_pgconfig):
         mock_get.side_effect = fake_get_file
-        pop = mock_popen.return_value
-        pop.returncode = 0
+        mock_popen.return_value.returncode = 0
+        mock_pgconfig.side_effect = fake_pg_config(libdir='/')
 
         from pgxnclient.cli import main
         main(['install', 'foobar'])
@@ -281,41 +287,44 @@ class InstallTestCase(unittest.TestCase):
         self.assertEquals(['make'], mock_popen.call_args_list[0][0][0][:1])
         self.assertEquals(['sudo', 'make'], mock_popen.call_args_list[1][0][0][:2])
 
+    @patch('pgxnclient.commands.WithPgConfig.call_pg_config')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
-    def test_install_fails(self, mock_get, mock_popen):
+    def test_install_fails(self, mock_get, mock_popen, mock_pgconfig):
         mock_get.side_effect = fake_get_file
-        pop = mock_popen.return_value
-        pop.returncode = 1
+        mock_popen.return_value.returncode = 1
+        mock_pgconfig.side_effect = fake_pg_config(libdir='/')
 
         from pgxnclient.cli import main
         self.assertRaises(PgxnClientException, main, ['install', 'foobar'])
 
         self.assertEquals(mock_popen.call_count, 1)
 
+    @patch('pgxnclient.commands.WithPgConfig.call_pg_config')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
-    def test_install_bad_sha1(self, mock_get, mock_popen):
+    def test_install_bad_sha1(self, mock_get, mock_popen, mock_pgconfig):
         def fakefake(url):
             return fake_get_file(url, urlmap = {
                 'http://api.pgxn.org/dist/foobar/0.42.1/META.json':
                 'http://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'})
 
         mock_get.side_effect = fakefake
-        pop = mock_popen.return_value
-        pop.returncode = 0
+        mock_popen.return_value.returncode = 0
+        mock_pgconfig.side_effect = fake_pg_config(libdir='/')
 
         from pgxnclient.cli import main
         from pgxnclient.errors import BadChecksum
         self.assertRaises(BadChecksum,
             main, ['install', 'foobar'])
 
+    @patch('pgxnclient.commands.WithPgConfig.call_pg_config')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
-    def test_install_nosudo(self, mock_get, mock_popen):
+    def test_install_nosudo(self, mock_get, mock_popen, mock_pgconfig):
         mock_get.side_effect = fake_get_file
-        pop = mock_popen.return_value
-        pop.returncode = 0
+        mock_popen.return_value.returncode = 0
+        mock_pgconfig.side_effect = fake_pg_config(libdir=os.environ['HOME'])
 
         from pgxnclient.cli import main
         main(['install', '--nosudo', 'foobar'])
@@ -324,12 +333,13 @@ class InstallTestCase(unittest.TestCase):
         self.assertEquals(['make'], mock_popen.call_args_list[0][0][0][:1])
         self.assertEquals(['make'], mock_popen.call_args_list[1][0][0][:1])
 
+    @patch('pgxnclient.commands.WithPgConfig.call_pg_config')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
-    def test_install_sudo(self, mock_get, mock_popen):
+    def test_install_sudo(self, mock_get, mock_popen, mock_pgconfig):
         mock_get.side_effect = fake_get_file
-        pop = mock_popen.return_value
-        pop.returncode = 0
+        mock_popen.return_value.returncode = 0
+        mock_pgconfig.side_effect = fake_pg_config(libdir='/')
 
         from pgxnclient.cli import main
         main(['install', '--sudo', 'gksudo -d "hello world"', 'foobar'])
@@ -339,15 +349,16 @@ class InstallTestCase(unittest.TestCase):
         self.assertEquals(['gksudo', '-d', 'hello world', 'make'],
             mock_popen.call_args_list[1][0][0][:4])
 
+    @patch('pgxnclient.commands.WithPgConfig.call_pg_config')
     @patch('pgxnclient.commands.unpack')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
-    def test_install_local_zip(self, mock_get, mock_popen, mock_unpack):
+    def test_install_local_zip(self, mock_get, mock_popen, mock_unpack, mock_pgconfig):
         mock_get.side_effect = lambda *args: self.fail('network invoked')
-        pop = mock_popen.return_value
-        pop.returncode = 0
+        mock_popen.return_value.returncode = 0
         from pgxnclient.utils.zip import unpack
         mock_unpack.side_effect = unpack
+        mock_pgconfig.side_effect = fake_pg_config(libdir='/')
 
         from pgxnclient.cli import main
         main(['install', get_test_filename('foobar-0.42.1.zip')])
@@ -363,12 +374,13 @@ class InstallTestCase(unittest.TestCase):
         self.assertEqual(zipname, get_test_filename('foobar-0.42.1.zip'))
         self.assertEqual(make_cwd, os.path.join(tmpdir, 'foobar-0.42.1'))
 
+    @patch('pgxnclient.commands.WithPgConfig.call_pg_config')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
-    def test_install_local_dir(self, mock_get, mock_popen):
+    def test_install_local_dir(self, mock_get, mock_popen, mock_pgconfig):
         mock_get.side_effect = lambda *args: self.fail('network invoked')
-        pop = mock_popen.return_value
-        pop.returncode = 0
+        mock_popen.return_value.returncode = 0
+        mock_pgconfig.side_effect = fake_pg_config(libdir='/')
 
         tdir = tempfile.mkdtemp()
         try:
@@ -390,12 +402,13 @@ class InstallTestCase(unittest.TestCase):
 
 
 class CheckTestCase(unittest.TestCase):
+    @patch('pgxnclient.commands.WithPgConfig.call_pg_config')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
-    def test_check_latest(self, mock_get, mock_popen):
+    def test_check_latest(self, mock_get, mock_popen, mock_pgconfig):
         mock_get.side_effect = fake_get_file
-        pop = mock_popen.return_value
-        pop.returncode = 0
+        mock_popen.return_value.returncode = 0
+        mock_pgconfig.side_effect = fake_pg_config(libdir='/')
 
         from pgxnclient.cli import main
         main(['check', 'foobar'])
@@ -403,12 +416,13 @@ class CheckTestCase(unittest.TestCase):
         self.assertEquals(mock_popen.call_count, 1)
         self.assertEquals(['make'], mock_popen.call_args_list[0][0][0][:1])
 
+    @patch('pgxnclient.commands.WithPgConfig.call_pg_config')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
-    def test_check_fails(self, mock_get, mock_popen):
+    def test_check_fails(self, mock_get, mock_popen, mock_pgconfig):
         mock_get.side_effect = fake_get_file
-        pop = mock_popen.return_value
-        pop.returncode = 1
+        mock_popen.return_value.returncode = 1
+        mock_pgconfig.side_effect = fake_pg_config(libdir='/')
 
         from pgxnclient.cli import main
 
@@ -416,9 +430,10 @@ class CheckTestCase(unittest.TestCase):
 
         self.assertEquals(mock_popen.call_count, 1)
 
+    @patch('pgxnclient.commands.WithPgConfig.call_pg_config')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
-    def test_check_diff_moved(self, mock_get, mock_popen):
+    def test_check_diff_moved(self, mock_get, mock_popen, mock_pgconfig):
         mock_get.side_effect = fake_get_file
 
         def create_regression_files(*args, **kwargs):
@@ -428,8 +443,8 @@ class CheckTestCase(unittest.TestCase):
             return Mock()
 
         mock_popen.side_effect = create_regression_files
-        pop = mock_popen.return_value
-        pop.returncode = 1
+        mock_popen.return_value.returncode = 1
+        mock_pgconfig.side_effect = fake_pg_config(libdir='/')
 
         self.assert_(not os.path.exists('regression.out'),
             "Please remove temp file 'regression.out' from current dir")
@@ -447,17 +462,18 @@ class CheckTestCase(unittest.TestCase):
             ifunlink('regression.out')
             ifunlink('regression.diffs')
 
+    @patch('pgxnclient.commands.WithPgConfig.call_pg_config')
     @patch('pgxnclient.commands.Popen')
     @patch('pgxnclient.api.get_file')
-    def test_check_bad_sha1(self, mock_get, mock_popen):
+    def test_check_bad_sha1(self, mock_get, mock_popen, mock_pgconfig):
         def fakefake(url):
             return fake_get_file(url, urlmap = {
                 'http://api.pgxn.org/dist/foobar/0.42.1/META.json':
                 'http://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'})
 
         mock_get.side_effect = fakefake
-        pop = mock_popen.return_value
-        pop.returncode = 1
+        mock_popen.return_value.returncode = 1
+        mock_pgconfig.side_effect = fake_pg_config(libdir='/')
 
         from pgxnclient.cli import main
         from pgxnclient.errors import BadChecksum
@@ -692,8 +708,7 @@ class LoadTestCase(unittest.TestCase):
     @patch('pgxnclient.commands.install.Load.get_pg_version')
     @patch('pgxnclient.commands.Popen')
     def test_load_missing(self, mock_popen, mock_pgver, mock_isext):
-        pop = mock_popen.return_value
-        pop.returncode = 0
+        mock_popen.return_value.returncode = 0
         mock_pgver.return_value = (9,1,0)
         mock_isext.return_value = True
 
@@ -718,8 +733,7 @@ class LoadTestCase(unittest.TestCase):
     @patch('pgxnclient.commands.install.Unload.get_pg_version')
     @patch('pgxnclient.commands.Popen')
     def test_unload_missing(self, mock_popen, mock_pgver, mock_isext):
-        pop = mock_popen.return_value
-        pop.returncode = 0
+        mock_popen.return_value.returncode = 0
         mock_pgver.return_value = (9,1,0)
         mock_isext.return_value = True
 

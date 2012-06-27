@@ -12,6 +12,7 @@ import sys
 import shutil
 import difflib
 import logging
+import tempfile
 from subprocess import PIPE
 
 from pgxnclient import SemVer
@@ -126,7 +127,49 @@ class InstallUninstall(WithMake, WithSpecLocal, Command):
                 _("configure failed with return code %s") % p.returncode)
 
 
-class Install(WithSudo, InstallUninstall):
+class SudoInstallUninstall(WithSudo, InstallUninstall):
+    """
+    Installation commands base class supporting sudo operations.
+    """
+    def run(self):
+        if not self.is_libdir_writable() and not self.opts.sudo:
+            dir = self.call_pg_config('libdir')
+            raise PgxnClientException(_(
+                "PostgreSQL library directory (%s) not writable: "
+                "you should run the program as superuser, or specify "
+                "a 'sudo' program") % dir)
+
+        return super(SudoInstallUninstall, self).run()
+
+    def get_sudo_prog(self):
+        if self.is_libdir_writable():
+            return None     # not needed
+
+        return self.opts.sudo
+
+    def is_libdir_writable(self):
+        """
+        Check if the Postgres installation directory is writable.
+
+        If it is, we will assume that sudo is not required to
+        install/uninstall the library, so the sudo program will not be invoked
+        or its specification will not be required.
+        """
+        dir = self.call_pg_config('libdir')
+        logger.debug("testing if %s is writable", dir)
+        try:
+            f = tempfile.TemporaryFile(prefix="pgxn-", suffix=".test", dir=dir)
+            f.write("test")
+            f.close()
+        except (IOError, OSError):
+            rv = False
+        else:
+            rv = True
+
+        return rv
+
+
+class Install(SudoInstallUninstall):
     name = 'install'
     description = N_("download, build and install a distribution")
 
@@ -135,16 +178,16 @@ class Install(WithSudo, InstallUninstall):
         self.run_make('all', dir=pdir)
 
         logger.info(_("installing extension"))
-        self.run_make('install', dir=pdir, sudo=self.opts.sudo)
+        self.run_make('install', dir=pdir, sudo=self.get_sudo_prog())
 
 
-class Uninstall(WithSudo, InstallUninstall):
+class Uninstall(SudoInstallUninstall):
     name = 'uninstall'
     description = N_("remove a distribution from the system")
 
     def _inun(self, pdir):
         logger.info(_("removing extension"))
-        self.run_make('uninstall', dir=pdir, sudo=self.opts.sudo)
+        self.run_make('uninstall', dir=pdir, sudo=self.get_sudo_prog())
 
 
 class Check(WithDatabase, InstallUninstall):
