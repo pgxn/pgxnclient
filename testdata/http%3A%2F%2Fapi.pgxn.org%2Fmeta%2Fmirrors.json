@@ -1,0 +1,98 @@
+[
+   {
+      "uri": "http://pgxn.depesz.com/",
+      "frequency": "every 6 hours",
+      "location": "Nürnberg, Germany",
+      "organization": "depesz Software Hubert Lubaczewski",
+      "timezone": "CEST",
+      "email": "depesz.com|web_pgxn",
+      "bandwidth": "100Mbps",
+      "src": "rsync://master.pgxn.org/pgxn/",
+      "rsync": "",
+      "notes": "access via http only"
+   },
+   {
+      "uri": "http://www.postgres-support.ch/pgxn/",
+      "frequency": "hourly",
+      "location": "Basel, Switzerland, Europe",
+      "organization": "micro systems",
+      "timezone": "CEST",
+      "email": "msys.ch|marc",
+      "bandwidth": "10Mbps",
+      "src": "rsync://master.pgxn.org/pgxn",
+      "rsync": "",
+      "notes": ""
+   },
+   {
+      "uri": "http://pgxn.justatheory.com/",
+      "frequency": "daily",
+      "location": "Portland, OR, USA",
+      "organization": "David E. Wheeler",
+      "timezone": "America/Los_Angeles",
+      "email": "justatheory.com|pgxn",
+      "bandwidth": "Cable",
+      "src": "rsync://master.pgxn.org/pgxn/",
+      "rsync": "",
+      "notes": ""
+   },
+   {
+      "uri": "http://pgxn.darkixion.com/",
+      "frequency": "hourly",
+      "location": "London, UK",
+      "organization": "Thom Brown",
+      "timezone": "Europe/London",
+      "email": "darkixion.com|pgxn",
+      "bandwidth": "1Gbps",
+      "src": "rsync://master.pgxn.org/pgxn",
+      "rsync": "rsync://pgxn.darkixion.com/pgxn",
+      "notes": ""
+   },
+   {
+      "uri": "http://mirrors.cat.pdx.edu/pgxn/",
+      "frequency": "hourly",
+      "location": "Portland, OR, USA",
+      "organization": "PSU Computer Action Team",
+      "timezone": "America/Los_Angeles",
+      "email": "cat.pdx.edu|support",
+      "bandwidth": "60Mbsec",
+      "src": "rsync://master.pgxn.org/pgxn",
+      "rsync": "rsync://mirrors.cat.pdx.edu/pgxn",
+      "notes": "I2 and IPv6"
+   },
+   {
+      "uri": "http://pgxn.dalibo.org/",
+      "frequency": "hourly",
+      "location": "Marseille, France",
+      "organization": "DALIBO SARL",
+      "timezone": "CEST",
+      "email": "dalibo.com|contact",
+      "bandwidth": "100Mbps",
+      "src": "rsync://master.pgxn.org/pgxn/",
+      "rsync": "",
+      "notes": ""
+   },
+   {
+      "uri": "http://pgxn.cxsoftware.org/",
+      "frequency": "hourly",
+      "location": "Seattle, WA, USA",
+      "organization": "CxNet",
+      "timezone": "America/Los_Angeles",
+      "email": "cxnet.cl|cristobal",
+      "bandwidth": "100Mbps",
+      "src": "rsync://master.pgxn.org/pgxn/",
+      "rsync": "",
+      "notes": ""
+   },
+   {
+      "uri": "http://api.pgxn.org/",
+      "frequency": "hourly",
+      "location": "Portland, OR, USA",
+      "organization": "PGXN",
+      "timezone": "America/Los_Angeles",
+      "email": "pgexperts.com|pgxn",
+      "bandwidth": "10MBps",
+      "src": "rsync://master.pgxn.org/pgxn",
+      "rsync": "",
+      "notes": "API server."
+   }
+]

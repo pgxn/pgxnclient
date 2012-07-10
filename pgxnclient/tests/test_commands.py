@@ -33,6 +33,7 @@ def fake_pg_config(**map):
 
     return f
 
+
 class InfoTestCase(unittest.TestCase):
     def _get_output(self, cmdline):
         @patch('sys.stdout')
@@ -71,6 +72,35 @@ foobar 0.42.1 stable
 foobar 0.43.2b1 testing
 foobar 0.42.1 stable
 foobar 0.42.0 stable
+"""))
+
+    def test_mirrors_list(self):
+        output = self._get_output(['mirror'])
+        self.assertEqual(output, b("""\
+http://pgxn.depesz.com/
+http://www.postgres-support.ch/pgxn/
+http://pgxn.justatheory.com/
+http://pgxn.darkixion.com/
+http://mirrors.cat.pdx.edu/pgxn/
+http://pgxn.dalibo.org/
+http://pgxn.cxsoftware.org/
+http://api.pgxn.org/
+"""))
+
+    def test_mirror_info(self):
+        output = self._get_output(['mirror', 'http://pgxn.justatheory.com/'])
+        self.assertEqual(output, b("""\
+uri: http://pgxn.justatheory.com/
+frequency: daily
+location: Portland, OR, USA
+bandwidth: Cable
+organization: David E. Wheeler
+email: justatheory.com|pgxn
+timezone: America/Los_Angeles
+src: rsync://master.pgxn.org/pgxn/
+rsync: 
+notes: 
+
 """))
 
 
