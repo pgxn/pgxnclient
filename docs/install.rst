@@ -4,7 +4,7 @@ Installation
 Prerequisites
 -------------
 
-The program is implemented in Python. Versions from Python 2.4 onwards are
+The program is implemented in Python. Versions from Python 2.5 onwards are
 supported, including Python 3.0 and successive.
 
 PostgreSQL client-side development tools are required to build and install

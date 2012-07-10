@@ -411,9 +411,7 @@ performed:\n\n%s\n\nDo you want to continue?""")
 
         if not self.opts.extensions:
             # All the extensions, in the order specified
-            if len(dist['provides']) > 1 and sys.version_info < (2, 5):
-                logger.warn(_("can't guarantee extensions load order "
-                    "with Python < 2.5"))
+            # (assume we got an orddict from json)
             for name, data in dist['provides'].items():
                 rv.append((name, data.get('file')))
         else:

@@ -6,6 +6,7 @@ PGXN Client changes log
 pgxnclient 1.1
 ==============
 
+- Dropped support for Python 2.4.
 - ``sudo`` is not invoked automatically: the ``--sudo`` option must be
   specified if the user has not permission to write into PostgreSQL's libdir
   (ticket #13). The ``--sudo`` option can also be invoked without argument.
