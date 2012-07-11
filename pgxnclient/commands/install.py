@@ -2,22 +2,24 @@
 pgxnclient -- installation/loading commands implementation
 """
 
-# Copyright (C) 2011 Daniele Varrazzo
+# Copyright (C) 2011-2012 Daniele Varrazzo
 
 # This file is part of the PGXN client
 
+from __future__ import with_statement
+
 import os
 import re
-import sys
 import shutil
 import difflib
 import logging
+import tempfile
 from subprocess import PIPE
 
 from pgxnclient import SemVer
 from pgxnclient.i18n import _, N_
-from pgxnclient.utils import sha1
-from pgxnclient.errors import BadChecksum, PgxnClientException
+from pgxnclient.utils import sha1, b
+from pgxnclient.errors import BadChecksum, PgxnClientException, InsufficientPrivileges
 from pgxnclient.network import download
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
 from pgxnclient.commands import WithSpec, WithSpecLocal, WithSudo
@@ -49,9 +51,9 @@ class Download(WithSpec, Command):
             raise PgxnClientException(
                 "sha1 missing from the distribution meta")
 
-        fin = self.api.download(data['name'], SemVer(data['version']))
-        fn = self._get_local_file_name(fin.url)
-        fn = download(fin, fn, rename=True)
+        with self.api.download(data['name'], SemVer(data['version'])) as fin:
+            fn = self._get_local_file_name(fin.url)
+            fn = download(fin, fn, rename=True)
         self.verify_checksum(fn, chk)
         return fn
 
@@ -126,7 +128,49 @@ class InstallUninstall(WithMake, WithSpecLocal, Command):
                 _("configure failed with return code %s") % p.returncode)
 
 
-class Install(WithSudo, InstallUninstall):
+class SudoInstallUninstall(WithSudo, InstallUninstall):
+    """
+    Installation commands base class supporting sudo operations.
+    """
+    def run(self):
+        if not self.is_libdir_writable() and not self.opts.sudo:
+            dir = self.call_pg_config('libdir')
+            raise InsufficientPrivileges(_(
+                "PostgreSQL library directory (%s) not writable: "
+                "you should run the program as superuser, or specify "
+                "a 'sudo' program") % dir)
+
+        return super(SudoInstallUninstall, self).run()
+
+    def get_sudo_prog(self):
+        if self.is_libdir_writable():
+            return None     # not needed
+
+        return self.opts.sudo
+
+    def is_libdir_writable(self):
+        """
+        Check if the Postgres installation directory is writable.
+
+        If it is, we will assume that sudo is not required to
+        install/uninstall the library, so the sudo program will not be invoked
+        or its specification will not be required.
+        """
+        dir = self.call_pg_config('libdir')
+        logger.debug("testing if %s is writable", dir)
+        try:
+            f = tempfile.TemporaryFile(prefix="pgxn-", suffix=".test", dir=dir)
+            f.write(b('test'))
+            f.close()
+        except (IOError, OSError):
+            rv = False
+        else:
+            rv = True
+
+        return rv
+
+
+class Install(SudoInstallUninstall):
     name = 'install'
     description = N_("download, build and install a distribution")
 
@@ -135,16 +179,16 @@ class Install(WithSudo, InstallUninstall):
         self.run_make('all', dir=pdir)
 
         logger.info(_("installing extension"))
-        self.run_make('install', dir=pdir, sudo=self.opts.sudo)
+        self.run_make('install', dir=pdir, sudo=self.get_sudo_prog())
 
 
-class Uninstall(WithSudo, InstallUninstall):
+class Uninstall(SudoInstallUninstall):
     name = 'uninstall'
     description = N_("remove a distribution from the system")
 
     def _inun(self, pdir):
         logger.info(_("removing extension"))
-        self.run_make('uninstall', dir=pdir, sudo=self.opts.sudo)
+        self.run_make('uninstall', dir=pdir, sudo=self.get_sudo_prog())
 
 
 class Check(WithDatabase, InstallUninstall):
@@ -237,9 +281,9 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
         # load via pipe to enable psql commands in the file
         if not data:
             logger.debug("loading sql from %s", filename)
-            fin = open(filename, 'r')
-            p = self.popen(cmdline, stdin=fin)
-            p.communicate()
+            with open(filename, 'r') as fin:
+                p = self.popen(cmdline, stdin=fin)
+                p.communicate()
         else:
             if len(data) > 105:
                 tdata = data[:100] + "..."
@@ -247,6 +291,9 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
                 tdata = data
             logger.debug('running sql command: "%s"', tdata)
             p = self.popen(cmdline, stdin=PIPE)
+            # for Python 3: just assume default encoding will do
+            if isinstance(data, unicode):
+                data = data.encode()
             p.communicate(data)
 
         if p.returncode:
@@ -357,7 +404,7 @@ performed:\n\n%s\n\nDo you want to continue?""")
             # not mangled by the PGXN upload script yet.
             name = dist['name']
             for ext in self.opts.extensions:
-                if ext <> name:
+                if ext != name:
                     raise PgxnClientException(
                         "can't find extension '%s' in the distribution '%s'"
                             % (name, spec))
@@ -368,9 +415,7 @@ performed:\n\n%s\n\nDo you want to continue?""")
 
         if not self.opts.extensions:
             # All the extensions, in the order specified
-            if len(dist['provides']) > 1 and sys.version_info < (2, 5):
-                logger.warn(_("can't guarantee extensions load order "
-                    "with Python < 2.5"))
+            # (assume we got an orddict from json)
             for name, data in dist['provides'].items():
                 rv.append((name, data.get('file')))
         else:

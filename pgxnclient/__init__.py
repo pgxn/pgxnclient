@@ -2,11 +2,11 @@
 pgxnclient -- main package
 """
 
-# Copyright (C) 2011 Daniele Varrazzo
+# Copyright (C) 2011-2012 Daniele Varrazzo
 
 # This file is part of the PGXN client
 
-__version__ = '1.0.3'
+__version__ = '1.1'
 
 # Paths where to find the command executables.
 # If relative, it's from the `pgxnclient` package directory.

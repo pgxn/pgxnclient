@@ -3,7 +3,7 @@
 pgxnclient -- setup script
 """
 
-# Copyright (C) 2011 Daniele Varrazzo
+# Copyright (C) 2011-2012 Daniele Varrazzo
 
 # This file is part of the PGXN client
 
@@ -31,7 +31,7 @@ requires = []
 tests_require = []
 
 if sys.version_info < (2, 5):
-    requires.append('simplejson<=2.0.9')
+    raise ValueError("PGXN client requires at least Python 2.5")
 elif sys.version_info < (2, 7):
     requires.append('simplejson>=2.1')
 
@@ -48,7 +48,12 @@ Intended Audience :: System Administrators
 License :: OSI Approved :: BSD License
 Operating System :: POSIX
 Programming Language :: Python :: 2
+Programming Language :: Python :: 2.5
+Programming Language :: Python :: 2.6
+Programming Language :: Python :: 2.7
 Programming Language :: Python :: 3
+Programming Language :: Python :: 3.1
+Programming Language :: Python :: 3.2
 Topic :: Database
 """
 

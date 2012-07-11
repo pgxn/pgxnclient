@@ -79,7 +79,7 @@ Usage:
     :class: pgxn-install
 
     pgxn install [--help] [--stable | --testing | --unstable]
-                 [--pg_config *PATH*] [--sudo *PROG* | --nosudo]
+                 [--pg_config *PATH*] [--sudo [*PROG*] | --nosudo]
                  *SPEC*
 
 The program takes a `package specification`_ identifying the distribution to
@@ -89,7 +89,7 @@ refers to a local directory or package.
 Note that the built extension is not loaded in any database: use the command
 `load`_ for this purpose.
 
-The command will run the ``./configure`` script if available in the package,
+The command will run the ``configure`` script if available in the package,
 then will perform ``make all`` and ``make install``. It is assumed that the
 ``Makefile`` provided by the distribution uses PGXS_ to build the extension,
 but this is not enforced: you may provide any Makefile as long as the expected
@@ -97,16 +97,25 @@ commands are implemented.
 
 .. _PGXS: http://www.postgresql.org/docs/9.1/static/extend-pgxs.html
 
-The install phase usually requires root privileges in order to install a build
-library and other files in the PostgreSQL directories: by default
-:program:`sudo` will be invoked for the purpose. An alternative program can be
-specified with the option :samp:`--sudo {PROG}`; ``--nosudo`` can be used to
-avoid running any program.
-
 If there are many PostgreSQL installations on the system, the extension will
 be built and installed against the instance whose :program:`pg_config` is
 first found on the :envvar:`PATH`. A different instance can be specified using
 the option :samp:`--pg_config {PATH}`.
+
+If the extension is being installed into a system PostgreSQL installation, the
+install phase will likely require root privileges to be performed.  In this
+case either run the command under :program:`sudo` or specify the ``--sudo``
+option: in the latter case :program:`sudo` will only be invoked during the
+"install" phase.  An optional program :samp:`{PROG}` to elevate the user
+privileges can be specified as ``--sudo`` option; if none is specified,
+:program:`sudo` will be used.
+
+.. note::
+
+    If ``--sudo`` is the last option and no :samp:`{PROG}` is specified, a
+    ``--`` separator may be required to disambiguate the :samp:`{SPEC}`::
+
+        pgxn install --sudo -- foobar
 
 
 .. _check:
@@ -170,7 +179,7 @@ Usage:
     :class: pgxn-uninstall
 
     pgxn uninstall [--help] [--stable | --testing | --unstable]
-                   [--pg_config *PATH*] [--sudo *PROG* | --nosudo]
+                   [--pg_config *PATH*] [--sudo [*PROG*] | --nosudo]
                    *SPEC*
 
 The command does the opposite of the install_ command, removing a

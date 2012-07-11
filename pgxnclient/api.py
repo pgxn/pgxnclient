@@ -2,9 +2,11 @@
 pgxnclient -- client API stub
 """
 
-# Copyright (C) 2011 Daniele Varrazzo
+# Copyright (C) 2011-2012 Daniele Varrazzo
 
 # This file is part of the PGXN client
+
+from __future__ import with_statement
 
 from urllib import urlencode
 
@@ -20,27 +22,29 @@ class Api(object):
 
     def dist(self, dist, version=''):
         try:
-            return load_json(self.call(
-                version and 'meta' or 'dist',
-                {'dist': dist, 'version': version}))
+            with self.call(version and 'meta' or 'dist',
+                    {'dist': dist, 'version': version}) as f:
+                return load_json(f)
         except ResourceNotFound:
             raise NotFound("distribution '%s' not found" % dist)
 
     def ext(self, ext):
         try:
-            return load_json(self.call('extension', {'extension': ext}))
+            with self.call('extension', {'extension': ext}) as f:
+                return load_json(f)
         except ResourceNotFound:
             raise NotFound("extension '%s' not found" % ext)
 
     def meta(self, dist, version, as_json=True):
-        f = self.call('meta', {'dist': dist, 'version': version})
-        if as_json:
-            return load_json(f)
-        else:
-            return f.read().decode('utf-8')
+        with self.call('meta', {'dist': dist, 'version': version}) as f:
+            if as_json:
+                return load_json(f)
+            else:
+                return f.read().decode('utf-8')
 
     def readme(self, dist, version):
-        return self.call('readme', {'dist': dist, 'version': version}).read()
+        with self.call('readme', {'dist': dist, 'version': version}) as f:
+            return f.read()
 
     def download(self, dist, version):
         dist = dist.lower()
@@ -48,7 +52,8 @@ class Api(object):
         return self.call('download', {'dist': dist, 'version': version})
 
     def mirrors(self):
-        return load_json(self.call('mirrors'))
+        with self.call('mirrors') as f:
+            return load_json(f)
 
     def search(self, where, query):
         """Search into PGXN.
@@ -60,14 +65,16 @@ class Api(object):
         # convert the query list into a string
         q = ' '.join([' ' in s and ('"%s"' % s) or s for s in query])
 
-        return load_json(self.call('search', {'in': where},
-            query={'q': q}))
+        with self.call('search', {'in': where}, query={'q': q}) as f:
+            return load_json(f)
 
     def stats(self, arg):
-        return load_json(self.call('stats', {'stats': arg}))
+        with self.call('stats', {'stats': arg}) as f:
+            return load_json(f)
 
     def user(self, username):
-        return load_json(self.call('user', {'user': username}))
+        with self.call('user', {'user': username}) as f:
+            return load_json(f)
 
     def call(self, meth, args=None, query=None):
         url = self.get_url(meth, args, query)
@@ -91,7 +98,8 @@ class Api(object):
         if self._api_index is None:
             url = self.mirror.rstrip('/') + '/index.json'
             try:
-                self._api_index = load_json(get_file(url))
+                with get_file(url) as f:
+                    self._api_index = load_json(f)
             except ResourceNotFound:
                 raise NetworkError("API index not found at '%s'" % url)
 

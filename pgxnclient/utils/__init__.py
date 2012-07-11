@@ -2,7 +2,7 @@
 pgxnclient -- misc utilities package
 """
 
-# Copyright (C) 2011 Daniele Varrazzo
+# Copyright (C) 2011-2012 Daniele Varrazzo
 
 # This file is part of the PGXN client
 
@@ -19,12 +19,13 @@ else:
     from pgxnclient.utils.ordereddict import OrderedDict
 
 
-# Import the proper JSON library
-# dependencies note: simplejson is certified for Python 2.5, and supports
-# Python 2.4 up to version 2.0.9. After that the package is in the stdlib
+# Import the proper JSON library.
 #
-# We use json only from 2.7 as it supports ordered dicts. For Python 2.6
-# simplejson >= 2.1 should be used.
+# Dependencies note: simplejson is certified for Python 2.5.  Support for
+# Python 2.4 was available up to version 2.0.9, but this version doesn't
+# support ordered dicts. In Py 2.6 the package is in stdlib, but without
+# orddict support, so we use simplejson 2.1 again. From Python 2.7 the stdlilb
+# json module has orddict support so we don't need the external dependency.
 if sys.version_info >= (2, 7):
     import json
 else:
@@ -37,20 +38,11 @@ def load_json(f):
     return load_jsons(data)
 
 def load_jsons(data):
-    # order required to keep "provides" extensions in order.
-    # Python 2.4 is only compatible with a simplejson version that doesn't
-    # support ordered dict.
-    if sys.version_info >= (2, 5):
-        return json.loads(data, object_pairs_hook=OrderedDict)
-    else:
-        return json.loads(data)
+    return json.loads(data, object_pairs_hook=OrderedDict)
 
 
 # Import the sha1 object without warnings
-if sys.version_info >= (2, 5):
-    from hashlib import sha1
-else:
-    from sha import new as sha1
+from hashlib import sha1
 
 
 # For compatibility from Python 2.4 to 3.x

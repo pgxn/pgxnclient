@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PGXN Client'
-copyright = u'2011, Daniele Varrazzo'
+copyright = u'2011-2012, Daniele Varrazzo'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

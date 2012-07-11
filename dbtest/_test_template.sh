@@ -1,5 +1,5 @@
 echo "INSTALL"
-${PGXN} install --nosudo ${LEVEL} ${EXTENSION} || exit
+${PGXN} install ${LEVEL} ${EXTENSION} || exit
 
 echo "CHECK"
 ${PGXN} check ${TEST_DSN} ${LEVEL} ${EXTENSION}
@@ -12,5 +12,5 @@ ${PGXN} unload ${TEST_DSN} ${LEVEL} ${EXTENSION}
 
 echo "UNINSTALL"
 dropdb -h ${PG_HOST} -p ${PG_PORT} ${TEST_DB}
-${PGXN} uninstall --nosudo ${LEVEL} ${EXTENSION} || exit
+${PGXN} uninstall ${LEVEL} ${EXTENSION} || exit
 

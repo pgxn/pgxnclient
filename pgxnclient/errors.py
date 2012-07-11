@@ -6,7 +6,7 @@ controlled way from the program.
 
 """
 
-# Copyright (C) 2011 Daniele Varrazzo
+# Copyright (C) 2011-2012 Daniele Varrazzo
 
 # This file is part of the PGXN client
 
@@ -24,6 +24,9 @@ class BadSpecError(PgxnClientException):
 
 class ProcessError(PgxnClientException):
     """An error raised calling an external program."""
+
+class InsufficientPrivileges(PgxnClientException):
+    """Operation will fail because the user is too lame."""
 
 class NotFound(PgxnException):
     """Something requested by the user not found on PGXN"""

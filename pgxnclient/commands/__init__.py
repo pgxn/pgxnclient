@@ -6,9 +6,11 @@ commands. Concrete commands implementations are available in other package
 modules.
 """
 
-# Copyright (C) 2011 Daniele Varrazzo
+# Copyright (C) 2011-2012 Daniele Varrazzo
 
 # This file is part of the PGXN client
+
+from __future__ import with_statement
 
 import os
 import sys
@@ -379,7 +381,8 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
                 raise PgxnClientException(
                     _("file 'META.json' not found in '%s'") % dir)
 
-            return load_json(open(fn))
+            with open(fn) as f:
+                return load_json(f)
 
         elif spec.is_file():
             # Get the metadata from a zip file
@@ -460,7 +463,7 @@ class WithPgConfig(object):
             return _cache[what]
 
         logger.debug("running pg_config --%s", what)
-        cmdline = [self.opts.pg_config, "--%s" % what]
+        cmdline = [self.get_pg_config(), "--%s" % what]
         p = self.popen(cmdline, stdout=PIPE)
         out, err = p.communicate()
         if p.returncode:
@@ -470,6 +473,25 @@ class WithPgConfig(object):
         out = out.rstrip().decode('utf-8')
         rv = _cache[what] = out
         return rv
+
+    def get_pg_config(self):
+        """
+        Return the absolute path of the pg_config binary.
+        """
+        pg_config = self.opts.pg_config
+        if os.path.split(pg_config)[0]:
+            pg_config = os.path.abspath(pg_config)
+        else:
+            for dir in os.environ.get('PATH', '').split(os.pathsep):
+                if not dir: continue
+                fn = os.path.abspath(os.path.join(dir, pg_config))
+                if os.path.exists(fn):
+                    pg_config = os.path.abspath(fn)
+                    break
+            else:
+                raise PgxnClientException(_("pg_config executable not found"))
+
+        return pg_config
 
 
 import shlex
@@ -500,13 +522,7 @@ class WithMake(WithPgConfig, WithUnpacking):
         if sudo:
             cmdline.extend(shlex.split(sudo))
 
-        # convert to absolute path for makefile, or else it may miss it
-        # if the cwd is changed during execution
-        pg_config = self.opts.pg_config
-        if os.path.split(pg_config)[0]:
-            pg_config = os.path.abspath(pg_config)
-
-        cmdline.extend(['make', 'PG_CONFIG=%s' % pg_config])
+        cmdline.extend(['make', 'PG_CONFIG=%s' % self.get_pg_config()])
 
         if isinstance(cmd, basestring):
             cmdline.append(cmd)
@@ -531,11 +547,12 @@ class WithSudo(object):
             parser, subparsers, **kwargs)
 
         g = subp.add_mutually_exclusive_group()
-        g.add_argument('--sudo', metavar="PROG", default='sudo',
+        g.add_argument('--sudo', metavar="PROG", const='sudo', nargs="?",
             help = _("run PROG to elevate privileges when required"
-                " [default: %(default)s]"))
+                " [default: %(const)s]"))
         g.add_argument('--nosudo', dest='sudo', action='store_false',
-            help = _("never elevate privileges"))
+            help = _("never elevate privileges "
+                "(no more needed: for backward compatibility)"))
 
         return subp
 

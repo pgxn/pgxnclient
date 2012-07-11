@@ -2,13 +2,14 @@
 pgxnclient -- network interaction
 """
 
-# Copyright (C) 2011 Daniele Varrazzo
+# Copyright (C) 2011-2012 Daniele Varrazzo
 
 # This file is part of the PGXN client
 
 import os
 import urllib2
 from itertools import count
+from contextlib import closing
 
 from pgxnclient import __version__
 from pgxnclient.i18n import _
@@ -22,7 +23,7 @@ def get_file(url):
     opener.addheaders = [('User-agent', 'pgxnclient/%s' % __version__)]
     logger.debug('opening url: %s', url)
     try:
-        return opener.open(url)
+        return closing(opener.open(url))
     except urllib2.HTTPError, e:
         if e.code == 404:
             raise ResourceNotFound(_("resource not found: '%s'") % e.url)
