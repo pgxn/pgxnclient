@@ -106,8 +106,9 @@ If the extension is being installed into a system PostgreSQL installation, the
 install phase will likely require root privileges to be performed.  In this
 case either run the command under :program:`sudo` or specify the ``--sudo``
 option: in the latter case :program:`sudo` will only be invoked during the
-"install" phase. An optional privilege elevation program :samp:`{PROG}` can be
-specified.
+"install" phase.  An optional program :samp:`{PROG}` to elevate the user
+privileges can be specified as ``--sudo`` option; if none is specified,
+:program:`sudo` will be used.
 
 .. note::
 
