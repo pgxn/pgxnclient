@@ -10,6 +10,8 @@ modules.
 
 # This file is part of the PGXN client
 
+from __future__ import with_statement
+
 import os
 import sys
 import logging
@@ -379,7 +381,8 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
                 raise PgxnClientException(
                     _("file 'META.json' not found in '%s'") % dir)
 
-            return load_json(open(fn))
+            with open(fn) as f:
+                return load_json(f)
 
         elif spec.is_file():
             # Get the metadata from a zip file

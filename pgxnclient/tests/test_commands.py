@@ -15,6 +15,13 @@ class FakeFile(object):
         self._f = open(*args)
         self.url = None
 
+    def __enter__(self):
+        self._f.__enter__()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self._f.__exit__(type, value, traceback)
+
     def __getattr__(self, attr):
         return getattr(self._f, attr)
 

@@ -6,9 +6,10 @@ pgxnclient -- installation/loading commands implementation
 
 # This file is part of the PGXN client
 
+from __future__ import with_statement
+
 import os
 import re
-import sys
 import shutil
 import difflib
 import logging
@@ -50,9 +51,9 @@ class Download(WithSpec, Command):
             raise PgxnClientException(
                 "sha1 missing from the distribution meta")
 
-        fin = self.api.download(data['name'], SemVer(data['version']))
-        fn = self._get_local_file_name(fin.url)
-        fn = download(fin, fn, rename=True)
+        with self.api.download(data['name'], SemVer(data['version'])) as fin:
+            fn = self._get_local_file_name(fin.url)
+            fn = download(fin, fn, rename=True)
         self.verify_checksum(fn, chk)
         return fn
 
@@ -280,9 +281,9 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
         # load via pipe to enable psql commands in the file
         if not data:
             logger.debug("loading sql from %s", filename)
-            fin = open(filename, 'r')
-            p = self.popen(cmdline, stdin=fin)
-            p.communicate()
+            with open(filename, 'r') as fin:
+                p = self.popen(cmdline, stdin=fin)
+                p.communicate()
         else:
             if len(data) > 105:
                 tdata = data[:100] + "..."
@@ -400,7 +401,7 @@ performed:\n\n%s\n\nDo you want to continue?""")
             # not mangled by the PGXN upload script yet.
             name = dist['name']
             for ext in self.opts.extensions:
-                if ext <> name:
+                if ext != name:
                     raise PgxnClientException(
                         "can't find extension '%s' in the distribution '%s'"
                             % (name, spec))

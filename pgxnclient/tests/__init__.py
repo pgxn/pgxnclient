@@ -22,6 +22,13 @@ else:
     import unittest
 
 
+# fix unittest maintainers stubborness: see Python issue #9424
+if unittest.TestCase.assert_ is not unittest.TestCase.assertTrue:
+    # Vaffanculo, Wolf
+    unittest.TestCase.assert_ = unittest.TestCase.assertTrue
+    unittest.TestCase.assertEquals = unittest.TestCase.assertEqual
+
+
 if __name__ == '__main__':
     unittest.main()
 
