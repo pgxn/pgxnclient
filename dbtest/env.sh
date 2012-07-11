@@ -1,5 +1,6 @@
 export PG_VERSION=9.1.1
 export PG_ROOT=`pwd`/postgresql-${PG_VERSION}/root/
+export PG_CONFIG=${PG_ROOT}/bin/pg_config
 export PG_PORT=15432
 export PG_HOST=localhost
 export TEST_DB=contrib_regression
