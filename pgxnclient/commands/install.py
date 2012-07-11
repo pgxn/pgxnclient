@@ -291,6 +291,9 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
                 tdata = data
             logger.debug('running sql command: "%s"', tdata)
             p = self.popen(cmdline, stdin=PIPE)
+            # for Python 3: just assume default encoding will do
+            if isinstance(data, unicode):
+                data = data.encode()
             p.communicate(data)
 
         if p.returncode:
