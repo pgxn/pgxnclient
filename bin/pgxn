@@ -13,7 +13,7 @@ sibling of the directory containing this script, then are looked for in the
 ``PATH`` directories.
 """
 
-# Copyright (C) 2011 Daniele Varrazzo
+# Copyright (C) 2011-2012 Daniele Varrazzo
 
 # This file is part of the PGXN client
 

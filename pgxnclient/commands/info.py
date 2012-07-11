@@ -2,7 +2,7 @@
 pgxnclient -- informative commands implementation
 """
 
-# Copyright (C) 2011 Daniele Varrazzo
+# Copyright (C) 2011-2012 Daniele Varrazzo
 
 # This file is part of the PGXN client
 
