@@ -23,7 +23,7 @@ PostgreSQL `Extension Building Infrastructure`__; however the client tries to
 degrade gracefully in presence of any package hosted on PGXN.
 
 .. _semver: http://pgxn.org/dist/semver
-.. __: http://www.postgresql.org/docs/9.1/static/extend-pgxs.html
+.. __: http://www.postgresql.org/docs/current/static/extend-pgxs.html
 
 - Home page: http://pgxnclient.projects.postgresql.org/
 - Downloads: http://pypi.python.org/pypi/pgxnclient/

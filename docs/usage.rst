@@ -95,7 +95,7 @@ then will perform ``make all`` and ``make install``. It is assumed that the
 but this is not enforced: you may provide any Makefile as long as the expected
 commands are implemented.
 
-.. _PGXS: http://www.postgresql.org/docs/9.1/static/extend-pgxs.html
+.. _PGXS: http://www.postgresql.org/docs/current/static/extend-pgxs.html
 
 If there are many PostgreSQL installations on the system, the extension will
 be built and installed against the instance whose :program:`pg_config` is
@@ -235,8 +235,8 @@ extension specifies a ``.control`` file, it will be loaded using the `CREATE
 EXTENSION`_ command, otherwise it will be loaded as a loose set of objects.
 For more information see the `extensions documentation`__.
 
-.. _CREATE EXTENSION: http://www.postgresql.org/docs/9.1/static/sql-createextension.html
-.. __: http://www.postgresql.org/docs/9.1/static/extend-extensions.html
+.. _CREATE EXTENSION: http://www.postgresql.org/docs/current/static/sql-createextension.html
+.. __: http://www.postgresql.org/docs/current/static/extend-extensions.html
 
 The command is based on the `'provides' section`_ of the distribution's
 ``META.json``: if a SQL file is specified, that file will be used to load the
@@ -301,7 +301,7 @@ reverse order respect to the order in which they are specified in the
 extensions provided, specifying them after *SPEC*: the extensions will be
 unloaded in the order specified.
 
-.. _DROP EXTENSION: http://www.postgresql.org/docs/9.1/static/sql-dropextension.html
+.. _DROP EXTENSION: http://www.postgresql.org/docs/current/static/sql-dropextension.html
 
 See the load_ command for details about the command arguments.
 
