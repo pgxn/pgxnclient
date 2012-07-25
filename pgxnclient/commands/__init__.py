@@ -522,7 +522,9 @@ class WithMake(WithPgConfig, WithUnpacking):
         if sudo:
             cmdline.extend(shlex.split(sudo))
 
-        cmdline.extend(['make', 'PG_CONFIG=%s' % self.get_pg_config()])
+        make = 'make' if not sys.platform.startswith('freebsd') else 'gmake'
+
+        cmdline.extend([make, 'PG_CONFIG=%s' % self.get_pg_config()])
 
         if isinstance(cmd, basestring):
             cmdline.append(cmd)
