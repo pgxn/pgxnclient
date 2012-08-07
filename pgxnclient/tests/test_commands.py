@@ -307,8 +307,23 @@ class DownloadTestCase(unittest.TestCase):
 
             self.assertEqual(res, cmd.get_best_version(data, spec))
 
+class Assertions(object):
 
-class InstallTestCase(unittest.TestCase):
+    make = object()
+
+    def assertCallArgs(self, pattern, args):
+        if len(pattern) != len(args):
+            self.fail('args and pattern have different lengths')
+        for p, a in zip(pattern, args):
+            if p is self.make:
+                if not a.endswith('make'):
+                    self.fail('%s is not a make in %s' % (a, args))
+            else:
+                if not a == p:
+                    self.fail('%s is not a %s in %s' % (a, p, args))
+
+class InstallTestCase(unittest.TestCase, Assertions):
+
     def setUp(self):
         self._p1 = patch('pgxnclient.api.get_file')
         self.mock_get = self._p1.start()
@@ -333,8 +348,8 @@ class InstallTestCase(unittest.TestCase):
         main(['install', '--sudo', '--', 'foobar'])
 
         self.assertEquals(self.mock_popen.call_count, 2)
-        self.assertEquals(['make'], self.mock_popen.call_args_list[0][0][0][:1])
-        self.assertEquals(['sudo', 'make'], self.mock_popen.call_args_list[1][0][0][:2])
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
+        self.assertCallArgs(['sudo', self.make], self.mock_popen.call_args_list[1][0][0][:2])
 
     def test_install_missing_sudo(self):
         from pgxnclient.cli import main
@@ -348,8 +363,8 @@ class InstallTestCase(unittest.TestCase):
         main(['install', 'foobar'])
 
         self.assertEquals(self.mock_popen.call_count, 2)
-        self.assertEquals(['make'], self.mock_popen.call_args_list[0][0][0][:1])
-        self.assertEquals(['make'], self.mock_popen.call_args_list[1][0][0][:1])
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[1][0][0][:1])
 
     def test_install_fails(self):
         self.mock_popen.return_value.returncode = 1
@@ -381,16 +396,17 @@ class InstallTestCase(unittest.TestCase):
         main(['install', '--nosudo', 'foobar'])
 
         self.assertEquals(self.mock_popen.call_count, 2)
-        self.assertEquals(['make'], self.mock_popen.call_args_list[0][0][0][:1])
-        self.assertEquals(['make'], self.mock_popen.call_args_list[1][0][0][:1])
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[1][0][0][:1])
 
     def test_install_sudo(self):
         from pgxnclient.cli import main
         main(['install', '--sudo', 'gksudo -d "hello world"', 'foobar'])
 
         self.assertEquals(self.mock_popen.call_count, 2)
-        self.assertEquals(['make'], self.mock_popen.call_args_list[0][0][0][:1])
-        self.assertEquals(['gksudo', '-d', 'hello world', 'make'],
+        self.assertCallArgs([self.make],
+            self.mock_popen.call_args_list[0][0][0][:1])
+        self.assertCallArgs(['gksudo', '-d', 'hello world', self.make],
             self.mock_popen.call_args_list[1][0][0][:4])
 
     @patch('pgxnclient.commands.unpack')
@@ -402,8 +418,8 @@ class InstallTestCase(unittest.TestCase):
         main(['install', '--sudo', '--', get_test_filename('foobar-0.42.1.zip')])
 
         self.assertEquals(self.mock_popen.call_count, 2)
-        self.assertEquals(['make'], self.mock_popen.call_args_list[0][0][0][:1])
-        self.assertEquals(['sudo', 'make'],
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
+        self.assertCallArgs(['sudo', self.make],
             self.mock_popen.call_args_list[1][0][0][:2])
         make_cwd = self.mock_popen.call_args_list[1][1]['cwd']
 
@@ -427,14 +443,14 @@ class InstallTestCase(unittest.TestCase):
             shutil.rmtree(tdir)
 
         self.assertEquals(self.mock_popen.call_count, 2)
-        self.assertEquals(['make'], self.mock_popen.call_args_list[0][0][0][:1])
-        self.assertEquals(dir, self.mock_popen.call_args_list[0][1]['cwd'])
-        self.assertEquals(['sudo', 'make'],
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
+        self.assertCallArgs(dir, self.mock_popen.call_args_list[0][1]['cwd'])
+        self.assertCallArgs(['sudo', self.make],
             self.mock_popen.call_args_list[1][0][0][:2])
         self.assertEquals(dir, self.mock_popen.call_args_list[1][1]['cwd'])
 
 
-class CheckTestCase(unittest.TestCase):
+class CheckTestCase(unittest.TestCase, Assertions):
     def setUp(self):
         self._p1 = patch('pgxnclient.api.get_file')
         self.mock_get = self._p1.start()
@@ -459,7 +475,7 @@ class CheckTestCase(unittest.TestCase):
         main(['check', 'foobar'])
 
         self.assertEquals(self.mock_popen.call_count, 1)
-        self.assertEquals(['make'], self.mock_popen.call_args_list[0][0][0][:1])
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
 
     def test_check_fails(self):
         self.mock_popen.return_value.returncode = 1
