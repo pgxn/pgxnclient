@@ -17,8 +17,7 @@ import sys
 import logging
 from subprocess import Popen, PIPE
 
-from pgxnclient.utils import load_json
-from pgxnclient.utils import argparse
+from pgxnclient.utils import load_json, argparse, find_executable
 
 from pgxnclient import __version__
 from pgxnclient import Spec, SemVer
@@ -482,17 +481,10 @@ class WithPgConfig(object):
         if os.path.split(pg_config)[0]:
             pg_config = os.path.abspath(pg_config)
         else:
-            for dir in os.environ.get('PATH', '').split(os.pathsep):
-                if not dir: continue
-                fn = os.path.abspath(os.path.join(dir, pg_config))
-                if os.path.exists(fn):
-                    pg_config = os.path.abspath(fn)
-                    break
-            else:
-                raise PgxnClientException(_("pg_config executable not found"))
-
+            pg_config = find_executable(pg_config)
+        if not pg_config:
+            raise PgxnClientException(_("pg_config executable not found"))
         return pg_config
-
 
 import shlex
 
@@ -500,6 +492,20 @@ class WithMake(WithPgConfig, WithUnpacking):
     """
     Mixin to implement commands that should invoke :program:`make`.
     """
+    @classmethod
+    def customize_parser(self, parser, subparsers, **kwargs):
+        """
+        Add the ``--make`` option to the options parser.
+        """
+        subp = super(WithMake, self).customize_parser(
+            parser, subparsers, **kwargs)
+
+        subp.add_argument('--make', metavar="PATH",
+            help = _("path to the make executable to use for building"
+                " extension"))
+
+        return subp
+
     def run_make(self, cmd, dir, env=None, sudo=None):
         """Invoke make with the selected command.
 
@@ -522,7 +528,7 @@ class WithMake(WithPgConfig, WithUnpacking):
         if sudo:
             cmdline.extend(shlex.split(sudo))
 
-        cmdline.extend(['make', 'PG_CONFIG=%s' % self.get_pg_config()])
+        cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % self.get_pg_config()])
 
         if isinstance(cmd, basestring):
             cmdline.append(cmd)
@@ -536,6 +542,26 @@ class WithMake(WithPgConfig, WithUnpacking):
             raise ProcessError(_("command returned %s: %s")
                 % (p.returncode, ' '.join(cmdline)))
 
+    def get_make(self):
+        """
+        Return the absolute path of the make binary.
+        """
+
+        make = self.opts.make
+        if make and os.path.split(make)[0]:
+            return os.path.abspath(make)
+        elif make:
+            make = find_executable(make)
+            if not make:
+                raise PgxnClientException(_("make executable not found"))
+            return make
+
+        for make in ('gmake', 'make'):
+            make = find_executable(make)
+            if make:
+                return make
+
+        raise PgxnClientException(_("make executable not found"))
 
 class WithSudo(object):
     """

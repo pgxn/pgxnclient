@@ -11,6 +11,9 @@ __all__ = ['OrderedDict', 'load_json', 'load_jsons', 'sha1', 'b']
 
 
 import sys
+import os
+
+from pgxnclient.i18n import _
 
 # OrderedDict available from Python 2.7
 if sys.version_info >= (2, 7):
@@ -54,3 +57,14 @@ else:
     def b(s):
         return s.encode('utf8')
 
+def find_executable(name):
+    """
+    Find executable by ``name`` by inspecting PATH environment variable, return
+    ``None`` if nothing found.
+    """
+    for dir in os.environ.get('PATH', '').split(os.pathsep):
+        if not dir:
+            continue
+        fn = os.path.abspath(os.path.join(dir, name))
+        if os.path.exists(fn):
+            return os.path.abspath(fn)
