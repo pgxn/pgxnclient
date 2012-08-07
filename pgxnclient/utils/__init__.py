@@ -13,8 +13,6 @@ __all__ = ['OrderedDict', 'load_json', 'load_jsons', 'sha1', 'b']
 import sys
 import os
 
-from pgxnclient.i18n import _
-
 # OrderedDict available from Python 2.7
 if sys.version_info >= (2, 7):
     from collections import OrderedDict
