@@ -79,7 +79,8 @@ Usage:
     :class: pgxn-install
 
     pgxn install [--help] [--stable | --testing | --unstable]
-                 [--pg_config *PATH*] [--sudo [*PROG*] | --nosudo]
+                 [--pg_config *PROG*] [--make *PROG*]
+                 [--sudo [*PROG*] | --nosudo]
                  *SPEC*
 
 The program takes a `package specification`_ identifying the distribution to
@@ -96,6 +97,11 @@ but this is not enforced: you may provide any Makefile as long as the expected
 commands are implemented.
 
 .. _PGXS: http://www.postgresql.org/docs/current/static/extend-pgxs.html
+
+PGXS_ relies on a presence of GNU Make — in most systems it's
+usually installed as ``gmake`` or ``make`` executable. If it's not the case you
+should provide path to GNU Make (or just simply a different executable name)
+using ``--make`` option.
 
 If there are many PostgreSQL installations on the system, the extension will
 be built and installed against the instance whose :program:`pg_config` is
@@ -131,7 +137,8 @@ Usage:
     :class: pgxn-check
 
     pgxn check [--help] [--stable | --testing | --unstable]
-               [--pg_config *PATH*] [-d *DBNAME*] [-h *HOST*] [-p *PORT*] [-U *NAME*]
+               [--pg_config *PROG*] [--make *PROG*]
+               [-d *DBNAME*] [-h *HOST*] [-p *PORT*] [-U *NAME*]
                *SPEC*
 
 The command takes a `package specification`_ identifying the distribution to
@@ -179,7 +186,8 @@ Usage:
     :class: pgxn-uninstall
 
     pgxn uninstall [--help] [--stable | --testing | --unstable]
-                   [--pg_config *PATH*] [--sudo [*PROG*] | --nosudo]
+                   [--pg_config *PROG*] [--make *PROG*]
+                   [--sudo [*PROG*] | --nosudo]
                    *SPEC*
 
 The command does the opposite of the install_ command, removing a
