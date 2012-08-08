@@ -486,6 +486,7 @@ class WithPgConfig(object):
             raise PgxnClientException(_("pg_config executable not found"))
         return pg_config
 
+
 import shlex
 
 class WithMake(WithPgConfig, WithUnpacking):
@@ -500,9 +501,10 @@ class WithMake(WithPgConfig, WithUnpacking):
         subp = super(WithMake, self).customize_parser(
             parser, subparsers, **kwargs)
 
-        subp.add_argument('--make', metavar="PATH",
-            help = _("path to the make executable to use for building"
-                " extension"))
+        subp.add_argument('--make', metavar="PROG",
+            default=self._find_default_make(),
+            help = _("the 'make' executable to use to build the extension "
+                "[default: %(default)s]"))
 
         return subp
 
@@ -542,26 +544,48 @@ class WithMake(WithPgConfig, WithUnpacking):
             raise ProcessError(_("command returned %s: %s")
                 % (p.returncode, ' '.join(cmdline)))
 
-    def get_make(self):
+    def get_make(self, _cache=[]):
         """
-        Return the absolute path of the make binary.
+        Return the path of the make binary.
         """
+        # the cache is not for performance but to return a consistent value
+        # even if the cwd is changed
+        if _cache:
+            return _cache[0]
 
         make = self.opts.make
-        if make and os.path.split(make)[0]:
-            return os.path.abspath(make)
-        elif make:
-            make = find_executable(make)
-            if not make:
-                raise PgxnClientException(_("make executable not found"))
-            return make
 
+        if os.path.split(make)[0]:
+            # At least a relative dir specified.
+            if not os.path.exists(make):
+                raise PgxnClientException(_("make executable not found: %s")
+                    % make)
+
+            # Convert to abs path to be robust in case the dir is changed.
+            make = os.path.abspath(make)
+
+        else:
+            # we don't find make here and convert to abs path because it's a
+            # security hole: make may be run under sudo and in this case we
+            # don't want root to execute a make hacked in an user local dir
+            if not find_executable(make):
+                raise PgxnClientException(_("make executable not found: %s")
+                    % make)
+
+        _cache.append(make)
+        return make
+
+    @classmethod
+    def _find_default_make(self):
         for make in ('gmake', 'make'):
-            make = find_executable(make)
-            if make:
+            path = find_executable(make)
+            if path:
                 return make
 
-        raise PgxnClientException(_("make executable not found"))
+        # if nothing was found, fall back on 'gmake'. If it was missing we
+        # will give an error when attempting to use it
+        return 'gmake'
+
 
 class WithSudo(object):
     """
