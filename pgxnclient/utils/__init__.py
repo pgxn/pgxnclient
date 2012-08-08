@@ -7,7 +7,8 @@ pgxnclient -- misc utilities package
 # This file is part of the PGXN client
 
 
-__all__ = ['OrderedDict', 'load_json', 'load_jsons', 'sha1', 'b']
+__all__ = ['OrderedDict', 'load_json', 'load_jsons', 'sha1', 'b',
+    'find_executable']
 
 
 import sys
@@ -55,6 +56,7 @@ else:
     def b(s):
         return s.encode('utf8')
 
+
 def find_executable(name):
     """
     Find executable by ``name`` by inspecting PATH environment variable, return
@@ -66,3 +68,4 @@ def find_executable(name):
         fn = os.path.abspath(os.path.join(dir, name))
         if os.path.exists(fn):
             return os.path.abspath(fn)
+
