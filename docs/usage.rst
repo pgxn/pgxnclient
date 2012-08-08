@@ -79,7 +79,8 @@ Usage:
     :class: pgxn-install
 
     pgxn install [--help] [--stable | --testing | --unstable]
-                 [--pg_config *PATH*] [--sudo [*PROG*] | --nosudo]
+                 [--pg_config *PROG*] [--make *PROG*]
+                 [--sudo [*PROG*] | --nosudo]
                  *SPEC*
 
 The program takes a `package specification`_ identifying the distribution to
@@ -101,6 +102,13 @@ If there are many PostgreSQL installations on the system, the extension will
 be built and installed against the instance whose :program:`pg_config` is
 first found on the :envvar:`PATH`. A different instance can be specified using
 the option :samp:`--pg_config {PATH}`.
+
+The PGXS_ build system relies on a presence of `GNU Make`__: in many systems
+it is installed as :program:`gmake` or :program:`make` executable. The program
+will use the first of them on the path. You can specify an alternative program
+using ``--make`` option.
+
+.. __: http://www.gnu.org/software/make/
 
 If the extension is being installed into a system PostgreSQL installation, the
 install phase will likely require root privileges to be performed.  In this
@@ -131,7 +139,8 @@ Usage:
     :class: pgxn-check
 
     pgxn check [--help] [--stable | --testing | --unstable]
-               [--pg_config *PATH*] [-d *DBNAME*] [-h *HOST*] [-p *PORT*] [-U *NAME*]
+               [--pg_config *PROG*] [--make *PROG*]
+               [-d *DBNAME*] [-h *HOST*] [-p *PORT*] [-U *NAME*]
                *SPEC*
 
 The command takes a `package specification`_ identifying the distribution to
@@ -159,6 +168,8 @@ The database connection options are similar to the ones in load_, with the
 difference that the variable :envvar:`PGDATABASE` doesn't influence the
 database name.
 
+See the install_ command for details about the command arguments.
+
 .. warning::
     At the time of writing, :program:`pg_regress` on Debian and derivatives is
     affected by `bug #554166`__ which makes *HOST* selection impossible.
@@ -179,7 +190,8 @@ Usage:
     :class: pgxn-uninstall
 
     pgxn uninstall [--help] [--stable | --testing | --unstable]
-                   [--pg_config *PATH*] [--sudo [*PROG*] | --nosudo]
+                   [--pg_config *PROG*] [--make *PROG*]
+                   [--sudo [*PROG*] | --nosudo]
                    *SPEC*
 
 The command does the opposite of the install_ command, removing a
@@ -249,7 +261,7 @@ confirmation.
 
 If the distribution provides more than one extension, the extensions are
 loaded in the order in which they are specified in the ``provides`` section of
-the ``META.json`` file. It is also possilbe to load only a few of the
+the ``META.json`` file. It is also possible to load only a few of the
 extensions provided, specifying them after *SPEC*: the extensions will be
 loaded in the order specified.
 
@@ -297,7 +309,7 @@ itself, so the option will be ignored.
 
 If the distribution specifies more than one extension, they are unloaded in
 reverse order respect to the order in which they are specified in the
-``META.json`` file.  It is also possilbe to unload only a few of the
+``META.json`` file.  It is also possible to unload only a few of the
 extensions provided, specifying them after *SPEC*: the extensions will be
 unloaded in the order specified.
 

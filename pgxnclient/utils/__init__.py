@@ -7,10 +7,12 @@ pgxnclient -- misc utilities package
 # This file is part of the PGXN client
 
 
-__all__ = ['OrderedDict', 'load_json', 'load_jsons', 'sha1', 'b']
+__all__ = ['OrderedDict', 'load_json', 'load_jsons', 'sha1', 'b',
+    'find_executable']
 
 
 import sys
+import os
 
 # OrderedDict available from Python 2.7
 if sys.version_info >= (2, 7):
@@ -53,4 +55,17 @@ if sys.version_info < (3,):
 else:
     def b(s):
         return s.encode('utf8')
+
+
+def find_executable(name):
+    """
+    Find executable by ``name`` by inspecting PATH environment variable, return
+    ``None`` if nothing found.
+    """
+    for dir in os.environ.get('PATH', '').split(os.pathsep):
+        if not dir:
+            continue
+        fn = os.path.abspath(os.path.join(dir, name))
+        if os.path.exists(fn):
+            return os.path.abspath(fn)
 

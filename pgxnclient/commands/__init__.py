@@ -17,8 +17,7 @@ import sys
 import logging
 from subprocess import Popen, PIPE
 
-from pgxnclient.utils import load_json
-from pgxnclient.utils import argparse
+from pgxnclient.utils import load_json, argparse, find_executable
 
 from pgxnclient import __version__
 from pgxnclient import Spec, SemVer
@@ -449,8 +448,8 @@ class WithPgConfig(object):
         subp = super(WithPgConfig, self).customize_parser(
             parser, subparsers, **kwargs)
 
-        subp.add_argument('--pg_config', metavar="PATH", default='pg_config',
-            help = _("path to the pg_config executable to find the database"
+        subp.add_argument('--pg_config', metavar="PROG", default='pg_config',
+            help = _("the pg_config executable to find the database"
                 " [default: %(default)s]"))
 
         return subp
@@ -482,15 +481,9 @@ class WithPgConfig(object):
         if os.path.split(pg_config)[0]:
             pg_config = os.path.abspath(pg_config)
         else:
-            for dir in os.environ.get('PATH', '').split(os.pathsep):
-                if not dir: continue
-                fn = os.path.abspath(os.path.join(dir, pg_config))
-                if os.path.exists(fn):
-                    pg_config = os.path.abspath(fn)
-                    break
-            else:
-                raise PgxnClientException(_("pg_config executable not found"))
-
+            pg_config = find_executable(pg_config)
+        if not pg_config:
+            raise PgxnClientException(_("pg_config executable not found"))
         return pg_config
 
 
@@ -500,6 +493,21 @@ class WithMake(WithPgConfig, WithUnpacking):
     """
     Mixin to implement commands that should invoke :program:`make`.
     """
+    @classmethod
+    def customize_parser(self, parser, subparsers, **kwargs):
+        """
+        Add the ``--make`` option to the options parser.
+        """
+        subp = super(WithMake, self).customize_parser(
+            parser, subparsers, **kwargs)
+
+        subp.add_argument('--make', metavar="PROG",
+            default=self._find_default_make(),
+            help = _("the 'make' executable to use to build the extension "
+                "[default: %(default)s]"))
+
+        return subp
+
     def run_make(self, cmd, dir, env=None, sudo=None):
         """Invoke make with the selected command.
 
@@ -522,7 +530,7 @@ class WithMake(WithPgConfig, WithUnpacking):
         if sudo:
             cmdline.extend(shlex.split(sudo))
 
-        cmdline.extend(['make', 'PG_CONFIG=%s' % self.get_pg_config()])
+        cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % self.get_pg_config()])
 
         if isinstance(cmd, basestring):
             cmdline.append(cmd)
@@ -535,6 +543,48 @@ class WithMake(WithPgConfig, WithUnpacking):
         if p.returncode:
             raise ProcessError(_("command returned %s: %s")
                 % (p.returncode, ' '.join(cmdline)))
+
+    def get_make(self, _cache=[]):
+        """
+        Return the path of the make binary.
+        """
+        # the cache is not for performance but to return a consistent value
+        # even if the cwd is changed
+        if _cache:
+            return _cache[0]
+
+        make = self.opts.make
+
+        if os.path.split(make)[0]:
+            # At least a relative dir specified.
+            if not os.path.exists(make):
+                raise PgxnClientException(_("make executable not found: %s")
+                    % make)
+
+            # Convert to abs path to be robust in case the dir is changed.
+            make = os.path.abspath(make)
+
+        else:
+            # we don't find make here and convert to abs path because it's a
+            # security hole: make may be run under sudo and in this case we
+            # don't want root to execute a make hacked in an user local dir
+            if not find_executable(make):
+                raise PgxnClientException(_("make executable not found: %s")
+                    % make)
+
+        _cache.append(make)
+        return make
+
+    @classmethod
+    def _find_default_make(self):
+        for make in ('gmake', 'make'):
+            path = find_executable(make)
+            if path:
+                return make
+
+        # if nothing was found, fall back on 'gmake'. If it was missing we
+        # will give an error when attempting to use it
+        return 'gmake'
 
 
 class WithSudo(object):

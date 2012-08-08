@@ -3,6 +3,14 @@
 PGXN Client changes log
 -----------------------
 
+pgxnclient 1.2
+==============
+
+- ``gmake`` if used in favour of ``make`` for platforms where the two are
+  distinct, such as BSD (ticket #14).
+- Added ``--make`` option to select the make executable (ticket #16).
+
+
 pgxnclient 1.1
 ==============
 
