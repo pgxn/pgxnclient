@@ -448,8 +448,8 @@ class WithPgConfig(object):
         subp = super(WithPgConfig, self).customize_parser(
             parser, subparsers, **kwargs)
 
-        subp.add_argument('--pg_config', metavar="PATH", default='pg_config',
-            help = _("path to the pg_config executable to find the database"
+        subp.add_argument('--pg_config', metavar="PROG", default='pg_config',
+            help = _("the pg_config executable to find the database"
                 " [default: %(default)s]"))
 
         return subp
