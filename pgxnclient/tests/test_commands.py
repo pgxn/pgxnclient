@@ -409,7 +409,26 @@ class InstallTestCase(unittest.TestCase, Assertions):
         self.assertCallArgs(['gksudo', '-d', 'hello world', self.make],
             self.mock_popen.call_args_list[1][0][0][:4])
 
-    @patch('pgxnclient.commands.unpack')
+    @patch('pgxnclient.commands.unpack_tar')
+    def test_install_local_tar(self, mock_unpack):
+        from pgxnclient.utils.tar import unpack
+        mock_unpack.side_effect = unpack
+
+        from pgxnclient.cli import main
+        main(['install', '--sudo', '--', get_test_filename('foobar-0.42.1.tar.gz')])
+
+        self.assertEquals(self.mock_popen.call_count, 2)
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
+        self.assertCallArgs(['sudo', self.make],
+            self.mock_popen.call_args_list[1][0][0][:2])
+        make_cwd = self.mock_popen.call_args_list[1][1]['cwd']
+
+        self.assertEquals(mock_unpack.call_count, 1)
+        zipname, tmpdir = mock_unpack.call_args[0]
+        self.assertEqual(zipname, get_test_filename('foobar-0.42.1.tar.gz'))
+        self.assertEqual(make_cwd, os.path.join(tmpdir, 'foobar-0.42.1'))
+
+    @patch('pgxnclient.commands.unpack_zip')
     def test_install_local_zip(self, mock_unpack):
         from pgxnclient.utils.zip import unpack
         mock_unpack.side_effect = unpack
@@ -580,7 +599,7 @@ class LoadTestCase(unittest.TestCase):
         args = self.mock_popen.call_args[0][0]
         self.assertEqual('somewhere', args[args.index('--host') + 1])
 
-    @patch('pgxnclient.commands.unpack')
+    @patch('pgxnclient.commands.unpack_zip')
     @patch('pgxnclient.api.get_file')
     def test_load_local_zip(self, mock_get, mock_unpack):
         mock_get.side_effect = lambda *args: self.fail('network invoked')
@@ -589,6 +608,23 @@ class LoadTestCase(unittest.TestCase):
 
         from pgxnclient.cli import main
         main(['load', '--yes', get_test_filename('foobar-0.42.1.zip')])
+
+        self.assertEquals(mock_unpack.call_count, 0)
+        self.assertEquals(self.mock_popen.call_count, 1)
+        self.assert_('psql' in self.mock_popen.call_args[0][0][0])
+        communicate = self.mock_popen.return_value.communicate
+        self.assertEquals(communicate.call_args[0][0],
+            'CREATE EXTENSION foobar;')
+
+    @patch('pgxnclient.commands.unpack_tar')
+    @patch('pgxnclient.api.get_file')
+    def test_load_local_tar(self, mock_get, mock_unpack):
+        mock_get.side_effect = lambda *args: self.fail('network invoked')
+        from pgxnclient.utils.tar import unpack
+        mock_unpack.side_effect = unpack
+
+        from pgxnclient.cli import main
+        main(['load', '--yes', get_test_filename('foobar-0.42.1.tar.gz')])
 
         self.assertEquals(mock_unpack.call_count, 0)
         self.assertEquals(self.mock_popen.call_count, 1)
