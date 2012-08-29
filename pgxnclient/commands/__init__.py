@@ -224,6 +224,7 @@ class Command(object):
 
 from pgxnclient.errors import BadSpecError
 from pgxnclient.utils.zip import get_meta_from_zip
+from pgxnclient.utils.tar import get_meta_from_tar
 
 class WithSpec(Command):
     """Mixin to implement commands taking a package specification.
@@ -384,8 +385,13 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
                 return load_json(f)
 
         elif spec.is_file():
-            # Get the metadata from a zip file
-            return get_meta_from_zip(spec.filename)
+            # Get the metadata from an archive file
+            if spec.filename.endswith('.zip'):
+                return get_meta_from_zip(spec.filename)
+            else:
+                # Tar files have many naming variants.  Let's not
+                # guess them.
+                return get_meta_from_tar(spec.filename)
 
 
 class WithSpecLocal(WithSpec):
@@ -411,7 +417,8 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
 
 import shutil
 import tempfile
-from pgxnclient.utils.zip import unpack
+from pgxnclient.utils.tar import unpack as unpack_tar
+from pgxnclient.utils.zip import unpack as unpack_zip
 
 class WithUnpacking(object):
     """
@@ -433,7 +440,10 @@ class WithUnpacking(object):
 
     def unpack(self, zipname, destdir):
         """Unpack the zip file *zipname* into *destdir*."""
-        return unpack(zipname, destdir)
+        if zipname.endswith('.zip'):
+            return unpack_zip(zipname, destdir)
+        else:
+            return unpack_tar(zipname, destdir)
 
 
 class WithPgConfig(object):
