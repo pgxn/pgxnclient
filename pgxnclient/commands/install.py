@@ -20,7 +20,7 @@ from pgxnclient import SemVer
 from pgxnclient.i18n import _, N_
 from pgxnclient.utils import sha1, b
 from pgxnclient.errors import BadChecksum, PgxnClientException, InsufficientPrivileges
-from pgxnclient.network import download, get_local_file_name
+from pgxnclient.network import download
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
 from pgxnclient.commands import WithSpec, WithSpecLocal, WithSudo
 from pgxnclient.utils.zip import unpack
@@ -54,8 +54,8 @@ class Download(WithSpec, Command):
                 "sha1 missing from the distribution meta")
 
         with self.api.download(data['name'], SemVer(data['version'])) as fin:
-            fn = self._get_local_file_name(fin.url)
-            fn = download(fin, fn, rename=True)
+            fn = download(fin, self.opts.target)
+
         self.verify_checksum(fn, chk)
         return fn
 
@@ -78,9 +78,6 @@ class Download(WithSpec, Command):
             logger.error(_("file %s has sha1 %s instead of %s"),
                 fn, sha, chk)
             raise BadChecksum(_("bad sha1 in downloaded file"))
-
-    def _get_local_file_name(self, url):
-        return get_local_file_name(self.opts.target, url)
 
 
 class InstallUninstall(WithMake, WithSpecLocal, Command):
