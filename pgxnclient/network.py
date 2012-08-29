@@ -8,6 +8,7 @@ pgxnclient -- network interaction
 
 import os
 import urllib2
+from urlparse import urlsplit
 from itertools import count
 from contextlib import closing
 
@@ -38,6 +39,20 @@ def get_file(url):
                 % (e.code, e.url))
     except urllib2.URLError, e:
         raise NetworkError(_("network error: %s") % e.reason)
+
+def get_local_file_name(target, url):
+    """Return a good name for a local file.
+
+    If *target* is a dir, make a name out of the url. Otherwise return target
+    itself. Always return an absolute path.
+    """
+    if os.path.isdir(target):
+        basename = urlsplit(url)[2].rsplit('/', 1)[-1]
+        fn = os.path.join(target, basename)
+    else:
+        fn = target
+
+    return os.path.abspath(fn)
 
 def download(f, fn, rename=True):
     """Download a file locally.

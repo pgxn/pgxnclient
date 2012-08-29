@@ -20,7 +20,7 @@ from pgxnclient import SemVer
 from pgxnclient.i18n import _, N_
 from pgxnclient.utils import sha1, b
 from pgxnclient.errors import BadChecksum, PgxnClientException, InsufficientPrivileges
-from pgxnclient.network import download
+from pgxnclient.network import download, get_local_file_name
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
 from pgxnclient.commands import WithSpec, WithSpecLocal, WithSudo
 from pgxnclient.utils.zip import unpack
@@ -80,14 +80,7 @@ class Download(WithSpec, Command):
             raise BadChecksum(_("bad sha1 in downloaded file"))
 
     def _get_local_file_name(self, url):
-        from urlparse import urlsplit
-        if os.path.isdir(self.opts.target):
-            basename = urlsplit(url)[2].rsplit('/', 1)[-1]
-            fn = os.path.join(self.opts.target, basename)
-        else:
-            fn = self.opts.target
-
-        return os.path.abspath(fn)
+        return get_local_file_name(self.opts.target, url)
 
 
 class InstallUninstall(WithMake, WithSpecLocal, Command):
