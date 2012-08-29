@@ -409,7 +409,7 @@ class InstallTestCase(unittest.TestCase, Assertions):
         self.assertCallArgs(['gksudo', '-d', 'hello world', self.make],
             self.mock_popen.call_args_list[1][0][0][:4])
 
-    @patch('pgxnclient.commands.unpack')
+    @patch('pgxnclient.commands.install.unpack')
     def test_install_local_zip(self, mock_unpack):
         from pgxnclient.utils.zip import unpack
         mock_unpack.side_effect = unpack
@@ -580,7 +580,7 @@ class LoadTestCase(unittest.TestCase):
         args = self.mock_popen.call_args[0][0]
         self.assertEqual('somewhere', args[args.index('--host') + 1])
 
-    @patch('pgxnclient.commands.unpack')
+    @patch('pgxnclient.commands.install.unpack')
     @patch('pgxnclient.api.get_file')
     def test_load_local_zip(self, mock_get, mock_unpack):
         mock_get.side_effect = lambda *args: self.fail('network invoked')

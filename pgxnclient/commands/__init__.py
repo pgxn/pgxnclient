@@ -409,33 +409,6 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
         return super(WithSpecLocal, self).get_spec(_can_be_local=True)
 
 
-import shutil
-import tempfile
-from pgxnclient.utils.zip import unpack
-
-class WithUnpacking(object):
-    """
-    Mixin to implement commands that may deal with zip files.
-    """
-    def call_with_temp_dir(self, f, *args, **kwargs):
-        """
-        Call a function in the context of a temporary directory.
-
-        Create the temp directory and pass its name as first argument to *f*.
-        Other arguments and keywords are passed to *f* too. Upon exit delete
-        the directory.
-        """
-        dir = tempfile.mkdtemp()
-        try:
-            return f(dir, *args, **kwargs)
-        finally:
-            shutil.rmtree(dir)
-
-    def unpack(self, zipname, destdir):
-        """Unpack the zip file *zipname* into *destdir*."""
-        return unpack(zipname, destdir)
-
-
 class WithPgConfig(object):
     """
     Mixin to implement commands that should query :program:`pg_config`.
@@ -489,7 +462,7 @@ class WithPgConfig(object):
 
 import shlex
 
-class WithMake(WithPgConfig, WithUnpacking):
+class WithMake(WithPgConfig):
     """
     Mixin to implement commands that should invoke :program:`make`.
     """

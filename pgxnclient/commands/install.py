@@ -23,6 +23,8 @@ from pgxnclient.errors import BadChecksum, PgxnClientException, InsufficientPriv
 from pgxnclient.network import download
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
 from pgxnclient.commands import WithSpec, WithSpecLocal, WithSudo
+from pgxnclient.utils.zip import unpack
+from pgxnclient.utils.temp import temp_dir
 from pgxnclient.utils.strings import Identifier
 
 logger = logging.getLogger('pgxnclient.commands')
@@ -93,18 +95,19 @@ class InstallUninstall(WithMake, WithSpecLocal, Command):
     Base class to implement the ``install`` and ``uninstall`` commands.
     """
     def run(self):
-        return self.call_with_temp_dir(self._run)
+        with temp_dir() as dir:
+            return self._run(dir)
 
     def _run(self, dir):
         spec = self.get_spec()
         if spec.is_dir():
             pdir = os.path.abspath(spec.dirname)
         elif spec.is_file():
-            pdir = self.unpack(spec.filename, dir)
+            pdir = unpack(spec.filename, dir)
         else:   # download
             self.opts.target = dir
             fn = Download(self.opts).run()
-            pdir = self.unpack(fn, dir)
+            pdir = unpack(fn, dir)
 
         self.maybe_run_configure(pdir)
 
