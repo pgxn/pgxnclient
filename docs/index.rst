@@ -29,7 +29,6 @@ degrade gracefully in presence of any package hosted on PGXN.
 - Downloads: http://pypi.python.org/pypi/pgxnclient/
 - Discussion group: http://groups.google.com/group/pgxn-users/
 - Source repository: https://github.com/dvarrazzo/pgxnclient/
-- PgFoundry project: http://pgfoundry.org/projects/pgxnclient/
 
 
 Contents:
