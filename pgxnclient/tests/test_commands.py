@@ -149,6 +149,20 @@ class DownloadTestCase(unittest.TestCase):
             ifunlink(fn)
 
     @patch('pgxnclient.network.get_file')
+    def test_download_url(self, mock):
+        mock.side_effect = fake_get_file
+
+        fn = 'foobar-0.43.2b1.zip'
+        self.assert_(not os.path.exists(fn))
+
+        from pgxnclient.cli import main
+        try:
+            main(['download', 'http://api.pgxn.org/dist/foobar/0.43.2b1/foobar-0.43.2b1.zip'])
+            self.assert_(os.path.exists(fn))
+        finally:
+            ifunlink(fn)
+
+    @patch('pgxnclient.network.get_file')
     def test_download_ext(self, mock):
         mock.side_effect = fake_get_file
 
@@ -366,6 +380,17 @@ class InstallTestCase(unittest.TestCase, Assertions):
         self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
         self.assertCallArgs([self.make], self.mock_popen.call_args_list[1][0][0][:1])
 
+    def test_install_url(self):
+        self.mock_pgconfig.side_effect = fake_pg_config(
+            libdir=os.environ['HOME'], bindir='/')
+
+        from pgxnclient.cli import main
+        main(['install', 'http://api.pgxn.org/dist/foobar/0.42.1/foobar-0.42.1.zip'])
+
+        self.assertEquals(self.mock_popen.call_count, 2)
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[1][0][0][:1])
+
     def test_install_fails(self):
         self.mock_popen.return_value.returncode = 1
         self.mock_pgconfig.side_effect = fake_pg_config(
@@ -473,6 +498,13 @@ class CheckTestCase(unittest.TestCase, Assertions):
     def test_check_latest(self):
         from pgxnclient.cli import main
         main(['check', 'foobar'])
+
+        self.assertEquals(self.mock_popen.call_count, 1)
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
+
+    def test_check_url(self):
+        from pgxnclient.cli import main
+        main(['check', 'http://api.pgxn.org/dist/foobar/0.42.1/foobar-0.42.1.zip'])
 
         self.assertEquals(self.mock_popen.call_count, 1)
         self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
@@ -612,6 +644,24 @@ class LoadTestCase(unittest.TestCase):
         finally:
             shutil.rmtree(tdir)
 
+        self.assertEquals(self.mock_popen.call_count, 1)
+        self.assert_('psql' in self.mock_popen.call_args[0][0][0])
+        communicate = self.mock_popen.return_value.communicate
+        self.assertEquals(communicate.call_args[0][0],
+            'CREATE EXTENSION foobar;')
+
+    @patch('pgxnclient.commands.install.unpack')
+    @patch('pgxnclient.network.get_file')
+    def test_load_url(self, mock_get, mock_unpack):
+        mock_get.side_effect = fake_get_file
+        from pgxnclient.utils.zip import unpack
+        mock_unpack.side_effect = unpack
+
+        from pgxnclient.cli import main
+        main(['load', '--yes',
+            'http://api.pgxn.org/dist/foobar/0.42.1/foobar-0.42.1.zip'])
+
+        self.assertEquals(mock_unpack.call_count, 0)
         self.assertEquals(self.mock_popen.call_count, 1)
         self.assert_('psql' in self.mock_popen.call_args[0][0][0])
         communicate = self.mock_popen.return_value.communicate

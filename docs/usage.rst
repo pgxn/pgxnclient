@@ -65,6 +65,9 @@ directory containing a distribution: in this case the specification should
 contain at least a path separator to disambiguate it from a distribution name,
 for instance ``pgxn install ./foo.zip``.
 
+A few commands also allow specifying a package with an URL. Currently the
+schemas ``http://`` and ``https://`` are supported.
+
 
 .. _install:
 
@@ -85,7 +88,8 @@ Usage:
 
 The program takes a `package specification`_ identifying the distribution to
 work with.  The download phase is skipped if the distribution specification
-refers to a local directory or package.
+refers to a local directory or package.  The package may be specified with an
+URL.
 
 Note that the built extension is not loaded in any database: use the command
 `load`_ for this purpose.
@@ -144,8 +148,9 @@ Usage:
                *SPEC*
 
 The command takes a `package specification`_ identifying the distribution to
-work with, which can also be a local file or directory. The distribution is
-unpacked if required and the ``installcheck`` make target is run.
+work with, which can also be a local file or directory or an URL. The
+distribution is unpacked if required and the ``installcheck`` make target is
+run.
 
 .. note::
     The command doesn't run ``make all`` before ``installcheck``: if any file
@@ -224,11 +229,11 @@ Usage:
               *SPEC* [*EXT* [*EXT* ...]]
 
 The distribution is specified according to the `package specification`_ and
-can refer to a local directory or file. No consistency check is performed
-between the packages specified in the ``install`` and ``load`` command: the
-specifications should refer to compatible packages. The specified distribution
-is only used to read the metadata: only installed files are actually used to
-issue database commands.
+can refer to a local directory or file or to an URL.  No consistency check is
+performed between the packages specified in the ``install`` and ``load``
+command: the specifications should refer to compatible packages. The specified
+distribution is only used to read the metadata: only installed files are
+actually used to issue database commands.
 
 The database to install into can be specified using options
 ``-d``/``--dbname``, ``-h``/``--host``, ``-p``/``--port``,
@@ -334,11 +339,12 @@ Usage:
                   [--target *PATH*]
                   *SPEC*
 
-The distribution is specified according to the `package specification`_.  The
-file is saved in the current directory with name usually
-:samp:`{distribution}-{version}.zip`. If a file with the same name exists, a
-suffix ``-1``, ``-2`` etc. is added to the name, before the extension.  A
-different directory or name can be specified using the ``--target`` option.
+The distribution is specified according to the `package specification`_ and
+can be represented by an URL.  The file is saved in the current directory with
+name usually :samp:`{distribution}-{version}.zip`. If a file with the same
+name exists, a suffix ``-1``, ``-2`` etc. is added to the name, before the
+extension.  A different directory or name can be specified using the
+``--target`` option.
 
 
 .. _pgxn-search:
@@ -419,9 +425,9 @@ Usage:
               [--details | --meta | --readme | --versions]
               *SPEC*
 
-The distribution is specified according to the `package specification`_.
-The command output is a list of values obtained by the distribution's
-``META.json`` file, for example:
+The distribution is specified according to the `package specification`_.  It
+cannot be a local dir or file nor an URL.  The command output is a list of
+values obtained by the distribution's ``META.json`` file, for example:
 
 .. code-block:: console
 

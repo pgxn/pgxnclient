@@ -20,10 +20,12 @@ from subprocess import Popen, PIPE
 from pgxnclient.utils import load_json, argparse, find_executable
 
 from pgxnclient import __version__
+from pgxnclient import network
 from pgxnclient import Spec, SemVer
 from pgxnclient.api import Api
 from pgxnclient.i18n import _, gettext
 from pgxnclient.errors import NotFound, PgxnClientException, ProcessError, ResourceNotFound, UserAbort
+from pgxnclient.utils.temp import temp_dir
 
 logger = logging.getLogger('pgxnclient.commands')
 
@@ -265,7 +267,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
 
         return subp
 
-    def get_spec(self, _can_be_local=False):
+    def get_spec(self, _can_be_local=False, _can_be_url=False):
         """
         Return the package specification requested.
 
@@ -282,6 +284,10 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         if not _can_be_local and spec.is_local():
             raise PgxnClientException(
                 _("you cannot use a local resource with this command"))
+
+        if not _can_be_url and spec.is_url():
+            raise PgxnClientException(
+                _("you cannot use an url with this command"))
 
         return spec
 
@@ -359,7 +365,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
 
         Return the object obtained parsing the JSON.
         """
-        if not spec.is_local():
+        if spec.is_name():
             # Get the metadata from the API
             try:
                 data = self.api.dist(spec.name)
@@ -387,6 +393,14 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
             # Get the metadata from a zip file
             return get_meta_from_zip(spec.filename)
 
+        elif spec.is_url():
+            with network.get_file(spec.url) as fin:
+                with temp_dir() as dir:
+                    fn = network.download(fin, dir)
+                    return get_meta_from_zip(fn)
+
+        else:
+            assert False
 
 class WithSpecLocal(WithSpec):
     """
@@ -405,8 +419,29 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
 
         return subp
 
-    def get_spec(self):
-        return super(WithSpecLocal, self).get_spec(_can_be_local=True)
+    def get_spec(self, **kwargs):
+        kwargs['_can_be_local'] = True
+        return super(WithSpecLocal, self).get_spec(**kwargs)
+
+class WithSpecUrl(WithSpec):
+    """
+    Mixin to implement commands that can also refer to a URL.
+    """
+
+    @classmethod
+    def customize_parser(self, parser, subparsers, epilog=None, **kwargs):
+        epilog = _("""
+SPEC may also be an url specifying a protocol such as 'http://' or 'https://'.
+""") + (epilog or "")
+
+        subp = super(WithSpecUrl, self).customize_parser(
+            parser, subparsers, epilog=epilog, **kwargs)
+
+        return subp
+
+    def get_spec(self, **kwargs):
+        kwargs['_can_be_url'] = True
+        return super(WithSpecUrl, self).get_spec(**kwargs)
 
 
 class WithPgConfig(object):

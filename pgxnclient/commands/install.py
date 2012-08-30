@@ -22,7 +22,7 @@ from pgxnclient.i18n import _, N_
 from pgxnclient.utils import sha1, b
 from pgxnclient.errors import BadChecksum, PgxnClientException, InsufficientPrivileges
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
-from pgxnclient.commands import WithSpec, WithSpecLocal, WithSudo
+from pgxnclient.commands import WithSpecUrl, WithSpecLocal, WithSudo
 from pgxnclient.utils.zip import unpack
 from pgxnclient.utils.temp import temp_dir
 from pgxnclient.utils.strings import Identifier
@@ -30,7 +30,7 @@ from pgxnclient.utils.strings import Identifier
 logger = logging.getLogger('pgxnclient.commands')
 
 
-class Download(WithSpec, Command):
+class Download(WithSpecUrl, Command):
     name = 'download'
     description = N_("download a distribution from the network")
 
@@ -45,6 +45,11 @@ class Download(WithSpec, Command):
 
     def run(self):
         spec = self.get_spec()
+        assert not spec.is_local()
+
+        if spec.is_url():
+            return self._run_url(spec)
+
         data = self.get_meta(spec)
 
         try:
@@ -57,6 +62,12 @@ class Download(WithSpec, Command):
             fn = network.download(fin, self.opts.target)
 
         self.verify_checksum(fn, chk)
+        return fn
+
+    def _run_url(self, spec):
+        with network.get_file(spec.url) as fin:
+            fn = network.download(fin, self.opts.target)
+
         return fn
 
     def verify_checksum(self, fn, chk):
@@ -80,7 +91,7 @@ class Download(WithSpec, Command):
             raise BadChecksum(_("bad sha1 in downloaded file"))
 
 
-class InstallUninstall(WithMake, WithSpecLocal, Command):
+class InstallUninstall(WithMake, WithSpecUrl, WithSpecLocal, Command):
     """
     Base class to implement the ``install`` and ``uninstall`` commands.
     """
@@ -94,10 +105,12 @@ class InstallUninstall(WithMake, WithSpecLocal, Command):
             pdir = os.path.abspath(spec.dirname)
         elif spec.is_file():
             pdir = unpack(spec.filename, dir)
-        else:   # download
+        elif not spec.is_local():
             self.opts.target = dir
             fn = Download(self.opts).run()
             pdir = unpack(fn, dir)
+        else:
+            assert False
 
         self.maybe_run_configure(pdir)
 
@@ -213,7 +226,7 @@ class Check(WithDatabase, InstallUninstall):
             raise
 
 
-class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
+class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command):
     """
     Base class to implement the ``load`` and ``unload`` commands.
     """
