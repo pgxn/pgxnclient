@@ -102,6 +102,11 @@ commands are implemented.
 
 .. _PGXS: http://www.postgresql.org/docs/current/static/extend-pgxs.html
 
+PGXS_ relies on a presence of GNU Make — in most systems it's
+usually installed as ``gmake`` or ``make`` executable. If it's not the case you
+should provide path to GNU Make (or just simply a different executable name)
+using ``--make`` option.
+
 If there are many PostgreSQL installations on the system, the extension will
 be built and installed against the instance whose :program:`pg_config` is
 first found on the :envvar:`PATH`. A different instance can be specified using
