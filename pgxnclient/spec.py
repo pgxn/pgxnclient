@@ -33,14 +33,18 @@ class Spec(object):
         'stable': STABLE, }
 
     def __init__(self, name=None, op=None, ver=None,
-            dirname=None, filename=None):
+            dirname=None, filename=None, url=None):
         self.name = name and name.lower()
         self.op = op
         self.ver = ver
 
-        # point to local files
+        # point to local files or specific resources
         self.dirname = dirname
         self.filename = filename
+        self.url = url
+
+    def is_name(self):
+        return self.name is not None
 
     def is_dir(self):
         return self.dirname is not None
@@ -48,11 +52,14 @@ class Spec(object):
     def is_file(self):
         return self.filename is not None
 
+    def is_url(self):
+        return self.url is not None
+
     def is_local(self):
         return self.is_dir() or self.is_file()
 
     def __str__(self):
-        name = self.name or self.filename or self.dirname or "???"
+        name = self.name or self.filename or self.dirname or self.url or "???"
         if self.op is None:
             return name
         else:
@@ -64,6 +71,10 @@ class Spec(object):
 
         Raise BadSpecError if couldn't parse.
         """
+        # TODO: handle file:// too
+        if spec.startswith('http://') or spec.startswith('https://'):
+            return Spec(url=spec)
+
         if os.sep in spec:
             # This is a local thing, let's see what
             if os.path.isdir(spec):
