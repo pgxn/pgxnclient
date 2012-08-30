@@ -17,10 +17,10 @@ import tempfile
 from subprocess import PIPE
 
 from pgxnclient import SemVer
+from pgxnclient import network
 from pgxnclient.i18n import _, N_
 from pgxnclient.utils import sha1, b
 from pgxnclient.errors import BadChecksum, PgxnClientException, InsufficientPrivileges
-from pgxnclient.network import download
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
 from pgxnclient.commands import WithSpec, WithSpecLocal, WithSudo
 from pgxnclient.utils.zip import unpack
@@ -54,7 +54,7 @@ class Download(WithSpec, Command):
                 "sha1 missing from the distribution meta")
 
         with self.api.download(data['name'], SemVer(data['version'])) as fin:
-            fn = download(fin, self.opts.target)
+            fn = network.download(fin, self.opts.target)
 
         self.verify_checksum(fn, chk)
         return fn
