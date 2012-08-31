@@ -7,10 +7,9 @@ pgxnclient -- tar file utilities
 # This file is part of the PGXN client
 
 import os
-import stat
 import tarfile
 
-from pgxnclient.utils import b, load_jsons
+from pgxnclient.utils import load_jsons
 from pgxnclient.i18n import _
 from pgxnclient.errors import PgxnClientException
 
@@ -24,7 +23,7 @@ def unpack(tarname, destdir):
     try:
         for fn in tf.getnames():
             if fn.startswith('.') or fn.startswith('/'):
-                raise PgxnClientException(_("insecure file name in archive: %s") % fname)
+                raise PgxnClientException(_("insecure file name in archive: %s") % fn)
 
         tf.extractall(path=destdir)
     finally:
