@@ -68,6 +68,9 @@ def unpack(zipname, destdir):
 
     return destdir
 
+unpack_zip = unpack # utility alias
+
+
 def get_meta_from_zip(filename):
     try:
         zf = ZipFile(filename, 'r')

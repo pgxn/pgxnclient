@@ -40,6 +40,9 @@ def unpack(tarname, destdir):
 
     return destdir
 
+unpack_tar = unpack # utility alias
+
+
 def get_meta_from_tar(filename):
     try:
         tf = tarfile.open(filename, 'r')
