@@ -23,12 +23,12 @@ def from_file(filename):
     """
     # Get the metadata from an archive file
     if filename.endswith('.zip'):
-        from pgxnclient.utils.zip import ZipArchive
+        from pgxnclient.zip import ZipArchive
         return ZipArchive(filename)
     else:
         # Tar files have many naming variants.  Let's not
         # guess them.
-        from pgxnclient.utils.tar import TarArchive
+        from pgxnclient.tar import TarArchive
         return TarArchive(filename)
 
 

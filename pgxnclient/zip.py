@@ -16,7 +16,8 @@ from pgxnclient.errors import PgxnClientException
 from pgxnclient.archive import Archive
 
 import logging
-logger = logging.getLogger('pgxnclient.utils.zip')
+logger = logging.getLogger('pgxnclient.zip')
+
 
 class ZipArchive(Archive):
     """Handle .zip archives"""

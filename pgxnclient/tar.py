@@ -14,7 +14,8 @@ from pgxnclient.errors import PgxnClientException
 from pgxnclient.archive import Archive
 
 import logging
-logger = logging.getLogger('pgxnclient.utils.tar')
+logger = logging.getLogger('pgxnclient.tar')
+
 
 class TarArchive(Archive):
     """Handle .tar archives"""
