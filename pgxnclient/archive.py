@@ -6,9 +6,11 @@ pgxnclient -- archives handling
 
 # This file is part of the PGXN client
 
-from pgxnclient.utils.tar import unpack_tar, get_meta_from_tar
-from pgxnclient.utils.zip import unpack_zip, get_meta_from_zip
+import os
 
+from pgxnclient.i18n import _
+from pgxnclient.utils import load_jsons
+from pgxnclient.errors import PgxnClientException
 
 def from_spec(spec):
     """Return an `Archive` instance to handle the file requested by *spec*
@@ -21,10 +23,12 @@ def from_file(filename):
     """
     # Get the metadata from an archive file
     if filename.endswith('.zip'):
+        from pgxnclient.utils.zip import ZipArchive
         return ZipArchive(filename)
     else:
         # Tar files have many naming variants.  Let's not
         # guess them.
+        from pgxnclient.utils.tar import TarArchive
         return TarArchive(filename)
 
 
@@ -33,28 +37,57 @@ class Archive(object):
     def __init__(self, filename):
         self.filename = filename
 
-    def get_meta(self):
+    def open(self):
+        """Open the archive for usage.
+
+        Raise PgxnClientException if the archive can't be open.
+        """
+        raise NotImplementedError
+
+    def close(self):
+        """Close the archive after usage."""
+        raise NotImplementedError
+
+    def list_files(self):
+        """Return an iterable with the list of file names in the archive."""
+        raise NotImplementedError
+
+    def read(self, fn):
+        """Return a file's data from the archive."""
         raise NotImplementedError
 
     def unpack(self, destdir):
         raise NotImplementedError
 
-
-class TarArchive(Archive):
-    """Handle .tar archives"""
     def get_meta(self):
-        return get_meta_from_tar(self.filename)
+        filename = self.filename
 
-    def unpack(self, destdir):
-        return unpack_tar(self.filename, destdir)
+        self.open()
+        try:
+            # Return the first file with the expected name
+            for fn in self.list_files():
+                if fn.endswith('META.json'):
+                    return load_jsons(self.read(fn).decode('utf8'))
+            else:
+                raise PgxnClientException(
+                    _("file 'META.json' not found in archive '%s'") % filename)
+        finally:
+            self.close()
 
+    def _find_work_directory(self, destdir):
+        """
+        Choose the directory where to work.
 
-class ZipArchive(Archive):
-    """Handle .zip archives"""
-    def get_meta(self):
-        return get_meta_from_zip(self.filename)
+        Because we are mostly a wrapper for pgxs, let's look for a makefile.
+        The tar should contain a single base directory, so return the first
+        dir we found containing a Makefile, alternatively just return the
+        unpacked dir
+        """
+        for dir in os.listdir(destdir):
+            for fn in ('Makefile', 'makefile', 'GNUmakefile', 'configure'):
+                if os.path.exists(os.path.join(destdir, dir, fn)):
+                    return os.path.join(destdir, dir)
 
-    def unpack(self, destdir):
-        return unpack_zip(self.filename, destdir)
+        return destdir
 
 

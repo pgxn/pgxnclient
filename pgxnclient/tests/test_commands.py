@@ -322,6 +322,14 @@ class Assertions(object):
                 if not a == p:
                     self.fail('%s is not a %s in %s' % (a, p, args))
 
+# With mock patching a method seems tricky: looks there's no way to get to
+# 'self' as the mock method is unbound.
+from pgxnclient.utils.tar import TarArchive
+TarArchive.unpack_orig = TarArchive.unpack
+
+from pgxnclient.utils.zip import ZipArchive
+ZipArchive.unpack_orig = ZipArchive.unpack
+
 class InstallTestCase(unittest.TestCase, Assertions):
 
     def setUp(self):
@@ -409,13 +417,13 @@ class InstallTestCase(unittest.TestCase, Assertions):
         self.assertCallArgs(['gksudo', '-d', 'hello world', self.make],
             self.mock_popen.call_args_list[1][0][0][:4])
 
-    @patch('pgxnclient.archive.unpack_tar')
+    @patch('pgxnclient.utils.tar.TarArchive.unpack')
     def test_install_local_tar(self, mock_unpack):
-        from pgxnclient.utils.tar import unpack
-        mock_unpack.side_effect = unpack
+        fn = get_test_filename('foobar-0.42.1.tar.gz')
+        mock_unpack.side_effect = TarArchive(fn).unpack_orig
 
         from pgxnclient.cli import main
-        main(['install', '--sudo', '--', get_test_filename('foobar-0.42.1.tar.gz')])
+        main(['install', '--sudo', '--', fn])
 
         self.assertEquals(self.mock_popen.call_count, 2)
         self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
@@ -424,17 +432,16 @@ class InstallTestCase(unittest.TestCase, Assertions):
         make_cwd = self.mock_popen.call_args_list[1][1]['cwd']
 
         self.assertEquals(mock_unpack.call_count, 1)
-        zipname, tmpdir = mock_unpack.call_args[0]
-        self.assertEqual(zipname, get_test_filename('foobar-0.42.1.tar.gz'))
+        tmpdir, = mock_unpack.call_args[0]
         self.assertEqual(make_cwd, os.path.join(tmpdir, 'foobar-0.42.1'))
 
-    @patch('pgxnclient.archive.unpack_zip')
+    @patch('pgxnclient.utils.zip.ZipArchive.unpack')
     def test_install_local_zip(self, mock_unpack):
-        from pgxnclient.utils.zip import unpack
-        mock_unpack.side_effect = unpack
+        fn = get_test_filename('foobar-0.42.1.zip')
+        mock_unpack.side_effect = ZipArchive(fn).unpack_orig
 
         from pgxnclient.cli import main
-        main(['install', '--sudo', '--', get_test_filename('foobar-0.42.1.zip')])
+        main(['install', '--sudo', '--', fn])
 
         self.assertEquals(self.mock_popen.call_count, 2)
         self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
@@ -443,8 +450,7 @@ class InstallTestCase(unittest.TestCase, Assertions):
         make_cwd = self.mock_popen.call_args_list[1][1]['cwd']
 
         self.assertEquals(mock_unpack.call_count, 1)
-        zipname, tmpdir = mock_unpack.call_args[0]
-        self.assertEqual(zipname, get_test_filename('foobar-0.42.1.zip'))
+        tmpdir, = mock_unpack.call_args[0]
         self.assertEqual(make_cwd, os.path.join(tmpdir, 'foobar-0.42.1'))
 
     def test_install_local_dir(self):
@@ -599,12 +605,11 @@ class LoadTestCase(unittest.TestCase):
         args = self.mock_popen.call_args[0][0]
         self.assertEqual('somewhere', args[args.index('--host') + 1])
 
-    @patch('pgxnclient.archive.unpack_zip')
+    @patch('pgxnclient.utils.zip.ZipArchive.unpack')
     @patch('pgxnclient.api.get_file')
     def test_load_local_zip(self, mock_get, mock_unpack):
         mock_get.side_effect = lambda *args: self.fail('network invoked')
-        from pgxnclient.utils.zip import unpack
-        mock_unpack.side_effect = unpack
+        mock_unpack.side_effect = ZipArchive.unpack_orig
 
         from pgxnclient.cli import main
         main(['load', '--yes', get_test_filename('foobar-0.42.1.zip')])
@@ -616,12 +621,11 @@ class LoadTestCase(unittest.TestCase):
         self.assertEquals(communicate.call_args[0][0],
             'CREATE EXTENSION foobar;')
 
-    @patch('pgxnclient.archive.unpack_tar')
+    @patch('pgxnclient.utils.tar.TarArchive.unpack')
     @patch('pgxnclient.api.get_file')
     def test_load_local_tar(self, mock_get, mock_unpack):
         mock_get.side_effect = lambda *args: self.fail('network invoked')
-        from pgxnclient.utils.tar import unpack
-        mock_unpack.side_effect = unpack
+        mock_unpack.side_effect = TarArchive.unpack_orig
 
         from pgxnclient.cli import main
         main(['load', '--yes', get_test_filename('foobar-0.42.1.tar.gz')])
