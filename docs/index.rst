@@ -20,7 +20,8 @@ which would load the extension in one of the databases of the server.
 The client interacts with the PGXN web service and a ``Makefile`` provided by
 the extension. The best results are achieved with makefiles using the
 PostgreSQL `Extension Building Infrastructure`__; however the client tries to
-degrade gracefully in presence of any package hosted on PGXN.
+degrade gracefully in presence of any package hosted on PGXN and any package
+available outside the extension network.
 
 .. _semver: http://pgxn.org/dist/semver
 .. __: http://www.postgresql.org/docs/current/static/extend-pgxs.html

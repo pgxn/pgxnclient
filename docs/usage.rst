@@ -60,10 +60,11 @@ Whenever a command takes a specification in input, it also accepts options
 ``--stable``, ``--testing`` and ``--unstable`` to specify the minimum release
 status accepted. The default is "stable".
 
-A few commands also allow specifying a local ``.zip`` package or a local
-directory containing a distribution: in this case the specification should
-contain at least a path separator to disambiguate it from a distribution name,
-for instance ``pgxn install ./foo.zip``.
+A few commands also allow specifying a local archive or local directory
+containing a distribution: in this case the specification should contain at
+least a path separator to disambiguate it from a distribution name, for
+instance ``pgxn install ./foo.zip``. Currently the client supports ``.zip``
+and ``.tar`` archives (eventually with *gzip* and *bz2* compression).
 
 A few commands also allow specifying a package with an URL. Currently the
 schemas ``http://`` and ``https://`` are supported.
