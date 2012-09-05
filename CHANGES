@@ -8,6 +8,7 @@ pgxnclient 1.2
 
 - Packages can be downloaded, installed, loaded specifying an URL
   (ticket #15).
+- Added support for ``.tar`` files (ticket #17).
 - Use ``gmake`` in favour of ``make`` for platforms where the two are
   distinct, such as BSD (ticket #14).
 - Added ``--make`` option to select the make executable (ticket #16).

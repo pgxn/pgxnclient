@@ -17,13 +17,13 @@ import tempfile
 from subprocess import PIPE
 
 from pgxnclient import SemVer
+from pgxnclient import archive
 from pgxnclient import network
 from pgxnclient.i18n import _, N_
 from pgxnclient.utils import sha1, b
 from pgxnclient.errors import BadChecksum, PgxnClientException, InsufficientPrivileges
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
 from pgxnclient.commands import WithSpecUrl, WithSpecLocal, WithSudo
-from pgxnclient.utils.zip import unpack
 from pgxnclient.utils.temp import temp_dir
 from pgxnclient.utils.strings import Identifier
 
@@ -104,11 +104,11 @@ class InstallUninstall(WithMake, WithSpecUrl, WithSpecLocal, Command):
         if spec.is_dir():
             pdir = os.path.abspath(spec.dirname)
         elif spec.is_file():
-            pdir = unpack(spec.filename, dir)
+            pdir = archive.from_file(spec.filename).unpack(dir)
         elif not spec.is_local():
             self.opts.target = dir
             fn = Download(self.opts).run()
-            pdir = unpack(fn, dir)
+            pdir = archive.from_file(fn).unpack(dir)
         else:
             assert False
 

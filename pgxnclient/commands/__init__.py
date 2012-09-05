@@ -22,6 +22,7 @@ from pgxnclient.utils import load_json, argparse, find_executable
 from pgxnclient import __version__
 from pgxnclient import network
 from pgxnclient import Spec, SemVer
+from pgxnclient import archive
 from pgxnclient.api import Api
 from pgxnclient.i18n import _, gettext
 from pgxnclient.errors import NotFound, PgxnClientException, ProcessError, ResourceNotFound, UserAbort
@@ -225,7 +226,6 @@ class Command(object):
 
 
 from pgxnclient.errors import BadSpecError
-from pgxnclient.utils.zip import get_meta_from_zip
 
 class WithSpec(Command):
     """Mixin to implement commands taking a package specification.
@@ -390,14 +390,15 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
                 return load_json(f)
 
         elif spec.is_file():
-            # Get the metadata from a zip file
-            return get_meta_from_zip(spec.filename)
+            arc = archive.from_spec(spec)
+            return arc.get_meta()
 
         elif spec.is_url():
             with network.get_file(spec.url) as fin:
                 with temp_dir() as dir:
                     fn = network.download(fin, dir)
-                    return get_meta_from_zip(fn)
+                    arc = archive.from_file(fn)
+                    return arc.get_meta()
 
         else:
             assert False
@@ -422,6 +423,7 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
     def get_spec(self, **kwargs):
         kwargs['_can_be_local'] = True
         return super(WithSpecLocal, self).get_spec(**kwargs)
+
 
 class WithSpecUrl(WithSpec):
     """
