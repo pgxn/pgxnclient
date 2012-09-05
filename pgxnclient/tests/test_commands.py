@@ -692,13 +692,30 @@ class LoadTestCase(unittest.TestCase):
 
     @patch('pgxnclient.zip.ZipArchive.unpack')
     @patch('pgxnclient.network.get_file')
-    def test_load_url(self, mock_get, mock_unpack):
+    def test_load_zip_url(self, mock_get, mock_unpack):
         mock_get.side_effect = fake_get_file
         mock_unpack.side_effect = ZipArchive.unpack_orig
 
         from pgxnclient.cli import main
         main(['load', '--yes',
             'http://api.pgxn.org/dist/foobar/0.42.1/foobar-0.42.1.zip'])
+
+        self.assertEquals(mock_unpack.call_count, 0)
+        self.assertEquals(self.mock_popen.call_count, 1)
+        self.assert_('psql' in self.mock_popen.call_args[0][0][0])
+        communicate = self.mock_popen.return_value.communicate
+        self.assertEquals(communicate.call_args[0][0],
+            'CREATE EXTENSION foobar;')
+
+    @patch('pgxnclient.tar.TarArchive.unpack')
+    @patch('pgxnclient.network.get_file')
+    def test_load_tar_url(self, mock_get, mock_unpack):
+        mock_get.side_effect = fake_get_file
+        mock_unpack.side_effect = TarArchive.unpack_orig
+
+        from pgxnclient.cli import main
+        main(['load', '--yes',
+            'http://example.org/foobar-0.42.1.tar.gz'])
 
         self.assertEquals(mock_unpack.call_count, 0)
         self.assertEquals(self.mock_popen.call_count, 1)
