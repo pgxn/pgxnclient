@@ -478,6 +478,18 @@ class InstallTestCase(unittest.TestCase, Assertions):
         tmpdir, = mock_unpack.call_args[0]
         self.assertEqual(make_cwd, os.path.join(tmpdir, 'foobar-0.42.1'))
 
+    def test_install_url_file(self):
+        fn = get_test_filename('foobar-0.42.1.zip')
+        url = 'file://' + os.path.abspath(fn).replace("f", '%%%2x' % ord('f'))
+
+        from pgxnclient.cli import main
+        main(['install', '--sudo', '--', url])
+
+        self.assertEquals(self.mock_popen.call_count, 2)
+        self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
+        self.assertCallArgs(['sudo', self.make],
+            self.mock_popen.call_args_list[1][0][0][:2])
+
     def test_install_local_dir(self):
         self.mock_get.side_effect = lambda *args: self.fail('network invoked')
 

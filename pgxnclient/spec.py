@@ -9,6 +9,7 @@ pgxnclient -- specification object
 
 import os
 import re
+import urllib
 import operator as _op
 
 from pgxnclient.i18n import _
@@ -71,18 +72,28 @@ class Spec(object):
 
         Raise BadSpecError if couldn't parse.
         """
-        # TODO: handle file:// too
+        # check if it's a network resource
         if spec.startswith('http://') or spec.startswith('https://'):
             return Spec(url=spec)
 
-        if os.sep in spec:
+        # check if it's a local resource
+        if spec.startswith('file://'):
+            try_file = urllib.unquote_plus(spec[len('file://'):])
+        elif os.sep in spec:
+            try_file = spec
+        else:
+            try_file = None
+
+        if try_file:
             # This is a local thing, let's see what
-            if os.path.isdir(spec):
-                return Spec(dirname=spec)
-            elif os.path.exists(spec):
-                return Spec(filename=spec)
+            if os.path.isdir(try_file):
+                return Spec(dirname=try_file)
+            elif os.path.exists(try_file):
+                return Spec(filename=try_file)
             else:
-                raise ResourceNotFound(_("cannot find '%s'") % spec)
+                raise ResourceNotFound(_("cannot find '%s'") % try_file)
+
+        # so we think it's a PGXN spec
 
         # split operator/version and name
         m = re.match(r'(.+?)(?:(==|=|>=|>|<=|<)(.*))?$', spec)

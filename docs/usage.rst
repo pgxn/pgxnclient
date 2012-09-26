@@ -62,12 +62,15 @@ status accepted. The default is "stable".
 
 A few commands also allow specifying a local archive or local directory
 containing a distribution: in this case the specification should contain at
-least a path separator to disambiguate it from a distribution name, for
-instance ``pgxn install ./foo.zip``. Currently the client supports ``.zip``
-and ``.tar`` archives (eventually with *gzip* and *bz2* compression).
+least a path separator to disambiguate it from a distribution name (for
+instance ``pgxn install ./foo.zip``) or it should be specified as an URL with
+``file://`` schema.
 
-A few commands also allow specifying a package with an URL. Currently the
-schemas ``http://`` and ``https://`` are supported.
+A few commands also allow specifying a remote package with a URL. Currently
+the schemas ``http://`` and ``https://`` are supported.
+
+Currently the client supports ``.zip`` and ``.tar`` archives (eventually with
+*gzip* and *bz2* compression).
 
 
 .. _install:
