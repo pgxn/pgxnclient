@@ -21,21 +21,27 @@ def from_spec(spec):
 def from_file(filename):
     """Return an `Archive` instance to handle the file *filename*
     """
-    # Get the metadata from an archive file
-    if filename.endswith('.zip'):
-        from pgxnclient.zip import ZipArchive
-        return ZipArchive(filename)
-    else:
-        # Tar files have many naming variants.  Let's not
-        # guess them.
-        from pgxnclient.tar import TarArchive
-        return TarArchive(filename)
+    from pgxnclient.zip import ZipArchive
+    from pgxnclient.tar import TarArchive
+
+    for cls in (ZipArchive, TarArchive):
+        a = cls(filename)
+        if a.can_open():
+            return a
+
+    raise PgxnClientException(
+        _("can't open archive '%s': file type not recognized")
+        % filename)
 
 
 class Archive(object):
     """Base class to handle archives."""
     def __init__(self, filename):
         self.filename = filename
+
+    def can_open(self):
+        """Return `!True` if the `!filename` can be opened by the obect."""
+        raise NotImplementedError
 
     def open(self):
         """Open the archive for usage.

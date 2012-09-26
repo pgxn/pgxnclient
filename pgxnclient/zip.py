@@ -8,7 +8,7 @@ pgxnclient -- zip file utilities
 
 import os
 import stat
-from zipfile import ZipFile
+import zipfile
 
 from pgxnclient.utils import b
 from pgxnclient.i18n import _
@@ -24,10 +24,13 @@ class ZipArchive(Archive):
 
     _file = None
 
+    def can_open(self):
+        return zipfile.is_zipfile(self.filename)
+
     def open(self):
         assert not self._file, "archive already open"
         try:
-            self._file = ZipFile(self.filename, 'r')
+            self._file = zipfile.ZipFile(self.filename, 'r')
         except Exception, e:
             raise PgxnClientException(
                 _("cannot open archive '%s': %s") % (self.filename, e))

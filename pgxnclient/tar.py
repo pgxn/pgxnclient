@@ -21,6 +21,9 @@ class TarArchive(Archive):
     """Handle .tar archives"""
     _file = None
 
+    def can_open(self):
+        return tarfile.is_tarfile(self.filename)
+
     def open(self):
         assert not self._file, "archive already open"
         try:
