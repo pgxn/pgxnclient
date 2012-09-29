@@ -9,6 +9,7 @@ pgxnclient -- specification object
 
 import os
 import re
+import urllib
 import operator as _op
 
 from pgxnclient.i18n import _
@@ -33,14 +34,18 @@ class Spec(object):
         'stable': STABLE, }
 
     def __init__(self, name=None, op=None, ver=None,
-            dirname=None, filename=None):
+            dirname=None, filename=None, url=None):
         self.name = name and name.lower()
         self.op = op
         self.ver = ver
 
-        # point to local files
+        # point to local files or specific resources
         self.dirname = dirname
         self.filename = filename
+        self.url = url
+
+    def is_name(self):
+        return self.name is not None
 
     def is_dir(self):
         return self.dirname is not None
@@ -48,11 +53,14 @@ class Spec(object):
     def is_file(self):
         return self.filename is not None
 
+    def is_url(self):
+        return self.url is not None
+
     def is_local(self):
         return self.is_dir() or self.is_file()
 
     def __str__(self):
-        name = self.name or self.filename or self.dirname or "???"
+        name = self.name or self.filename or self.dirname or self.url or "???"
         if self.op is None:
             return name
         else:
@@ -64,14 +72,28 @@ class Spec(object):
 
         Raise BadSpecError if couldn't parse.
         """
-        if os.sep in spec:
+        # check if it's a network resource
+        if spec.startswith('http://') or spec.startswith('https://'):
+            return Spec(url=spec)
+
+        # check if it's a local resource
+        if spec.startswith('file://'):
+            try_file = urllib.unquote_plus(spec[len('file://'):])
+        elif os.sep in spec:
+            try_file = spec
+        else:
+            try_file = None
+
+        if try_file:
             # This is a local thing, let's see what
-            if os.path.isdir(spec):
-                return Spec(dirname=spec)
-            elif os.path.exists(spec):
-                return Spec(filename=spec)
+            if os.path.isdir(try_file):
+                return Spec(dirname=try_file)
+            elif os.path.exists(try_file):
+                return Spec(filename=try_file)
             else:
-                raise ResourceNotFound(_("cannot find '%s'") % spec)
+                raise ResourceNotFound(_("cannot find '%s'") % try_file)
+
+        # so we think it's a PGXN spec
 
         # split operator/version and name
         m = re.match(r'(.+?)(?:(==|=|>=|>|<=|<)(.*))?$', spec)

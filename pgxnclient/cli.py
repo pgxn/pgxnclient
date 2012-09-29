@@ -122,3 +122,6 @@ def _get_exec(cmd):
 
     return fn
 
+if __name__ == '__main__':
+    script()
+

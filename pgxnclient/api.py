@@ -10,9 +10,9 @@ from __future__ import with_statement
 
 from urllib import urlencode
 
+from pgxnclient import network
 from pgxnclient.utils import load_json
 from pgxnclient.errors import NetworkError, NotFound, ResourceNotFound
-from pgxnclient.network import get_file
 from pgxnclient.utils.uri import expand_template
 
 
@@ -78,7 +78,7 @@ class Api(object):
 
     def call(self, meth, args=None, query=None):
         url = self.get_url(meth, args, query)
-        return get_file(url)
+        return network.get_file(url)
 
     def get_url(self, meth, args=None, query=None):
         tmpl = self.get_template(meth)
@@ -98,7 +98,7 @@ class Api(object):
         if self._api_index is None:
             url = self.mirror.rstrip('/') + '/index.json'
             try:
-                with get_file(url) as f:
+                with network.get_file(url) as f:
                     self._api_index = load_json(f)
             except ResourceNotFound:
                 raise NetworkError("API index not found at '%s'" % url)

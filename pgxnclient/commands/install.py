@@ -17,18 +17,20 @@ import tempfile
 from subprocess import PIPE
 
 from pgxnclient import SemVer
+from pgxnclient import archive
+from pgxnclient import network
 from pgxnclient.i18n import _, N_
 from pgxnclient.utils import sha1, b
 from pgxnclient.errors import BadChecksum, PgxnClientException, InsufficientPrivileges
-from pgxnclient.network import download
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
-from pgxnclient.commands import WithSpec, WithSpecLocal, WithSudo
+from pgxnclient.commands import WithSpecUrl, WithSpecLocal, WithSudo
+from pgxnclient.utils.temp import temp_dir
 from pgxnclient.utils.strings import Identifier
 
 logger = logging.getLogger('pgxnclient.commands')
 
 
-class Download(WithSpec, Command):
+class Download(WithSpecUrl, Command):
     name = 'download'
     description = N_("download a distribution from the network")
 
@@ -43,6 +45,11 @@ class Download(WithSpec, Command):
 
     def run(self):
         spec = self.get_spec()
+        assert not spec.is_local()
+
+        if spec.is_url():
+            return self._run_url(spec)
+
         data = self.get_meta(spec)
 
         try:
@@ -52,9 +59,15 @@ class Download(WithSpec, Command):
                 "sha1 missing from the distribution meta")
 
         with self.api.download(data['name'], SemVer(data['version'])) as fin:
-            fn = self._get_local_file_name(fin.url)
-            fn = download(fin, fn, rename=True)
+            fn = network.download(fin, self.opts.target)
+
         self.verify_checksum(fn, chk)
+        return fn
+
+    def _run_url(self, spec):
+        with network.get_file(spec.url) as fin:
+            fn = network.download(fin, self.opts.target)
+
         return fn
 
     def verify_checksum(self, fn, chk):
@@ -77,34 +90,27 @@ class Download(WithSpec, Command):
                 fn, sha, chk)
             raise BadChecksum(_("bad sha1 in downloaded file"))
 
-    def _get_local_file_name(self, url):
-        from urlparse import urlsplit
-        if os.path.isdir(self.opts.target):
-            basename = urlsplit(url)[2].rsplit('/', 1)[-1]
-            fn = os.path.join(self.opts.target, basename)
-        else:
-            fn = self.opts.target
 
-        return os.path.abspath(fn)
-
-
-class InstallUninstall(WithMake, WithSpecLocal, Command):
+class InstallUninstall(WithMake, WithSpecUrl, WithSpecLocal, Command):
     """
     Base class to implement the ``install`` and ``uninstall`` commands.
     """
     def run(self):
-        return self.call_with_temp_dir(self._run)
+        with temp_dir() as dir:
+            return self._run(dir)
 
     def _run(self, dir):
         spec = self.get_spec()
         if spec.is_dir():
             pdir = os.path.abspath(spec.dirname)
         elif spec.is_file():
-            pdir = self.unpack(spec.filename, dir)
-        else:   # download
+            pdir = archive.from_file(spec.filename).unpack(dir)
+        elif not spec.is_local():
             self.opts.target = dir
             fn = Download(self.opts).run()
-            pdir = self.unpack(fn, dir)
+            pdir = archive.from_file(fn).unpack(dir)
+        else:
+            assert False
 
         self.maybe_run_configure(pdir)
 
@@ -220,7 +226,7 @@ class Check(WithDatabase, InstallUninstall):
             raise
 
 
-class LoadUnload(WithPgConfig, WithDatabase, WithSpecLocal, Command):
+class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command):
     """
     Base class to implement the ``load`` and ``unload`` commands.
     """

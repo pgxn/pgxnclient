@@ -17,14 +17,16 @@ import sys
 import logging
 from subprocess import Popen, PIPE
 
-from pgxnclient.utils import load_json
-from pgxnclient.utils import argparse
+from pgxnclient.utils import load_json, argparse, find_executable
 
 from pgxnclient import __version__
+from pgxnclient import network
 from pgxnclient import Spec, SemVer
+from pgxnclient import archive
 from pgxnclient.api import Api
 from pgxnclient.i18n import _, gettext
 from pgxnclient.errors import NotFound, PgxnClientException, ProcessError, ResourceNotFound, UserAbort
+from pgxnclient.utils.temp import temp_dir
 
 logger = logging.getLogger('pgxnclient.commands')
 
@@ -224,7 +226,6 @@ class Command(object):
 
 
 from pgxnclient.errors import BadSpecError
-from pgxnclient.utils.zip import get_meta_from_zip
 
 class WithSpec(Command):
     """Mixin to implement commands taking a package specification.
@@ -266,7 +267,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
 
         return subp
 
-    def get_spec(self, _can_be_local=False):
+    def get_spec(self, _can_be_local=False, _can_be_url=False):
         """
         Return the package specification requested.
 
@@ -283,6 +284,10 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         if not _can_be_local and spec.is_local():
             raise PgxnClientException(
                 _("you cannot use a local resource with this command"))
+
+        if not _can_be_url and spec.is_url():
+            raise PgxnClientException(
+                _("you cannot use an url with this command"))
 
         return spec
 
@@ -360,7 +365,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
 
         Return the object obtained parsing the JSON.
         """
-        if not spec.is_local():
+        if spec.is_name():
             # Get the metadata from the API
             try:
                 data = self.api.dist(spec.name)
@@ -385,9 +390,18 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
                 return load_json(f)
 
         elif spec.is_file():
-            # Get the metadata from a zip file
-            return get_meta_from_zip(spec.filename)
+            arc = archive.from_spec(spec)
+            return arc.get_meta()
 
+        elif spec.is_url():
+            with network.get_file(spec.url) as fin:
+                with temp_dir() as dir:
+                    fn = network.download(fin, dir)
+                    arc = archive.from_file(fn)
+                    return arc.get_meta()
+
+        else:
+            assert False
 
 class WithSpecLocal(WithSpec):
     """
@@ -406,35 +420,30 @@ it should contain at least a '%s', for instance '.%spkgname.zip'.
 
         return subp
 
-    def get_spec(self):
-        return super(WithSpecLocal, self).get_spec(_can_be_local=True)
+    def get_spec(self, **kwargs):
+        kwargs['_can_be_local'] = True
+        return super(WithSpecLocal, self).get_spec(**kwargs)
 
 
-import shutil
-import tempfile
-from pgxnclient.utils.zip import unpack
-
-class WithUnpacking(object):
+class WithSpecUrl(WithSpec):
     """
-    Mixin to implement commands that may deal with zip files.
+    Mixin to implement commands that can also refer to a URL.
     """
-    def call_with_temp_dir(self, f, *args, **kwargs):
-        """
-        Call a function in the context of a temporary directory.
 
-        Create the temp directory and pass its name as first argument to *f*.
-        Other arguments and keywords are passed to *f* too. Upon exit delete
-        the directory.
-        """
-        dir = tempfile.mkdtemp()
-        try:
-            return f(dir, *args, **kwargs)
-        finally:
-            shutil.rmtree(dir)
+    @classmethod
+    def customize_parser(self, parser, subparsers, epilog=None, **kwargs):
+        epilog = _("""
+SPEC may also be an url specifying a protocol such as 'http://' or 'https://'.
+""") + (epilog or "")
 
-    def unpack(self, zipname, destdir):
-        """Unpack the zip file *zipname* into *destdir*."""
-        return unpack(zipname, destdir)
+        subp = super(WithSpecUrl, self).customize_parser(
+            parser, subparsers, epilog=epilog, **kwargs)
+
+        return subp
+
+    def get_spec(self, **kwargs):
+        kwargs['_can_be_url'] = True
+        return super(WithSpecUrl, self).get_spec(**kwargs)
 
 
 class WithPgConfig(object):
@@ -449,8 +458,8 @@ class WithPgConfig(object):
         subp = super(WithPgConfig, self).customize_parser(
             parser, subparsers, **kwargs)
 
-        subp.add_argument('--pg_config', metavar="PATH", default='pg_config',
-            help = _("path to the pg_config executable to find the database"
+        subp.add_argument('--pg_config', metavar="PROG", default='pg_config',
+            help = _("the pg_config executable to find the database"
                 " [default: %(default)s]"))
 
         return subp
@@ -482,24 +491,33 @@ class WithPgConfig(object):
         if os.path.split(pg_config)[0]:
             pg_config = os.path.abspath(pg_config)
         else:
-            for dir in os.environ.get('PATH', '').split(os.pathsep):
-                if not dir: continue
-                fn = os.path.abspath(os.path.join(dir, pg_config))
-                if os.path.exists(fn):
-                    pg_config = os.path.abspath(fn)
-                    break
-            else:
-                raise PgxnClientException(_("pg_config executable not found"))
-
+            pg_config = find_executable(pg_config)
+        if not pg_config:
+            raise PgxnClientException(_("pg_config executable not found"))
         return pg_config
 
 
 import shlex
 
-class WithMake(WithPgConfig, WithUnpacking):
+class WithMake(WithPgConfig):
     """
     Mixin to implement commands that should invoke :program:`make`.
     """
+    @classmethod
+    def customize_parser(self, parser, subparsers, **kwargs):
+        """
+        Add the ``--make`` option to the options parser.
+        """
+        subp = super(WithMake, self).customize_parser(
+            parser, subparsers, **kwargs)
+
+        subp.add_argument('--make', metavar="PROG",
+            default=self._find_default_make(),
+            help = _("the 'make' executable to use to build the extension "
+                "[default: %(default)s]"))
+
+        return subp
+
     def run_make(self, cmd, dir, env=None, sudo=None):
         """Invoke make with the selected command.
 
@@ -522,7 +540,7 @@ class WithMake(WithPgConfig, WithUnpacking):
         if sudo:
             cmdline.extend(shlex.split(sudo))
 
-        cmdline.extend(['make', 'PG_CONFIG=%s' % self.get_pg_config()])
+        cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % self.get_pg_config()])
 
         if isinstance(cmd, basestring):
             cmdline.append(cmd)
@@ -535,6 +553,48 @@ class WithMake(WithPgConfig, WithUnpacking):
         if p.returncode:
             raise ProcessError(_("command returned %s: %s")
                 % (p.returncode, ' '.join(cmdline)))
+
+    def get_make(self, _cache=[]):
+        """
+        Return the path of the make binary.
+        """
+        # the cache is not for performance but to return a consistent value
+        # even if the cwd is changed
+        if _cache:
+            return _cache[0]
+
+        make = self.opts.make
+
+        if os.path.split(make)[0]:
+            # At least a relative dir specified.
+            if not os.path.exists(make):
+                raise PgxnClientException(_("make executable not found: %s")
+                    % make)
+
+            # Convert to abs path to be robust in case the dir is changed.
+            make = os.path.abspath(make)
+
+        else:
+            # we don't find make here and convert to abs path because it's a
+            # security hole: make may be run under sudo and in this case we
+            # don't want root to execute a make hacked in an user local dir
+            if not find_executable(make):
+                raise PgxnClientException(_("make executable not found: %s")
+                    % make)
+
+        _cache.append(make)
+        return make
+
+    @classmethod
+    def _find_default_make(self):
+        for make in ('gmake', 'make'):
+            path = find_executable(make)
+            if path:
+                return make
+
+        # if nothing was found, fall back on 'gmake'. If it was missing we
+        # will give an error when attempting to use it
+        return 'gmake'
 
 
 class WithSudo(object):

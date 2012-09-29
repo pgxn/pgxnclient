@@ -60,10 +60,17 @@ Whenever a command takes a specification in input, it also accepts options
 ``--stable``, ``--testing`` and ``--unstable`` to specify the minimum release
 status accepted. The default is "stable".
 
-A few commands also allow specifying a local ``.zip`` package or a local
-directory containing a distribution: in this case the specification should
-contain at least a path separator to disambiguate it from a distribution name,
-for instance ``pgxn install ./foo.zip``.
+A few commands also allow specifying a local archive or local directory
+containing a distribution: in this case the specification should contain at
+least a path separator to disambiguate it from a distribution name (for
+instance ``pgxn install ./foo.zip``) or it should be specified as an URL with
+``file://`` schema.
+
+A few commands also allow specifying a remote package with a URL. Currently
+the schemas ``http://`` and ``https://`` are supported.
+
+Currently the client supports ``.zip`` and ``.tar`` archives (eventually with
+*gzip* and *bz2* compression).
 
 
 .. _install:
@@ -79,12 +86,14 @@ Usage:
     :class: pgxn-install
 
     pgxn install [--help] [--stable | --testing | --unstable]
-                 [--pg_config *PATH*] [--sudo [*PROG*] | --nosudo]
+                 [--pg_config *PROG*] [--make *PROG*]
+                 [--sudo [*PROG*] | --nosudo]
                  *SPEC*
 
 The program takes a `package specification`_ identifying the distribution to
 work with.  The download phase is skipped if the distribution specification
-refers to a local directory or package.
+refers to a local directory or package.  The package may be specified with an
+URL.
 
 Note that the built extension is not loaded in any database: use the command
 `load`_ for this purpose.
@@ -95,12 +104,19 @@ then will perform ``make all`` and ``make install``. It is assumed that the
 but this is not enforced: you may provide any Makefile as long as the expected
 commands are implemented.
 
-.. _PGXS: http://www.postgresql.org/docs/9.1/static/extend-pgxs.html
+.. _PGXS: http://www.postgresql.org/docs/current/static/extend-pgxs.html
 
 If there are many PostgreSQL installations on the system, the extension will
 be built and installed against the instance whose :program:`pg_config` is
 first found on the :envvar:`PATH`. A different instance can be specified using
 the option :samp:`--pg_config {PATH}`.
+
+The PGXS_ build system relies on a presence of `GNU Make`__: in many systems
+it is installed as :program:`gmake` or :program:`make` executable. The program
+will use the first of them on the path. You can specify an alternative program
+using ``--make`` option.
+
+.. __: http://www.gnu.org/software/make/
 
 If the extension is being installed into a system PostgreSQL installation, the
 install phase will likely require root privileges to be performed.  In this
@@ -131,12 +147,14 @@ Usage:
     :class: pgxn-check
 
     pgxn check [--help] [--stable | --testing | --unstable]
-               [--pg_config *PATH*] [-d *DBNAME*] [-h *HOST*] [-p *PORT*] [-U *NAME*]
+               [--pg_config *PROG*] [--make *PROG*]
+               [-d *DBNAME*] [-h *HOST*] [-p *PORT*] [-U *NAME*]
                *SPEC*
 
 The command takes a `package specification`_ identifying the distribution to
-work with, which can also be a local file or directory. The distribution is
-unpacked if required and the ``installcheck`` make target is run.
+work with, which can also be a local file or directory or an URL. The
+distribution is unpacked if required and the ``installcheck`` make target is
+run.
 
 .. note::
     The command doesn't run ``make all`` before ``installcheck``: if any file
@@ -159,6 +177,8 @@ The database connection options are similar to the ones in load_, with the
 difference that the variable :envvar:`PGDATABASE` doesn't influence the
 database name.
 
+See the install_ command for details about the command arguments.
+
 .. warning::
     At the time of writing, :program:`pg_regress` on Debian and derivatives is
     affected by `bug #554166`__ which makes *HOST* selection impossible.
@@ -179,7 +199,8 @@ Usage:
     :class: pgxn-uninstall
 
     pgxn uninstall [--help] [--stable | --testing | --unstable]
-                   [--pg_config *PATH*] [--sudo [*PROG*] | --nosudo]
+                   [--pg_config *PROG*] [--make *PROG*]
+                   [--sudo [*PROG*] | --nosudo]
                    *SPEC*
 
 The command does the opposite of the install_ command, removing a
@@ -212,11 +233,11 @@ Usage:
               *SPEC* [*EXT* [*EXT* ...]]
 
 The distribution is specified according to the `package specification`_ and
-can refer to a local directory or file. No consistency check is performed
-between the packages specified in the ``install`` and ``load`` command: the
-specifications should refer to compatible packages. The specified distribution
-is only used to read the metadata: only installed files are actually used to
-issue database commands.
+can refer to a local directory or file or to an URL.  No consistency check is
+performed between the packages specified in the ``install`` and ``load``
+command: the specifications should refer to compatible packages. The specified
+distribution is only used to read the metadata: only installed files are
+actually used to issue database commands.
 
 The database to install into can be specified using options
 ``-d``/``--dbname``, ``-h``/``--host``, ``-p``/``--port``,
@@ -235,8 +256,8 @@ extension specifies a ``.control`` file, it will be loaded using the `CREATE
 EXTENSION`_ command, otherwise it will be loaded as a loose set of objects.
 For more information see the `extensions documentation`__.
 
-.. _CREATE EXTENSION: http://www.postgresql.org/docs/9.1/static/sql-createextension.html
-.. __: http://www.postgresql.org/docs/9.1/static/extend-extensions.html
+.. _CREATE EXTENSION: http://www.postgresql.org/docs/current/static/sql-createextension.html
+.. __: http://www.postgresql.org/docs/current/static/extend-extensions.html
 
 The command is based on the `'provides' section`_ of the distribution's
 ``META.json``: if a SQL file is specified, that file will be used to load the
@@ -249,7 +270,7 @@ confirmation.
 
 If the distribution provides more than one extension, the extensions are
 loaded in the order in which they are specified in the ``provides`` section of
-the ``META.json`` file. It is also possilbe to load only a few of the
+the ``META.json`` file. It is also possible to load only a few of the
 extensions provided, specifying them after *SPEC*: the extensions will be
 loaded in the order specified.
 
@@ -297,11 +318,11 @@ itself, so the option will be ignored.
 
 If the distribution specifies more than one extension, they are unloaded in
 reverse order respect to the order in which they are specified in the
-``META.json`` file.  It is also possilbe to unload only a few of the
+``META.json`` file.  It is also possible to unload only a few of the
 extensions provided, specifying them after *SPEC*: the extensions will be
 unloaded in the order specified.
 
-.. _DROP EXTENSION: http://www.postgresql.org/docs/9.1/static/sql-dropextension.html
+.. _DROP EXTENSION: http://www.postgresql.org/docs/current/static/sql-dropextension.html
 
 See the load_ command for details about the command arguments.
 
@@ -322,11 +343,12 @@ Usage:
                   [--target *PATH*]
                   *SPEC*
 
-The distribution is specified according to the `package specification`_.  The
-file is saved in the current directory with name usually
-:samp:`{distribution}-{version}.zip`. If a file with the same name exists, a
-suffix ``-1``, ``-2`` etc. is added to the name, before the extension.  A
-different directory or name can be specified using the ``--target`` option.
+The distribution is specified according to the `package specification`_ and
+can be represented by an URL.  The file is saved in the current directory with
+name usually :samp:`{distribution}-{version}.zip`. If a file with the same
+name exists, a suffix ``-1``, ``-2`` etc. is added to the name, before the
+extension.  A different directory or name can be specified using the
+``--target`` option.
 
 
 .. _pgxn-search:
@@ -407,9 +429,9 @@ Usage:
               [--details | --meta | --readme | --versions]
               *SPEC*
 
-The distribution is specified according to the `package specification`_.
-The command output is a list of values obtained by the distribution's
-``META.json`` file, for example:
+The distribution is specified according to the `package specification`_.  It
+cannot be a local dir or file nor an URL.  The command output is a list of
+values obtained by the distribution's ``META.json`` file, for example:
 
 .. code-block:: console
 

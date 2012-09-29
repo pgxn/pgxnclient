@@ -1,0 +1,27 @@
+Who has contributed to the PGXN client?
+=======================================
+
+Daniele Varrazzo
+
+    He rushed to implement a client before David could do it in Perl!
+
+David Wheeler
+
+    He is the PGXN mastermind: a lot of helpful design discussions.
+
+Peter Eisentraut
+
+    First implementation of tarball support. Auto-sudo is not a good idea, I
+    got it.
+
+Hitoshi Harada
+
+    Tricky installation corner cases.
+
+Andrey Popp
+
+    Make selection. Helped the program not to suck on BSD!
+
+Also thank you everybody for the useful discussions on the PGXN mailing list,
+bug reports, proofreading the docs and the general support to the project.
+
