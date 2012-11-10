@@ -384,7 +384,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
             logger.debug("reading %s", fn)
             if not os.path.exists(fn):
                 raise PgxnClientException(
-                    _("file 'META.json' not found in '%s'") % dir)
+                    _("file 'META.json' not found in '%s'") % spec.dirname)
 
             with open(fn) as f:
                 return load_json(f)
