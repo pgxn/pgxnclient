@@ -872,6 +872,20 @@ class LoadTestCase(unittest.TestCase):
 
         self.assertEquals(self.mock_popen.call_count, 0)
 
+    def test_missing_meta_dir(self):
+        # issue #19
+        tdir = tempfile.mkdtemp()
+        try:
+            from pgxnclient.zip import unpack
+            dir = unpack(get_test_filename('foobar-0.42.1.zip'), tdir)
+            os.unlink(os.path.join(dir, 'META.json'))
+
+            from pgxnclient.cli import main
+            self.assertRaises(PgxnClientException, main, ['load', dir])
+
+        finally:
+            shutil.rmtree(tdir)
+
 
 class SearchTestCase(unittest.TestCase):
     @patch('sys.stdout')
