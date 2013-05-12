@@ -125,7 +125,7 @@ re_semver = re.compile(r"""
         (0|[1-9][0-9]*)
     \.  (0|[1-9][0-9]*)
     \.  (0|[1-9][0-9]*)
-        ([a-z][a-z0-9-]*)?
+        (-[a-z][a-z0-9-]*)?
     $
     """,
     re.IGNORECASE | re.VERBOSE)
@@ -135,7 +135,7 @@ re_clean = re.compile(r"""
         ([0-9]+)?
     \.? ([0-9]+)?
     \.? ([0-9]+)?
-    \s* ([a-z][a-z0-9-]*)?
+    \s* (-[a-z][a-z0-9-]*)?
     $
     """,
     re.IGNORECASE | re.VERBOSE)
