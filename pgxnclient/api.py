@@ -78,7 +78,19 @@ class Api(object):
 
     def call(self, meth, args=None, query=None):
         url = self.get_url(meth, args, query)
-        return network.get_file(url)
+        try:
+            return network.get_file(url)
+        except ResourceNotFound:
+            # check if it is one of the broken URLs as reported in
+            # https://groups.google.com/group/pgxn-users/browse_thread/thread/e41fbc202680c92c
+            version = args and args.get('version')
+            if not (version and version.trail):
+                raise
+
+            args = args.copy()
+            args['version'] = str(version).replace('-', '', 1)
+            url = self.get_url(meth, args, query)
+            return network.get_file(url)
 
     def get_url(self, meth, args=None, query=None):
         tmpl = self.get_template(meth)
