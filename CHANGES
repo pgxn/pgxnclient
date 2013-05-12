@@ -3,6 +3,12 @@
 PGXN Client changes log
 -----------------------
 
+pgxnclient 1.2.1
+================
+
+- Handle version numbers both with and without hyphen (ticket #22).
+
+
 pgxnclient 1.2
 ==============
 
