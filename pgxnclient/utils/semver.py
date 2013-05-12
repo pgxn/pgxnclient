@@ -57,6 +57,9 @@ class SemVer(str):
     @property
     def trail(self): return self.tuple[3]
 
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__.__name__, str(self))
+
     def __eq__(self, other):
         if isinstance(other, SemVer):
             return self.tuple[:3] == other.tuple[:3] \
