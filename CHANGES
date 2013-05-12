@@ -3,6 +3,12 @@
 PGXN Client changes log
 -----------------------
 
+pgxnclient 1.2.1
+================
+
+- Fixed traceback on error when a dir doesn't contain META.json (ticket #19).
+
+
 pgxnclient 1.2
 ==============
 
