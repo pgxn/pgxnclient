@@ -3,6 +3,13 @@
 PGXN Client changes log
 -----------------------
 
+pgxnclient 1.2.2
+================
+
+- Exit with nonzero return code after command line parsing errors
+  (ticket #23).
+
+
 pgxnclient 1.2.1
 ================
 
