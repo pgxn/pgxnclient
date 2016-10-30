@@ -460,13 +460,13 @@ class WithPgConfig(object):
 
         import platform
         if platform.system() == 'Windows':
-          subp.add_argument('--pg_config', metavar="PROG", default='pg_config.exe',
-              help = _("the pg_config executable to find the database"
-                  " [default: %(default)s]"))
+            subp.add_argument('--pg_config', metavar="PROG", default='pg_config.exe',
+                help = _("the pg_config executable to find the database"
+                    " [default: %(default)s]"))
         else:
-          subp.add_argument('--pg_config', metavar="PROG", default='pg_config',
-              help = _("the pg_config executable to find the database"
-                  " [default: %(default)s]"))
+            subp.add_argument('--pg_config', metavar="PROG", default='pg_config',
+                help = _("the pg_config executable to find the database"
+                    " [default: %(default)s]"))
 
         return subp
 
