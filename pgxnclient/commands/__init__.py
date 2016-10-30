@@ -593,10 +593,17 @@ class WithMake(WithPgConfig):
 
     @classmethod
     def _find_default_make(self):
-        for make in ('gmake', 'make'):
-            path = find_executable(make)
-            if path:
-                return make
+        import platform
+        if platform.system() == 'Windows':
+            for make in ('gmake.exe', 'make.exe'):
+                path = find_executable(make)
+                if path:
+                    return make
+        else:
+            for make in ('gmake', 'make'):
+                path = find_executable(make)
+                if path:
+                    return make
 
         # if nothing was found, fall back on 'gmake'. If it was missing we
         # will give an error when attempting to use it
