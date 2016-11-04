@@ -217,6 +217,18 @@ class Command(object):
         """
         logger.debug("running command: %s", cmd)
         try:
+            import platform
+            if platform.system() == 'Windows':
+                import re
+                if isinstance(cmd, (list, tuple)):
+                    if re.search('configure$', cmd[0]):
+                        cmd[0] = 'sh ./configure'
+                if isinstance(cmd, str):
+                    if re.search('configure$', cmd):
+                        cmd = 'sh ./configure'
+            else:
+                cmd = cmd
+
             return Popen(cmd, *args, **kwargs)
         except OSError, e:
             if not isinstance(cmd, basestring):
@@ -546,7 +558,17 @@ class WithMake(WithPgConfig):
         if sudo:
             cmdline.extend(shlex.split(sudo))
 
-        cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % self.get_pg_config()])
+        import platform
+        if platform.system() == 'Windows':
+            # remove colons ':'
+            # if a character exists at the beginning and if it is upper case, then make it lowercase
+            # append a backslash '/' to the beginning of the line
+            # replace occurances of '\\' with '/' 
+            import re
+            new_pg_config = ('/' + re.sub("^[A-Z]", lambda m: m.group(0).lower(),self.get_pg_config().replace(":",""))).replace("\\","/")
+            cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % new_pg_config])
+        else:
+            cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % self.get_pg_config()])
 
         if isinstance(cmd, basestring):
             cmdline.append(cmd)
