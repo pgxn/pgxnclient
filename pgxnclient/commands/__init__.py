@@ -230,6 +230,7 @@ class Command(object):
                 cmd = cmd
 
             return Popen(cmd, *args, **kwargs)
+
         except OSError, e:
             if not isinstance(cmd, basestring):
                 cmd = ' '.join(cmd)
