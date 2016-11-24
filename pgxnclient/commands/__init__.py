@@ -564,7 +564,7 @@ class WithMake(WithPgConfig):
             # remove colons ':'
             # if a character exists at the beginning and if it is upper case, then make it lowercase
             # append a backslash '/' to the beginning of the line
-            # replace occurances of '\\' with '/' 
+            # replace many occurances of '\\' with '/' 
             import re
             new_pg_config = ('/' + re.sub("^[A-Z]", lambda m: m.group(0).lower(),self.get_pg_config().replace(":",""))).replace("\\","/")
             cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % new_pg_config])
@@ -629,7 +629,7 @@ class WithMake(WithPgConfig):
                     return make
 
         # if nothing was found, fall back on 'gmake'. If it was missing we
-        # will give an error when attempting to use it
+        # will give an error when attempting to use it. 
         return 'gmake'
 
 
@@ -704,4 +704,3 @@ variables PGDATABASE, PGHOST, PGPORT, PGUSER.
         if self.opts.port: rv['PGPORT'] = str(self.opts.port)
         if self.opts.username: rv['PGUSER'] = self.opts.username
         return rv
-
