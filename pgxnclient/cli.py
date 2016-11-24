@@ -121,11 +121,11 @@ def command_dispatch(argv=None):
         # 
         # If env is not None, it must be a mapping that defines the environment variables 
         # for the new process; these are used instead of the default behavior of 
-        # inheriting the current process’ environment.
+        # inheriting the current processâ€™ environment. 
         # 
         # https://docs.python.org/3.3/library/subprocess.html#replacing-the-os-spawn-family
         # 
-        # os.exec on Windows
+        # os.exec on all Windows versions
         # http://stackoverflow.com/questions/7004687/os-exec-on-windows
         #
         # sys.executable: get current /path/to/python.exe that is being used
