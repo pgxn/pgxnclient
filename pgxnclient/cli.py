@@ -114,7 +114,27 @@ def command_dispatch(argv=None):
         # through the current executable.
         argv.insert(0, sys.executable)
 
-    os.execv(argv[0], argv)
+    import platform
+    if platform.system() == 'Windows':
+        # 
+        # On Windows, the [Popen] class uses the Windows CreateProcess() function.
+        # 
+        # If env is not None, it must be a mapping that defines the environment variables 
+        # for the new process; these are used instead of the default behavior of 
+        # inheriting the current process environment. 
+        # 
+        # https://docs.python.org/3.3/library/subprocess.html#replacing-the-os-spawn-family
+        # 
+        # os.exec on all Windows versions
+        # http://stackoverflow.com/questions/7004687/os-exec-on-windows
+        #
+        # sys.executable: get current /path/to/python.exe that is being used
+        # 
+        import subprocess
+        all_argv = [sys.executable] + argv
+        subprocess.call(all_argv) 
+    else:
+        os.execv(argv[0], argv)
 
 def _get_exec(cmd):
     fn = find_script('pgxn-' + cmd)

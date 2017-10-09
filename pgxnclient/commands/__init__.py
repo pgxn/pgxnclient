@@ -217,7 +217,20 @@ class Command(object):
         """
         logger.debug("running command: %s", cmd)
         try:
+            import platform
+            if platform.system() == 'Windows':
+                import re
+                if isinstance(cmd, (list, tuple)):
+                    if re.search('configure$', cmd[0]):
+                        cmd[0] = 'sh ./configure'
+                if isinstance(cmd, str):
+                    if re.search('configure$', cmd):
+                        cmd = 'sh ./configure'
+            else:
+                cmd = cmd
+
             return Popen(cmd, *args, **kwargs)
+
         except OSError, e:
             if not isinstance(cmd, basestring):
                 cmd = ' '.join(cmd)
@@ -458,9 +471,15 @@ class WithPgConfig(object):
         subp = super(WithPgConfig, self).customize_parser(
             parser, subparsers, **kwargs)
 
-        subp.add_argument('--pg_config', metavar="PROG", default='pg_config',
-            help = _("the pg_config executable to find the database"
-                " [default: %(default)s]"))
+        import platform
+        if platform.system() == 'Windows':
+            subp.add_argument('--pg_config', metavar="PROG", default='pg_config.exe',
+                help = _("the pg_config executable to find the database"
+                    " [default: %(default)s]"))
+        else:
+            subp.add_argument('--pg_config', metavar="PROG", default='pg_config',
+                help = _("the pg_config executable to find the database"
+                    " [default: %(default)s]"))
 
         return subp
 
@@ -540,7 +559,17 @@ class WithMake(WithPgConfig):
         if sudo:
             cmdline.extend(shlex.split(sudo))
 
-        cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % self.get_pg_config()])
+        import platform
+        if platform.system() == 'Windows':
+            # remove colons ':'
+            # if a character exists at the beginning and if it is upper case, then make it lowercase
+            # append a backslash '/' to the beginning of the line
+            # replace many occurances of '\\' with '/' 
+            import re
+            new_pg_config = ('/' + re.sub("^[A-Z]", lambda m: m.group(0).lower(),self.get_pg_config().replace(":",""))).replace("\\","/")
+            cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % new_pg_config])
+        else:
+            cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % self.get_pg_config()])
 
         if isinstance(cmd, basestring):
             cmdline.append(cmd)
@@ -587,13 +616,20 @@ class WithMake(WithPgConfig):
 
     @classmethod
     def _find_default_make(self):
-        for make in ('gmake', 'make'):
-            path = find_executable(make)
-            if path:
-                return make
+        import platform
+        if platform.system() == 'Windows':
+            for make in ('gmake.exe', 'make.exe'):
+                path = find_executable(make)
+                if path:
+                    return make
+        else:
+            for make in ('gmake', 'make'):
+                path = find_executable(make)
+                if path:
+                    return make
 
         # if nothing was found, fall back on 'gmake'. If it was missing we
-        # will give an error when attempting to use it
+        # will give an error when attempting to use it. 
         return 'gmake'
 
 
@@ -668,4 +704,3 @@ variables PGDATABASE, PGHOST, PGPORT, PGUSER.
         if self.opts.port: rv['PGPORT'] = str(self.opts.port)
         if self.opts.username: rv['PGUSER'] = self.opts.username
         return rv
-
