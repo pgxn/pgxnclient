@@ -121,7 +121,7 @@ def command_dispatch(argv=None):
         # 
         # If env is not None, it must be a mapping that defines the environment variables 
         # for the new process; these are used instead of the default behavior of 
-        # inheriting the current processâ€™ environment. 
+        # inheriting the current process environment. 
         # 
         # https://docs.python.org/3.3/library/subprocess.html#replacing-the-os-spawn-family
         # 
