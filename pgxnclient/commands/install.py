@@ -254,10 +254,22 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
     def parse_pg_version(self, data):
         m = re.match(r'\S+\s+(\d+)\.(\d+)(?:\.(\d+))?', data)
         if m is None:
-            raise PgxnClientException(
-                "cannot parse version number from '%s'" % data)
+            m = re.match( r'\S+\s+(\d+)beta(\d+)', data )
+            is_beta = True
+            if m is None:
+                raise PgxnClientException(
+                    "cannot parse version number from '%s'" % data)
+        else:
+            is_beta = False
 
-        return (int(m.group(1)), int(m.group(2)), int(m.group(3) or 0))
+        major = int( m.group( 1 ) )
+        minor = int( m.group( 2 ) )
+        if is_beta:
+            patch = 99
+        else:
+            patch = int( m.group( 3 ) or 0 )
+
+        return ( major, minor, patch )
 
     def is_extension(self, name):
         fn = os.path.join(self.call_pg_config('sharedir'),
