@@ -48,9 +48,9 @@ class Help(Command):
     def print_all_commands(self):
         cmds = self.find_all_commands()
         if not cmds:
-            print "Unable to get all commands"
+            print _("Unable to get all commands")
             return
-        
+
         title = _("Available PGXN Client commands")
         print title
         print "-" * len(title)
