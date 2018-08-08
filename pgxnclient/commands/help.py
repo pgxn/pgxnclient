@@ -61,9 +61,12 @@ class Help(Command):
         for p in path:
             if not os.path.isdir(p):
                 continue
-            for fn in os.listdir(p):
-                if fn.startswith('pgxn-'):
-                    rv.append(fn[5:])
+            try:
+                for fn in os.listdir(p):
+                    if fn.startswith('pgxn-'):
+                        rv.append(fn[5:])
+            except OSError as e:
+                return rv
 
         rv.sort()
         return rv
