@@ -252,9 +252,9 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
         return pgver
 
     def parse_pg_version(self, data):
-        m = re.match(r'\S+\s+(\d+)\.(\d+)(?:\.(\d+))?', data)
+        m = re.match(r'^(\d+)\.(\d+)(?:\.(\d+))?', data)
         if m is None:
-            m = re.match( r'\S+\s+(\d+)beta(\d+)', data )
+            m = re.match( r'^(\d+)beta(\d+)', data )
             is_beta = True
             if m is None:
                 raise PgxnClientException(
