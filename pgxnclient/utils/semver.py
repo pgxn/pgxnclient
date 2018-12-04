@@ -65,7 +65,7 @@ class SemVer(str):
         if isinstance(other, SemVer):
             t1 = self.tuple[:3]
             t2 = other.tuple[:3]
-            if t1 <> t2: return op(t1, t2)
+            if t1 != t2: return op(t1, t2)
 
             s1 = self.tuple[3].lower()
             s2 = other.tuple[3].lower()

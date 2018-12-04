@@ -47,7 +47,7 @@ class Label(CIStr):
 
     Labels can then be used as host names in domains.
 
-    http://tools.ietf.org/html/rfc1034
+    https://tools.ietf.org/html/rfc1034
 
     "The labels must follow the rules for ARPANET host names. They must
     start with a letter, end with a letter or digit, and have as interior
@@ -70,7 +70,7 @@ class Term(CIStr):
     A Term is a subtype of String that must be at least two characters long
     contain no slash (/), backslash (\), control, or space characters.
 
-    See http://pgxn.org/spec#Term
+    See https://pgxn.org/spec#Term
     """
     def __new__(cls, value):
         if not Term._re_chk.match(value) or min(map(ord, value)) < 32:

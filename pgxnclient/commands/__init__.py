@@ -169,7 +169,7 @@ class Command(object):
 
         glb = subp.add_argument_group(_("global options"))
         glb.add_argument("--mirror", metavar="URL",
-            default = 'http://api.pgxn.org/',
+            default = 'https://api.pgxn.org/',
             help = _("the mirror to interact with [default: %(default)s]"))
         glb.add_argument("--verbose", action='store_true',
             help = _("print more information"))

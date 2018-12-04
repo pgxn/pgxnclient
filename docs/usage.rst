@@ -51,7 +51,7 @@ it.
 The specification allows specifying an operator and a version number, so that
 ``pgxn install 'foo<2.0'`` will install the most recent stable release of the
 distribution before the release 2.0. The version numbers are ordered according to
-the `Semantic Versioning specification <http://semver.org/>`__. Supported
+the `Semantic Versioning specification <https://semver.org/>`__. Supported
 operators are ``=``, ``==`` (alias for ``=``), ``<``, ``<=``, ``>``, ``>=``.
 Note that you probably need to quote the string as in the example to avoid
 invoking shell command redirection.
@@ -104,7 +104,7 @@ then will perform ``make all`` and ``make install``. It is assumed that the
 but this is not enforced: you may provide any Makefile as long as the expected
 commands are implemented.
 
-.. _PGXS: http://www.postgresql.org/docs/current/static/extend-pgxs.html
+.. _PGXS: https://www.postgresql.org/docs/current/extend-pgxs.html
 
 If there are many PostgreSQL installations on the system, the extension will
 be built and installed against the instance whose :program:`pg_config` is
@@ -116,7 +116,7 @@ it is installed as :program:`gmake` or :program:`make` executable. The program
 will use the first of them on the path. You can specify an alternative program
 using ``--make`` option.
 
-.. __: http://www.gnu.org/software/make/
+.. __: https://www.gnu.org/software/make/
 
 If the extension is being installed into a system PostgreSQL installation, the
 install phase will likely require root privileges to be performed.  In this
@@ -183,7 +183,7 @@ See the install_ command for details about the command arguments.
     At the time of writing, :program:`pg_regress` on Debian and derivatives is
     affected by `bug #554166`__ which makes *HOST* selection impossible.
 
-   .. __: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=554166
+   .. __: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=554166
 
 
 .. _uninstall:
@@ -256,8 +256,8 @@ extension specifies a ``.control`` file, it will be loaded using the `CREATE
 EXTENSION`_ command, otherwise it will be loaded as a loose set of objects.
 For more information see the `extensions documentation`__.
 
-.. _CREATE EXTENSION: http://www.postgresql.org/docs/current/static/sql-createextension.html
-.. __: http://www.postgresql.org/docs/current/static/extend-extensions.html
+.. _CREATE EXTENSION: https://www.postgresql.org/docs/current/sql-createextension.html
+.. __: https://www.postgresql.org/docs/current/extend-extensions.html
 
 The command is based on the `'provides' section`_ of the distribution's
 ``META.json``: if a SQL file is specified, that file will be used to load the
@@ -279,7 +279,7 @@ Note that if ``CREATE EXTENSION`` is used, the schema is directly supported;
 otherwise the ``.sql`` script loaded will be patched to create the objects in
 the provided schema (a confirmation will be asked before attempting loading).
 
-.. _'provides' section: http://pgxn.org/spec/#provides
+.. _'provides' section: https://pgxn.org/spec/#provides
 
 
 .. _unload:
@@ -322,7 +322,7 @@ reverse order respect to the order in which they are specified in the
 extensions provided, specifying them after *SPEC*: the extensions will be
 unloaded in the order specified.
 
-.. _DROP EXTENSION: http://www.postgresql.org/docs/current/static/sql-dropextension.html
+.. _DROP EXTENSION: http://www.postgresql.org/docs/current/sql-dropextension.html
 
 See the load_ command for details about the command arguments.
 
