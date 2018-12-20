@@ -1,10 +1,21 @@
 """
-SemVer -- semantic version specification
+SemVer -- (not quite) semantic version specification
 
 http://semver.org/
 
-This implementation is conform to the SemVer 0.2.1 implementation by David
-Wheeler (http://pgxn.org/dist/semver/0.2.1/) and passes all its unit test.
+IMPORTANT: don't trust this implementation. And don't trust SemVer AT ALL.
+We have a bloody mess because the specification changed after being published
+and after several extension had been uploaded with a version number that
+suddenly had become no more valid.
+
+https://github.com/mojombo/semver.org/issues/49
+
+My plea for forking the spec and keep our schema has been ignored. So this
+module only tries to make sure people can use PGXN, not to be conform to an
+half-aborted specification.  End of rant.
+
+This implementation is conform to the SemVer 0.3.0 implementation by David
+Wheeler (http://pgxn.org/dist/semver/0.3.0/) and passes all its unit test.
 
 Note that it is slightly non conform to the original specification, as the
 trailing part should be compared in ascii order while our comparison is not
@@ -15,7 +26,7 @@ understand each other.
 
 """
 
-# Copyright (C) 2011-2012 Daniele Varrazzo
+# Copyright (C) 2011-2013 Daniele Varrazzo
 
 # This file is part of the PGXN client
 
@@ -45,6 +56,9 @@ class SemVer(str):
 
     @property
     def trail(self): return self.tuple[3]
+
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__.__name__, str(self))
 
     def __eq__(self, other):
         if isinstance(other, SemVer):
@@ -117,7 +131,7 @@ class SemVer(str):
         maj =  maj and int(maj) or 0
         min = min and int(min) or 0
         patch = patch and int(patch) or 0
-        trail = trail and trail.strip() or ''
+        trail = trail and '-' + trail.strip() or ''
         return "%d.%d.%d%s" % (maj, min, patch, trail)
 
 re_semver = re.compile(r"""
@@ -125,7 +139,10 @@ re_semver = re.compile(r"""
         (0|[1-9][0-9]*)
     \.  (0|[1-9][0-9]*)
     \.  (0|[1-9][0-9]*)
-        ([a-z][a-z0-9-]*)?
+    (?:
+        -?                       # should be mandatory, but see rant above
+        ([a-z][a-z0-9-]*)
+    )?
     $
     """,
     re.IGNORECASE | re.VERBOSE)
@@ -135,7 +152,10 @@ re_clean = re.compile(r"""
         ([0-9]+)?
     \.? ([0-9]+)?
     \.? ([0-9]+)?
-    \s* ([a-z][a-z0-9-]*)?
+    (?:
+        -?  \s*
+        ([a-z][a-z0-9-]*)
+    )?
     $
     """,
     re.IGNORECASE | re.VERBOSE)

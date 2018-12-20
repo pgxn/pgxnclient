@@ -3,6 +3,20 @@
 PGXN Client changes log
 -----------------------
 
+pgxnclient 1.2.2
+================
+
+- Exit with nonzero return code after command line parsing errors
+  (ticket #23).
+
+
+pgxnclient 1.2.1
+================
+
+- Fixed traceback on error when a dir doesn't contain META.json (ticket #19).
+- Handle version numbers both with and without hyphen (ticket #22).
+
+
 pgxnclient 1.2
 ==============
 

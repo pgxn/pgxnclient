@@ -71,7 +71,10 @@ def script():
 
     except SystemExit, e:
         # Usually the arg parser bailing out.
-        pass
+        if isinstance(getattr(e, 'code', None), int):
+            sys.exit(e.code)
+        else:
+            sys.exit(1)
 
     except Exception, e:
         logger.error(_("unexpected error: %s - %s"),
