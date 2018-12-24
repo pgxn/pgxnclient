@@ -246,18 +246,20 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
 
     def get_pg_version(self):
         """Return the version of the selected database."""
-        data = self.call_psql('SELECT version();')
+        data = self.call_psql('SHOW pg_version_num')
         pgver = self.parse_pg_version(data)
         logger.debug("PostgreSQL version: %d.%d.%d", *pgver)
         return pgver
 
     def parse_pg_version(self, data):
-        m = re.match(r'\S+\s+(\d+)\.(\d+)(?:\.(\d+))?', data)
-        if m is None:
+        try:
+            return (
+                int(data[:-4]),
+                int(data[-4:-2]),
+                int(data[-2:]))
+        except Exception:
             raise PgxnClientException(
                 "cannot parse version number from '%s'" % data)
-
-        return (int(m.group(1)), int(m.group(2)), int(m.group(3) or 0))
 
     def is_extension(self, name):
         fn = os.path.join(self.call_pg_config('sharedir'),

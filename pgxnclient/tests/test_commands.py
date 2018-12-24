@@ -620,12 +620,8 @@ class LoadTestCase(unittest.TestCase):
     def test_parse_version(self):
         from pgxnclient.commands.install import Load
         cmd = Load(None)
-        self.assertEquals((9,0,3), cmd.parse_pg_version(
-            'PostgreSQL 9.0.3 on i686-pc-linux-gnu, compiled by GCC'
-            ' gcc-4.4.real (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5, 32-bit'))
-        self.assertEquals((9,1,0), cmd.parse_pg_version(
-            'PostgreSQL 9.1alpha5 on i686-pc-linux-gnu, compiled by GCC gcc'
-            ' (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5, 32-bit '))
+        self.assertEquals((9,0,3), cmd.parse_pg_version('90003'))
+        self.assertEquals((9,1,0), cmd.parse_pg_version('90100'))
 
     @patch('pgxnclient.network.get_file')
     def test_check_psql_options(self, mock_get):
