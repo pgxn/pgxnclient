@@ -27,8 +27,12 @@ finally:
     f.close()
 
 # External dependencies, depending on the Python version
-requires = []
-tests_require = []
+requires = [
+    'six'
+]
+tests_require = [
+    'pytest'
+]
 
 if sys.version_info < (2, 5):
     raise ValueError("PGXN client requires at least Python 2.5")
@@ -48,12 +52,15 @@ Intended Audience :: System Administrators
 License :: OSI Approved :: BSD License
 Operating System :: POSIX
 Programming Language :: Python :: 2
-Programming Language :: Python :: 2.5
-Programming Language :: Python :: 2.6
 Programming Language :: Python :: 2.7
 Programming Language :: Python :: 3
 Programming Language :: Python :: 3.1
 Programming Language :: Python :: 3.2
+Programming Language :: Python :: 3.3
+Programming Language :: Python :: 3.4
+Programming Language :: Python :: 3.5
+Programming Language :: Python :: 3.6
+Programming Language :: Python :: 3.7
 Topic :: Database
 """
 
@@ -74,7 +81,7 @@ setup(
     zip_safe = False,   # because we dynamically look for commands
     install_requires = requires,
     tests_require = tests_require,
+    extras_require={'test': tests_require},
     version = version,
-    use_2to3 = True,
 )
 
