@@ -29,7 +29,15 @@ You can also use keyword arguments for a more pythonic style::
 """
 
 import re
-import urllib
+try:
+    from urllib.parse import quote
+except ImportError:
+    from urllib import quote
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 __all__ = ["expand_template", "TemplateSyntaxError"]
 
@@ -54,7 +62,7 @@ def _handle_match(match, values):
             raise TemplateSyntaxError("Unexpected operator: %r" % op)
     else:
         assert len(variables) == 1
-        key, default = variables.items()[0]
+        key, default = next(iter(variables.items()))
         return values.get(key, default)
 
 #
@@ -109,9 +117,9 @@ def percent_encode(values):
     rv = {}
     for k, v in values.items():
         if isinstance(v, basestring):
-            rv[k] = urllib.quote(v)
+            rv[k] = quote(v)
         else:
-            rv[k] = [urllib.quote(s) for s in v]
+            rv[k] = [quote(s) for s in v]
     return rv
 
 #

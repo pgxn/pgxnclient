@@ -35,7 +35,7 @@ else:
 
 def load_json(f):
     data = f.read()
-    if not isinstance(data, unicode):
+    if isinstance(data, bytes):
         data = data.decode('utf-8')
     return load_jsons(data)
 

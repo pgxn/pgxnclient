@@ -8,7 +8,10 @@ pgxnclient -- client API stub
 
 from __future__ import with_statement
 
-from urllib import urlencode
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
 
 from pgxnclient import network
 from pgxnclient.utils import load_json

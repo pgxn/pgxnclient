@@ -15,9 +15,11 @@ from __future__ import with_statement
 import os
 import sys
 import logging
+from pgxnclient.utils import argparse
+from six import with_metaclass
 from subprocess import Popen, PIPE
 
-from pgxnclient.utils import load_json, argparse, find_executable
+from pgxnclient.utils import load_json, find_executable
 
 from pgxnclient import __version__
 from pgxnclient import network
@@ -29,6 +31,12 @@ from pgxnclient.errors import NotFound, PgxnClientException, ProcessError, Resou
 from pgxnclient.utils.temp import temp_dir
 
 logger = logging.getLogger('pgxnclient.commands')
+
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 
 def get_option_parser():
@@ -83,7 +91,7 @@ def load_commands():
 
         try:
             __import__(modname)
-        except Exception, e:
+        except Exception as e:
             logger.warn(_("error importing commands module %s: %s - %s"),
                 modname, e.__class__.__name__, e)
 
@@ -113,7 +121,7 @@ class CommandType(type):
         super(CommandType, cls).__init__(name, bases, dct)
 
 
-class Command(object):
+class Command(with_metaclass(CommandType)):
     """
     Base class to implement client commands.
 
@@ -124,7 +132,6 @@ class Command(object):
     `run()` method. If command line parser customization is required,
     `customize_parser()` should be extended.
     """
-    __metaclass__ = CommandType
     name = None
     description = None
 
@@ -218,7 +225,7 @@ class Command(object):
         logger.debug("running command: %s", cmd)
         try:
             return Popen(cmd, *args, **kwargs)
-        except OSError, e:
+        except OSError as e:
             if not isinstance(cmd, basestring):
                 cmd = ' '.join(cmd)
             msg = _("%s running command: %s") % (e, cmd)
@@ -277,7 +284,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
 
         try:
             spec = Spec.parse(spec)
-        except (ValueError, BadSpecError), e:
+        except (ValueError, BadSpecError) as e:
             self.parser.error(_("cannot parse package '%s': %s")
                 % (spec, e))
 
@@ -304,7 +311,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
 
         # Get the maximum version for each release status satisfying the spec
         vers = [ None ] * len(Spec.STATUS)
-        for n, d in drels.iteritems():
+        for n, d in drels.items():
             vs = filter(spec.accepted, [SemVer(r['version']) for r in d])
             if vs:
                 vers[Spec.STATUS[n]] = max(vs)
@@ -316,9 +323,9 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         Return the best distribution version from an extension's data
         """
         # Get the maximum version for each release status satisfying the spec
-        vers = [ [] for i in xrange(len(Spec.STATUS)) ]
+        vers = [ [] for i in range(len(Spec.STATUS)) ]
         vmap = {} # ext_version -> (dist_name, dist_version)
-        for ev, dists in data.get('versions', {}).iteritems():
+        for ev, dists in data.get('versions', {}).items():
             ev = SemVer(ev)
             if not spec.accepted(ev):
                 continue
@@ -329,7 +336,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
                 vmap[ev] = (dist['dist'], dv)
 
         # for each rel status only take the max one.
-        for i in xrange(len(vers)):
+        for i in range(len(vers)):
             vers[i] = vers[i] and max(vers[i]) or None
 
         ev = self._get_best_version(vers, spec, quiet=False)

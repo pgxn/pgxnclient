@@ -21,7 +21,7 @@ class TestArchive(unittest.TestCase):
 
     def test_from_file_unknown(self):
         fn = get_test_filename('META-manyext.json')
-        self.assertRaises(PgxnClientException(archive.from_file, fn))
+        self.assertRaises(PgxnClientException, archive.from_file, fn)
 
 
 class TestZipArchive(unittest.TestCase):

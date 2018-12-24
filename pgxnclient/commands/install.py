@@ -164,16 +164,7 @@ class SudoInstallUninstall(WithSudo, InstallUninstall):
         """
         dir = self.call_pg_config('libdir')
         logger.debug("testing if %s is writable", dir)
-        try:
-            f = tempfile.TemporaryFile(prefix="pgxn-", suffix=".test", dir=dir)
-            f.write(b('test'))
-            f.close()
-        except (IOError, OSError):
-            rv = False
-        else:
-            rv = True
-
-        return rv
+        return os.access(dir, os.W_OK)
 
 
 class Install(SudoInstallUninstall):

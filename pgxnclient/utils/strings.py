@@ -10,7 +10,7 @@ Strings -- implementation of a few specific string subclasses.
 import re
 
 from pgxnclient.i18n import _
-from pgxnclient.utils.argparse import ArgumentTypeError
+from argparse import ArgumentTypeError
 
 
 class CIStr(str):
@@ -103,7 +103,7 @@ class Identifier(CIStr):
         """
         try:
             return Identifier(s)
-        except ValueError, e:
+        except ValueError as e:
             # shouldn't happen anymore as we quote invalid identifiers
             raise ArgumentTypeError(e)
 

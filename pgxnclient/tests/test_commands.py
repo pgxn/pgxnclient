@@ -3,7 +3,10 @@ from mock import patch, Mock
 import os
 import tempfile
 import shutil
-from urllib import quote
+try:
+    from urllib.parse import quote
+except ImportError:
+    from urllib import quote
 
 from pgxnclient.utils import b
 from pgxnclient.errors import PgxnClientException, ResourceNotFound, InsufficientPrivileges

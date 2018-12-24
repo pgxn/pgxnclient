@@ -45,14 +45,15 @@ class Mirror(Command):
 
         for i, d in enumerate(data):
             if not detailed:
-                print d['uri']
+                print(d['uri'])
             else:
                 for k in [
-                "uri", "frequency", "location", "bandwidth", "organization",
-                "email", "timezone", "src", "rsync", "notes",]:
-                    print "%s: %s" % (k, d.get(k, ''))
+                    "uri", "frequency", "location", "bandwidth", "organization",
+                    "email", "timezone", "src", "rsync", "notes"
+                ]:
+                    print("%s: %s" % (k, d.get(k, '')))
 
-                print
+                print('')
 
 
 import re
