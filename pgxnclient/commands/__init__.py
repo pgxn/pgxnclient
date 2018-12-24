@@ -10,13 +10,14 @@ modules.
 
 # This file is part of the PGXN client
 
-from __future__ import with_statement
 
 import os
 import sys
 import logging
+
+import six
+
 from pgxnclient.utils import argparse
-from six import with_metaclass
 from subprocess import Popen, PIPE
 
 from pgxnclient.utils import load_json, find_executable
@@ -31,12 +32,6 @@ from pgxnclient.errors import NotFound, PgxnClientException, ProcessError, Resou
 from pgxnclient.utils.temp import temp_dir
 
 logger = logging.getLogger('pgxnclient.commands')
-
-
-try:
-    basestring
-except NameError:
-    basestring = str
 
 
 def get_option_parser():
@@ -121,7 +116,7 @@ class CommandType(type):
         super(CommandType, cls).__init__(name, bases, dct)
 
 
-class Command(with_metaclass(CommandType)):
+class Command(six.with_metaclass(CommandType)):
     """
     Base class to implement client commands.
 
@@ -207,7 +202,7 @@ class Command(with_metaclass(CommandType)):
             return True
 
         while 1:
-            ans = raw_input(_("%s [y/N] ") % prompt)
+            ans = six.input(_("%s [y/N] ") % prompt)
             if _('no').startswith(ans.lower()):
                 raise UserAbort(_("operation interrupted on user request"))
             elif _('yes').startswith(ans.lower()):
@@ -226,7 +221,7 @@ class Command(with_metaclass(CommandType)):
         try:
             return Popen(cmd, *args, **kwargs)
         except OSError as e:
-            if not isinstance(cmd, basestring):
+            if not isinstance(cmd, six.string_types):
                 cmd = ' '.join(cmd)
             msg = _("%s running command: %s") % (e, cmd)
             raise ProcessError(msg)
@@ -311,8 +306,8 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
 
         # Get the maximum version for each release status satisfying the spec
         vers = [ None ] * len(Spec.STATUS)
-        for n, d in drels.items():
-            vs = filter(spec.accepted, [SemVer(r['version']) for r in d])
+        for n, d in list(drels.items()):
+            vs = list(filter(spec.accepted, [SemVer(r['version']) for r in d]))
             if vs:
                 vers[Spec.STATUS[n]] = max(vs)
 
@@ -325,7 +320,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         # Get the maximum version for each release status satisfying the spec
         vers = [ [] for i in range(len(Spec.STATUS)) ]
         vmap = {} # ext_version -> (dist_name, dist_version)
-        for ev, dists in data.get('versions', {}).items():
+        for ev, dists in list(data.get('versions', {}).items()):
             ev = SemVer(ev)
             if not spec.accepted(ev):
                 continue
@@ -549,7 +544,7 @@ class WithMake(WithPgConfig):
 
         cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % self.get_pg_config()])
 
-        if isinstance(cmd, basestring):
+        if isinstance(cmd, six.string_types):
             cmdline.append(cmd)
         else: # a list
             cmdline.extend(cmd)

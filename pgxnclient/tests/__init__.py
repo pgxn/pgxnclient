@@ -23,10 +23,10 @@ else:
 
 
 # fix unittest maintainers stubborness: see Python issue #9424
-if unittest.TestCase.assert_ is not unittest.TestCase.assertTrue:
+if unittest.TestCase.assertTrue is not unittest.TestCase.assertTrue:
     # Vaffanculo, Wolf
-    unittest.TestCase.assert_ = unittest.TestCase.assertTrue
-    unittest.TestCase.assertEquals = unittest.TestCase.assertEqual
+    unittest.TestCase.assertTrue = unittest.TestCase.assertTrue
+    unittest.TestCase.assertEqual = unittest.TestCase.assertEqual
 
 
 if __name__ == '__main__':

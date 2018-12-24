@@ -29,6 +29,8 @@ You can also use keyword arguments for a more pythonic style::
 """
 
 import re
+import six
+
 try:
     from urllib.parse import quote
 except ImportError:
@@ -115,8 +117,8 @@ def parse_expansion(expansion):
 #
 def percent_encode(values):
     rv = {}
-    for k, v in values.items():
-        if isinstance(v, basestring):
+    for k, v in list(values.items()):
+        if isinstance(v, six.string_types):
             rv[k] = quote(v)
         else:
             rv[k] = [quote(s) for s in v]
@@ -131,9 +133,9 @@ class _operators(object):
     
     @staticmethod
     def opt(variables, arg, values):
-        for k in variables.keys():
+        for k in list(variables.keys()):
             v = values.get(k, None)
-            if v is None or (not isinstance(v, basestring) and len(v) == 0):
+            if v is None or (not isinstance(v, six.string_types) and len(v) == 0):
                 continue
             else:
                 return arg
@@ -148,20 +150,20 @@ class _operators(object):
 
     @staticmethod
     def listjoin(variables, arg, values):
-        k = variables.keys()[0]
+        k = list(variables.keys())[0]
         return arg.join(values.get(k, []))
 
     @staticmethod
     def join(variables, arg, values):
         return arg.join([
             "%s=%s" % (k, values.get(k, default))
-            for k, default in variables.items()
+            for k, default in list(variables.items())
             if values.get(k, default) is not None
         ])
 
     @staticmethod
     def prefix(variables, arg, values):
-        k, default = variables.items()[0]
+        k, default = list(variables.items())[0]
         v = values.get(k, default)
         if v is not None and len(v) > 0:
             return arg + v
@@ -170,7 +172,7 @@ class _operators(object):
             
     @staticmethod
     def append(variables, arg, values):
-        k, default = variables.items()[0]
+        k, default = list(variables.items())[0]
         v = values.get(k, default)
         if v is not None and len(v) > 0:
             return v + arg

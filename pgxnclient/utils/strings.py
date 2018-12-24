@@ -10,7 +10,7 @@ Strings -- implementation of a few specific string subclasses.
 import re
 
 from pgxnclient.i18n import _
-from argparse import ArgumentTypeError
+from .argparse import ArgumentTypeError
 
 
 class CIStr(str):
@@ -73,7 +73,7 @@ class Term(CIStr):
     See http://pgxn.org/spec#Term
     """
     def __new__(cls, value):
-        if not Term._re_chk.match(value) or min(map(ord, value)) < 32:
+        if not Term._re_chk.match(value) or min(list(map(ord, value))) < 32:
             raise ValueError(_("not a valid term term: '%s'") % value)
         return CIStr.__new__(cls, value)
 

@@ -47,9 +47,9 @@ class SemVerTestCase(unittest.TestCase):
             ('1.0.0rc-1', '1.0.0RC-1'), ]:
             self.assertEqual(SemVer(s1), SemVer(s2))
             self.assertEqual(hash(SemVer(s1)), hash(SemVer(s2)))
-            self.assert_(SemVer(s1) <= SemVer(s2),
+            self.assertTrue(SemVer(s1) <= SemVer(s2),
                 "%s <= %s failed" % (s1, s2))
-            self.assert_(SemVer(s1) >= SemVer(s2),
+            self.assertTrue(SemVer(s1) >= SemVer(s2),
                 "%s >= %s failed" % (s1, s2))
 
     def test_ne(self):
@@ -75,13 +75,13 @@ class SemVerTestCase(unittest.TestCase):
             ('2.2.2c', '2.2.2b'),
             ('2.2.2rc-2', '2.2.2RC-1'),
             ('0.9.10', '0.9.9'), ]:
-            self.assert_(SemVer(s1) >= SemVer(s2),
+            self.assertTrue(SemVer(s1) >= SemVer(s2),
                 "%s >= %s failed" % (s1, s2))
-            self.assert_(SemVer(s1) > SemVer(s2),
+            self.assertTrue(SemVer(s1) > SemVer(s2),
                 "%s > %s failed" % (s1, s2))
-            self.assert_(SemVer(s2) <= SemVer(s1),
+            self.assertTrue(SemVer(s2) <= SemVer(s1),
                 "%s <= %s failed" % (s2, s1))
-            self.assert_(SemVer(s2) < SemVer(s1),
+            self.assertTrue(SemVer(s2) < SemVer(s1),
                 "%s < %s failed" % (s2, s1))
 
     def test_clean(self):

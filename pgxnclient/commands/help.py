@@ -49,10 +49,10 @@ class Help(Command):
         cmds = self.find_all_commands()
         title = _("Available PGXN Client commands")
         print(title)
-        print("-" * len(title))
+        print(("-" * len(title)))
 
         for cmd in cmds:
-            print("  " + cmd)
+            print(("  " + cmd))
 
     def find_all_commands(self):
         rv = []
@@ -69,5 +69,5 @@ class Help(Command):
         return rv
 
     def print_libexec(self):
-        print(get_public_scripts_dir())
+        print((get_public_scripts_dir()))
 

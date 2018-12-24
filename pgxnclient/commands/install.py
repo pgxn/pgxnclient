@@ -6,7 +6,7 @@ pgxnclient -- installation/loading commands implementation
 
 # This file is part of the PGXN client
 
-from __future__ import with_statement
+
 
 import os
 import re
@@ -289,7 +289,7 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
             logger.debug('running sql command: "%s"', tdata)
             p = self.popen(cmdline, stdin=PIPE)
             # for Python 3: just assume default encoding will do
-            if isinstance(data, unicode):
+            if isinstance(data, str):
                 data = data.encode()
             p.communicate(data)
 
@@ -413,7 +413,7 @@ performed:\n\n%s\n\nDo you want to continue?""")
         if not self.opts.extensions:
             # All the extensions, in the order specified
             # (assume we got an orddict from json)
-            for name, data in dist['provides'].items():
+            for name, data in list(dist['provides'].items()):
                 rv.append((name, data.get('file')))
         else:
             # Only the specified extensions

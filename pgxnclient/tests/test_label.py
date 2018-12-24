@@ -11,8 +11,8 @@ class LabelTestCase(unittest.TestCase):
             'a12345678901234567890123456789012345678901234567890123456789012',]:
             self.assertEqual(Label(s), s)
             self.assertEqual(Label(s), Label(s))
-            self.assert_(Label(s) <= Label(s))
-            self.assert_(Label(s) >= Label(s))
+            self.assertTrue(Label(s) <= Label(s))
+            self.assertTrue(Label(s) >= Label(s))
 
     def test_bad(self):
         def ar(s):
@@ -36,14 +36,14 @@ class LabelTestCase(unittest.TestCase):
         self.assertNotEqual(str(Label('a')), str(Label('A')))   # preserving
 
     def test_order(self):
-        self.assert_(Label('a') < Label('B') < Label('c'))
-        self.assert_(Label('A') < Label('b') < Label('C'))
-        self.assert_(Label('a') <= Label('B') <= Label('c'))
-        self.assert_(Label('A') <= Label('b') <= Label('C'))
-        self.assert_(Label('c') > Label('B') > Label('a'))
-        self.assert_(Label('C') > Label('b') > Label('A'))
-        self.assert_(Label('c') >= Label('B') >= Label('a'))
-        self.assert_(Label('C') >= Label('b') >= Label('A'))
+        self.assertTrue(Label('a') < Label('B') < Label('c'))
+        self.assertTrue(Label('A') < Label('b') < Label('C'))
+        self.assertTrue(Label('a') <= Label('B') <= Label('c'))
+        self.assertTrue(Label('A') <= Label('b') <= Label('C'))
+        self.assertTrue(Label('c') > Label('B') > Label('a'))
+        self.assertTrue(Label('C') > Label('b') > Label('A'))
+        self.assertTrue(Label('c') >= Label('B') >= Label('a'))
+        self.assertTrue(Label('C') >= Label('b') >= Label('A'))
 
 
 class TermTestCase(unittest.TestCase):
@@ -53,8 +53,8 @@ class TermTestCase(unittest.TestCase):
             'adfkjh"()', ]:
             self.assertEqual(Term(s), s)
             self.assertEqual(Term(s), Term(s))
-            self.assert_(Term(s) <= Term(s))
-            self.assert_(Term(s) >= Term(s))
+            self.assertTrue(Term(s) <= Term(s))
+            self.assertTrue(Term(s) >= Term(s))
 
     def test_bad(self):
         def ar(s):

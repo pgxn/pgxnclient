@@ -9,8 +9,12 @@ pgxnclient -- specification object
 
 import os
 import re
-import urllib
 import operator as _op
+
+try:
+    from urllib.parse import unquote_plus
+except ImportError:
+    from urllib import unquote_plus
 
 from pgxnclient.i18n import _
 from pgxnclient.errors import BadSpecError, ResourceNotFound
@@ -78,7 +82,7 @@ class Spec(object):
 
         # check if it's a local resource
         if spec.startswith('file://'):
-            try_file = urllib.unquote_plus(spec[len('file://'):])
+            try_file = unquote_plus(spec[len('file://'):])
         elif os.sep in spec:
             try_file = spec
         else:

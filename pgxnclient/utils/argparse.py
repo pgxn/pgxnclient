@@ -91,9 +91,9 @@ import textwrap as _textwrap
 from gettext import gettext as _
 
 try:
-    basestring
+    str
 except NameError:
-    basestring = str
+    str = str
 
 
 def _callable(obj):
@@ -1705,7 +1705,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
                 if not hasattr(namespace, action.dest):
                     if action.default is not SUPPRESS:
                         default = action.default
-                        if isinstance(action.default, basestring):
+                        if isinstance(action.default, str):
                             default = self._get_value(action, default)
                         setattr(namespace, action.dest, default)
 
@@ -2183,7 +2183,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
                 value = action.const
             else:
                 value = action.default
-            if isinstance(value, basestring):
+            if isinstance(value, str):
                 value = self._get_value(action, value)
                 self._check_value(action, value)
 
@@ -2249,7 +2249,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
     def _check_value(self, action, value):
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:
-            tup = map(repr, action.choices)
+            tup = list(map(repr, action.choices))
             tup = value, ', '.join(sorted(tup))
             msg = _('invalid choice: %r (choose from %s)') % tup
             raise ArgumentError(action, msg)
