@@ -6,6 +6,7 @@ from pgxnclient.tests import unittest
 from pgxnclient.errors import PgxnClientException
 from pgxnclient.tests.testutils import get_test_filename
 
+
 class TestArchive(unittest.TestCase):
     def test_from_file_zip(self):
         fn = get_test_filename('foobar-0.42.1.zip')
@@ -64,4 +65,3 @@ class TestTarArchive(unittest.TestCase):
         fn = get_test_filename('foobar-0.42.1.zip')
         a = tar.TarArchive(fn)
         self.assert_(not a.can_open())
-

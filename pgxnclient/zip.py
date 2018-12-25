@@ -15,6 +15,7 @@ from pgxnclient.errors import PgxnClientException
 from pgxnclient.archive import Archive
 
 import logging
+
 logger = logging.getLogger('pgxnclient.zip')
 
 
@@ -32,7 +33,8 @@ class ZipArchive(Archive):
             self._file = zipfile.ZipFile(self.filename, 'r')
         except Exception as e:
             raise PgxnClientException(
-                _("cannot open archive '%s': %s") % (self.filename, e))
+                _("cannot open archive '%s': %s") % (self.filename, e)
+            )
 
     def close(self):
         if self._file is not None:
@@ -57,7 +59,8 @@ class ZipArchive(Archive):
                 fname = os.path.abspath(os.path.join(destdir, fn))
                 if not fname.startswith(destdir):
                     raise PgxnClientException(
-                        _("archive file '%s' trying to escape!") % fname)
+                        _("archive file '%s' trying to escape!") % fname
+                    )
 
                 # Looks like checking for a trailing / is the only way to
                 # tell if the file is a directory.
@@ -83,7 +86,9 @@ class ZipArchive(Archive):
                     fout.close()
 
                 if isexec:
-                    os.chmod(fname, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+                    os.chmod(
+                        fname, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC
+                    )
 
         finally:
             self.close()
@@ -93,4 +98,3 @@ class ZipArchive(Archive):
 
 def unpack(filename, destdir):
     return ZipArchive(filename).unpack(destdir)
-

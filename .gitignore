@@ -7,3 +7,4 @@ mock-*.egg
 .eggs
 dbtest/regression.*
 dbtest/postgresql-*/*
+env

@@ -14,6 +14,7 @@ from pgxnclient.i18n import _
 from pgxnclient.errors import PgxnException, UserAbort
 from pgxnclient.commands import get_option_parser, load_commands, run_command
 
+
 def main(argv=None):
     """
     The program main function.
@@ -40,10 +41,12 @@ def script():
     """
     # Setup logging
     import logging
+
     logging.basicConfig(
         format="%(levelname)s: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
-        stream=sys.stdout)
+        stream=sys.stdout,
+    )
     logger = logging.getLogger()
 
     # Dispatch to the command according to the script name
@@ -77,14 +80,17 @@ def script():
             sys.exit(1)
 
     except Exception as e:
-        logger.error(_("unexpected error: %s - %s"),
-            e.__class__.__name__, e, exc_info=True)
+        logger.error(
+            _("unexpected error: %s - %s"),
+            e.__class__.__name__,
+            e,
+            exc_info=True,
+        )
         sys.exit(1)
 
     except BaseException as e:
         # ctrl-c
         sys.exit(1)
-
 
 
 def command_dispatch(argv=None):
@@ -100,13 +106,14 @@ def command_dispatch(argv=None):
     # Assume the first arg after the option is the command to run
     for icmd, cmd in enumerate(argv):
         if not cmd.startswith('-'):
-            argv = [_get_exec(cmd)] + argv[:icmd] + argv[icmd+1:]
+            argv = [_get_exec(cmd)] + argv[:icmd] + argv[icmd + 1 :]
             break
     else:
         # No command specified: dispatch to the pgxnclient script
         # to print basic help, main command etc.
-        argv = ([os.path.join(os.path.dirname(sys.argv[0]), 'pgxnclient')]
-            + argv)
+        argv = [
+            os.path.join(os.path.dirname(sys.argv[0]), 'pgxnclient')
+        ] + argv
 
     if not os.access(argv[0], os.X_OK):
         # This is our friend setuptools' job: the script have lost the
@@ -116,15 +123,15 @@ def command_dispatch(argv=None):
 
     os.execv(argv[0], argv)
 
+
 def _get_exec(cmd):
     fn = find_script('pgxn-' + cmd)
     if not fn:
-        print >>sys.stderr, \
-            "pgxn: unknown command: '%s'. See 'pgxn --help'" % cmd
+        print >>sys.stderr, "pgxn: unknown command: '%s'. See 'pgxn --help'" % cmd
         sys.exit(2)
 
     return fn
 
+
 if __name__ == '__main__':
     script()
-

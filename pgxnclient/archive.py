@@ -12,11 +12,13 @@ from pgxnclient.i18n import _
 from pgxnclient.utils import load_jsons
 from pgxnclient.errors import PgxnClientException
 
+
 def from_spec(spec):
     """Return an `Archive` instance to handle the file requested by *spec*
     """
     assert spec.is_file()
     return from_file(spec.filename)
+
 
 def from_file(filename):
     """Return an `Archive` instance to handle the file *filename*
@@ -30,12 +32,13 @@ def from_file(filename):
             return a
 
     raise PgxnClientException(
-        _("can't open archive '%s': file type not recognized")
-        % filename)
+        _("can't open archive '%s': file type not recognized") % filename
+    )
 
 
 class Archive(object):
     """Base class to handle archives."""
+
     def __init__(self, filename):
         self.filename = filename
 
@@ -76,7 +79,8 @@ class Archive(object):
                     return load_jsons(self.read(fn).decode('utf8'))
             else:
                 raise PgxnClientException(
-                    _("file 'META.json' not found in archive '%s'") % filename)
+                    _("file 'META.json' not found in archive '%s'") % filename
+                )
         finally:
             self.close()
 
@@ -95,5 +99,3 @@ class Archive(object):
                     return os.path.join(destdir, dir)
 
         return destdir
-
-

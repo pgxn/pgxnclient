@@ -26,7 +26,13 @@ from pgxnclient import Spec, SemVer
 from pgxnclient import archive
 from pgxnclient.api import Api
 from pgxnclient.i18n import _, gettext
-from pgxnclient.errors import NotFound, PgxnClientException, ProcessError, ResourceNotFound, UserAbort
+from pgxnclient.errors import (
+    NotFound,
+    PgxnClientException,
+    ProcessError,
+    ResourceNotFound,
+    UserAbort,
+)
 from pgxnclient.utils.temp import temp_dir
 
 logger = logging.getLogger('pgxnclient.commands')
@@ -43,31 +49,43 @@ def get_option_parser():
     """
     parser = argparse.ArgumentParser(
         # usage = _("%(prog)s [global options] COMMAND [command options]"),
-        description =
-            _("Interact with the PostgreSQL Extension Network (PGXN)."),
+        description=_(
+            "Interact with the PostgreSQL Extension Network (PGXN)."
+        ),
         add_help=False,
     )
-    parser.add_argument("--version", action='version',
+    parser.add_argument(
+        "--version",
+        action='version',
         version="%%(prog)s %s" % __version__,
-        help = _("print the version number and exit"))
+        help=_("print the version number and exit"),
+    )
 
     # Drop the conflicting -h argument
-    parser.add_argument("--help", action='help', default=argparse.SUPPRESS,
-        help=_('show this help message and exit'))
+    parser.add_argument(
+        "--help",
+        action='help',
+        default=argparse.SUPPRESS,
+        help=_('show this help message and exit'),
+    )
 
     subparsers = parser.add_subparsers(
-        title = _("available commands"),
-        metavar = 'COMMAND',
-        help = _("the command to execute."
+        title=_("available commands"),
+        metavar='COMMAND',
+        help=_(
+            "the command to execute."
             " The complete list is available using `pgxn help --all`."
-            " Builtin commands are:"))
+            " Builtin commands are:"
+        ),
+    )
 
-    clss = [ cls for cls in CommandType.subclasses if cls.name ]
+    clss = [cls for cls in CommandType.subclasses if cls.name]
     clss.sort(key=lambda c: c.name)
     for cls in clss:
         cls.customize_parser(parser, subparsers)
 
     return parser
+
 
 def load_commands():
     """
@@ -81,24 +99,31 @@ def load_commands():
     """
     pkgdir = os.path.dirname(__file__)
     for fn in os.listdir(pkgdir):
-        if fn.startswith('_'): continue
+        if fn.startswith('_'):
+            continue
         modname = __name__ + '.' + os.path.splitext(fn)[0]
 
         # skip already imported modules
-        if modname in sys.modules: continue
+        if modname in sys.modules:
+            continue
 
         try:
             __import__(modname)
         except Exception as e:
-            logger.warn(_("error importing commands module %s: %s - %s"),
-                modname, e.__class__.__name__, e)
+            logger.warn(
+                _("error importing commands module %s: %s - %s"),
+                modname,
+                e.__class__.__name__,
+                e,
+            )
 
 
 def run_command(opts, parser):
     """Run the command specified by options parsed on the command line."""
     # setup the logging
     logging.getLogger().setLevel(
-        opts.verbose and logging.DEBUG or logging.INFO)
+        opts.verbose and logging.DEBUG or logging.INFO
+    )
     return opts.cmd(opts, parser=parser).run()
 
 
@@ -109,7 +134,9 @@ class CommandType(type):
     This metaclass allows self-registration of the commands: any Command
     subclass is automatically added to the `subclasses` list.
     """
+
     subclasses = []
+
     def __new__(cls, name, bases, dct):
         rv = type.__new__(cls, name, bases, dct)
         CommandType.subclasses.append(rv)
@@ -130,6 +157,7 @@ class Command(six.with_metaclass(CommandType, object)):
     `run()` method. If command line parser customization is required,
     `customize_parser()` should be extended.
     """
+
     name = None
     description = None
 
@@ -163,28 +191,42 @@ class Command(six.with_metaclass(CommandType, object)):
         raise NotImplementedError
 
     @classmethod
-    def __make_subparser(self, parser, subparsers,
-            description=None, epilog=None):
+    def __make_subparser(
+        self, parser, subparsers, description=None, epilog=None
+    ):
         """Create a new subparser with help populated."""
-        subp = subparsers.add_parser(self.name,
-            help = gettext(self.description),
-            description = description or gettext(self.description),
+        subp = subparsers.add_parser(
+            self.name,
+            help=gettext(self.description),
+            description=description or gettext(self.description),
             add_help=False,
-            epilog = epilog)
+            epilog=epilog,
+        )
         subp.set_defaults(cmd=self)
 
         # Drop the conflicting -h argument
-        subp.add_argument("--help", action='help', default=argparse.SUPPRESS,
-            help=_('show this help message and exit'))
+        subp.add_argument(
+            "--help",
+            action='help',
+            default=argparse.SUPPRESS,
+            help=_('show this help message and exit'),
+        )
 
         glb = subp.add_argument_group(_("global options"))
-        glb.add_argument("--mirror", metavar="URL",
-            default = 'https://api.pgxn.org/',
-            help = _("the mirror to interact with [default: %(default)s]"))
-        glb.add_argument("--verbose", action='store_true',
-            help = _("print more information"))
-        glb.add_argument("--yes", action='store_true',
-            help = _("assume affirmative answer to all questions"))
+        glb.add_argument(
+            "--mirror",
+            metavar="URL",
+            default='https://api.pgxn.org/',
+            help=_("the mirror to interact with [default: %(default)s]"),
+        )
+        glb.add_argument(
+            "--verbose", action='store_true', help=_("print more information")
+        )
+        glb.add_argument(
+            "--yes",
+            action='store_true',
+            help=_("assume affirmative answer to all questions"),
+        )
 
         return subp
 
@@ -237,43 +279,68 @@ class Command(six.with_metaclass(CommandType, object)):
 
 from pgxnclient.errors import BadSpecError
 
+
 class WithSpec(Command):
     """Mixin to implement commands taking a package specification.
 
     This class adds a positional argument SPEC to the parser and related
     options.
     """
+
     @classmethod
-    def customize_parser(self, parser, subparsers,
-        with_status=True, epilog=None, **kwargs):
+    def customize_parser(
+        self, parser, subparsers, with_status=True, epilog=None, **kwargs
+    ):
         """
         Add the SPEC related options to the parser.
 
         If *with_status* is true, options ``--stable``, ``--testing``,
         ``--unstable`` are also handled.
         """
-        epilog = _("""
+        epilog = (
+            _(
+                """
 SPEC can either specify just a name or contain required versions
 indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
-""") + (epilog or "")
+"""
+            )
+            + (epilog or "")
+        )
 
         subp = super(WithSpec, self).customize_parser(
-            parser, subparsers, epilog=epilog, **kwargs)
+            parser, subparsers, epilog=epilog, **kwargs
+        )
 
-        subp.add_argument('spec', metavar='SPEC',
-            help = _("name and optional version of the package"))
+        subp.add_argument(
+            'spec',
+            metavar='SPEC',
+            help=_("name and optional version of the package"),
+        )
 
         if with_status:
             g = subp.add_mutually_exclusive_group(required=False)
-            g.add_argument('--stable', dest='status',
-                action='store_const', const=Spec.STABLE, default=Spec.STABLE,
-                help=_("only accept stable distributions [default]"))
-            g.add_argument('--testing', dest='status',
-                action='store_const', const=Spec.TESTING,
-                help=_("accept testing distributions too"))
-            g.add_argument('--unstable', dest='status',
-                action='store_const', const=Spec.UNSTABLE,
-                help=_("accept unstable distributions too"))
+            g.add_argument(
+                '--stable',
+                dest='status',
+                action='store_const',
+                const=Spec.STABLE,
+                default=Spec.STABLE,
+                help=_("only accept stable distributions [default]"),
+            )
+            g.add_argument(
+                '--testing',
+                dest='status',
+                action='store_const',
+                const=Spec.TESTING,
+                help=_("accept testing distributions too"),
+            )
+            g.add_argument(
+                '--unstable',
+                dest='status',
+                action='store_const',
+                const=Spec.UNSTABLE,
+                help=_("accept unstable distributions too"),
+            )
 
         return subp
 
@@ -288,16 +355,17 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         try:
             spec = Spec.parse(spec)
         except (ValueError, BadSpecError) as e:
-            self.parser.error(_("cannot parse package '%s': %s")
-                % (spec, e))
+            self.parser.error(_("cannot parse package '%s': %s") % (spec, e))
 
         if not _can_be_local and spec.is_local():
             raise PgxnClientException(
-                _("you cannot use a local resource with this command"))
+                _("you cannot use a local resource with this command")
+            )
 
         if not _can_be_url and spec.is_url():
             raise PgxnClientException(
-                _("you cannot use an url with this command"))
+                _("you cannot use an url with this command")
+            )
 
         return spec
 
@@ -313,7 +381,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         drels = data['releases']
 
         # Get the maximum version for each release status satisfying the spec
-        vers = [ None ] * len(Spec.STATUS)
+        vers = [None] * len(Spec.STATUS)
         for n, d in drels.items():
             vs = list(filter(spec.accepted, [SemVer(r['version']) for r in d]))
             if vs:
@@ -326,8 +394,8 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         Return the best distribution version from an extension's data
         """
         # Get the maximum version for each release status satisfying the spec
-        vers = [ [] for i in range(len(Spec.STATUS)) ]
-        vmap = {} # ext_version -> (dist_name, dist_version)
+        vers = [[] for i in range(len(Spec.STATUS))]
+        vmap = {}  # ext_version -> (dist_name, dist_version)
         for ev, dists in data.get('versions', {}).items():
             ev = SemVer(ev)
             if not spec.accepted(ev):
@@ -347,8 +415,11 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
 
     def _get_best_version(self, vers, spec, quiet):
         # Is there any result at the desired release status?
-        want = [ v for lvl, v in enumerate(vers)
-            if lvl >= self.opts.status and v is not None ]
+        want = [
+            v
+            for lvl, v in enumerate(vers)
+            if lvl >= self.opts.status and v is not None
+        ]
         if want:
             ver = max(want)
             if not quiet:
@@ -394,7 +465,8 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
             logger.debug("reading %s", fn)
             if not os.path.exists(fn):
                 raise PgxnClientException(
-                    _("file 'META.json' not found in '%s'") % spec.dirname)
+                    _("file 'META.json' not found in '%s'") % spec.dirname
+                )
 
             with open(fn) as f:
                 return load_json(f)
@@ -413,6 +485,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         else:
             assert False
 
+
 class WithSpecLocal(WithSpec):
     """
     Mixin to implement commands that can also refer to a local file or dir.
@@ -420,13 +493,20 @@ class WithSpecLocal(WithSpec):
 
     @classmethod
     def customize_parser(self, parser, subparsers, epilog=None, **kwargs):
-        epilog = _("""
+        epilog = (
+            _(
+                """
 SPEC may also be a local zip file or unpacked directory, but in this case
 it should contain at least a '%s', for instance '.%spkgname.zip'.
-""") % (os.sep, os.sep) + (epilog or "")
+"""
+            )
+            % (os.sep, os.sep)
+            + (epilog or "")
+        )
 
         subp = super(WithSpecLocal, self).customize_parser(
-            parser, subparsers, epilog=epilog, **kwargs)
+            parser, subparsers, epilog=epilog, **kwargs
+        )
 
         return subp
 
@@ -442,12 +522,18 @@ class WithSpecUrl(WithSpec):
 
     @classmethod
     def customize_parser(self, parser, subparsers, epilog=None, **kwargs):
-        epilog = _("""
+        epilog = (
+            _(
+                """
 SPEC may also be an url specifying a protocol such as 'http://' or 'https://'.
-""") + (epilog or "")
+"""
+            )
+            + (epilog or "")
+        )
 
         subp = super(WithSpecUrl, self).customize_parser(
-            parser, subparsers, epilog=epilog, **kwargs)
+            parser, subparsers, epilog=epilog, **kwargs
+        )
 
         return subp
 
@@ -460,17 +546,25 @@ class WithPgConfig(object):
     """
     Mixin to implement commands that should query :program:`pg_config`.
     """
+
     @classmethod
     def customize_parser(self, parser, subparsers, **kwargs):
         """
         Add the ``--pg_config`` option to the options parser.
         """
         subp = super(WithPgConfig, self).customize_parser(
-            parser, subparsers, **kwargs)
+            parser, subparsers, **kwargs
+        )
 
-        subp.add_argument('--pg_config', metavar="PROG", default='pg_config',
-            help = _("the pg_config executable to find the database"
-                " [default: %(default)s]"))
+        subp.add_argument(
+            '--pg_config',
+            metavar="PROG",
+            default='pg_config',
+            help=_(
+                "the pg_config executable to find the database"
+                " [default: %(default)s]"
+            ),
+        )
 
         return subp
 
@@ -486,8 +580,9 @@ class WithPgConfig(object):
         p = self.popen(cmdline, stdout=PIPE)
         out, err = p.communicate()
         if p.returncode:
-            raise ProcessError(_("command returned %s: %s")
-                % (p.returncode, cmdline))
+            raise ProcessError(
+                _("command returned %s: %s") % (p.returncode, cmdline)
+            )
 
         out = out.rstrip().decode('utf-8')
         rv = _cache[what] = out
@@ -509,22 +604,30 @@ class WithPgConfig(object):
 
 import shlex
 
+
 class WithMake(WithPgConfig):
     """
     Mixin to implement commands that should invoke :program:`make`.
     """
+
     @classmethod
     def customize_parser(self, parser, subparsers, **kwargs):
         """
         Add the ``--make`` option to the options parser.
         """
         subp = super(WithMake, self).customize_parser(
-            parser, subparsers, **kwargs)
+            parser, subparsers, **kwargs
+        )
 
-        subp.add_argument('--make', metavar="PROG",
+        subp.add_argument(
+            '--make',
+            metavar="PROG",
             default=self._find_default_make(),
-            help = _("the 'make' executable to use to build the extension "
-                "[default: %(default)s]"))
+            help=_(
+                "the 'make' executable to use to build the extension "
+                "[default: %(default)s]"
+            ),
+        )
 
         return subp
 
@@ -543,26 +646,31 @@ class WithMake(WithPgConfig):
                 break
         else:
             raise PgxnClientException(
-                _("no Makefile found in the extension root"))
+                _("no Makefile found in the extension root")
+            )
 
         cmdline = []
 
         if sudo:
             cmdline.extend(shlex.split(sudo))
 
-        cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % self.get_pg_config()])
+        cmdline.extend(
+            [self.get_make(), 'PG_CONFIG=%s' % self.get_pg_config()]
+        )
 
         if isinstance(cmd, six.string_types):
             cmdline.append(cmd)
-        else: # a list
+        else:  # a list
             cmdline.extend(cmd)
 
         logger.debug(_("running: %s"), cmdline)
         p = self.popen(cmdline, cwd=dir, shell=False, env=env, close_fds=True)
         p.communicate()
         if p.returncode:
-            raise ProcessError(_("command returned %s: %s")
-                % (p.returncode, ' '.join(cmdline)))
+            raise ProcessError(
+                _("command returned %s: %s")
+                % (p.returncode, ' '.join(cmdline))
+            )
 
     def get_make(self, _cache=[]):
         """
@@ -578,8 +686,9 @@ class WithMake(WithPgConfig):
         if os.path.split(make)[0]:
             # At least a relative dir specified.
             if not os.path.exists(make):
-                raise PgxnClientException(_("make executable not found: %s")
-                    % make)
+                raise PgxnClientException(
+                    _("make executable not found: %s") % make
+                )
 
             # Convert to abs path to be robust in case the dir is changed.
             make = os.path.abspath(make)
@@ -589,8 +698,9 @@ class WithMake(WithPgConfig):
             # security hole: make may be run under sudo and in this case we
             # don't want root to execute a make hacked in an user local dir
             if not find_executable(make):
-                raise PgxnClientException(_("make executable not found: %s")
-                    % make)
+                raise PgxnClientException(
+                    _("make executable not found: %s") % make
+                )
 
         _cache.append(make)
         return make
@@ -611,18 +721,33 @@ class WithSudo(object):
     """
     Mixin to implement commands that may invoke sudo.
     """
+
     @classmethod
     def customize_parser(self, parser, subparsers, **kwargs):
         subp = super(WithSudo, self).customize_parser(
-            parser, subparsers, **kwargs)
+            parser, subparsers, **kwargs
+        )
 
         g = subp.add_mutually_exclusive_group()
-        g.add_argument('--sudo', metavar="PROG", const='sudo', nargs="?",
-            help = _("run PROG to elevate privileges when required"
-                " [default: %(const)s]"))
-        g.add_argument('--nosudo', dest='sudo', action='store_false',
-            help = _("never elevate privileges "
-                "(no more needed: for backward compatibility)"))
+        g.add_argument(
+            '--sudo',
+            metavar="PROG",
+            const='sudo',
+            nargs="?",
+            help=_(
+                "run PROG to elevate privileges when required"
+                " [default: %(const)s]"
+            ),
+        )
+        g.add_argument(
+            '--nosudo',
+            dest='sudo',
+            action='store_false',
+            help=_(
+                "never elevate privileges "
+                "(no more needed: for backward compatibility)"
+            ),
+        )
 
         return subp
 
@@ -631,29 +756,50 @@ class WithDatabase(object):
     """
     Mixin to implement commands that should communicate to a database.
     """
+
     @classmethod
     def customize_parser(self, parser, subparsers, epilog=None, **kwargs):
         """
         Add the options related to database connections.
         """
-        epilog =  _("""
+        epilog = (
+            _(
+                """
 The default database connection options depend on the value of environment
 variables PGDATABASE, PGHOST, PGPORT, PGUSER.
-""") + (epilog or "")
+"""
+            )
+            + (epilog or "")
+        )
 
         subp = super(WithDatabase, self).customize_parser(
-            parser, subparsers, epilog=epilog, **kwargs)
+            parser, subparsers, epilog=epilog, **kwargs
+        )
 
         g = subp.add_argument_group(_("database connections options"))
 
-        g.add_argument('-d', '--dbname', metavar="DBNAME",
-            help = _("database name to install into"))
-        g.add_argument('-h', '--host', metavar="HOST",
-            help = _("database server host or socket directory"))
-        g.add_argument('-p', '--port', metavar="PORT", type=int,
-            help = _("database server port"))
-        g.add_argument('-U', '--username', metavar="NAME",
-            help = _("database user name"))
+        g.add_argument(
+            '-d',
+            '--dbname',
+            metavar="DBNAME",
+            help=_("database name to install into"),
+        )
+        g.add_argument(
+            '-h',
+            '--host',
+            metavar="HOST",
+            help=_("database server host or socket directory"),
+        )
+        g.add_argument(
+            '-p',
+            '--port',
+            metavar="PORT",
+            type=int,
+            help=_("database server port"),
+        )
+        g.add_argument(
+            '-U', '--username', metavar="NAME", help=_("database user name")
+        )
 
         return subp
 
@@ -662,10 +808,14 @@ variables PGDATABASE, PGHOST, PGPORT, PGUSER.
         Return the cmdline options to connect to the specified database.
         """
         rv = []
-        if self.opts.dbname: rv.extend(['--dbname', self.opts.dbname])
-        if self.opts.host: rv.extend(['--host', self.opts.host])
-        if self.opts.port: rv.extend(['--port', str(self.opts.port)])
-        if self.opts.username: rv.extend(['--username', self.opts.username])
+        if self.opts.dbname:
+            rv.extend(['--dbname', self.opts.dbname])
+        if self.opts.host:
+            rv.extend(['--host', self.opts.host])
+        if self.opts.port:
+            rv.extend(['--port', str(self.opts.port)])
+        if self.opts.username:
+            rv.extend(['--username', self.opts.username])
         return rv
 
     def get_psql_env(self):
@@ -673,9 +823,12 @@ variables PGDATABASE, PGHOST, PGPORT, PGUSER.
         Return a dict with env variables to connect to the specified db.
         """
         rv = {}
-        if self.opts.dbname: rv['PGDATABASE'] = self.opts.dbname
-        if self.opts.host: rv['PGHOST'] = self.opts.host
-        if self.opts.port: rv['PGPORT'] = str(self.opts.port)
-        if self.opts.username: rv['PGUSER'] = self.opts.username
+        if self.opts.dbname:
+            rv['PGDATABASE'] = self.opts.dbname
+        if self.opts.host:
+            rv['PGHOST'] = self.opts.host
+        if self.opts.port:
+            rv['PGPORT'] = str(self.opts.port)
+        if self.opts.username:
+            rv['PGUSER'] = self.opts.username
         return rv
-

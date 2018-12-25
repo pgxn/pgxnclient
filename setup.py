@@ -49,23 +49,25 @@ Topic :: Database
 """
 
 setup(
-    name = 'pgxnclient',
-    description = 'A command line tool to interact with the PostgreSQL Extension Network.',
-    author = 'Daniele Varrazzo',
-    author_email = 'daniele.varrazzo@gmail.com',
-    url = 'https://github.com/dvarrazzo/pgxnclient',
-    license = 'BSD',
+    name='pgxnclient',
+    description='A command line tool to interact with the PostgreSQL Extension Network.',
+    author='Daniele Varrazzo',
+    author_email='daniele.varrazzo@gmail.com',
+    url='https://github.com/dvarrazzo/pgxnclient',
+    license='BSD',
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
-    packages = find_packages(),
-    package_data = {'pgxnclient': ['libexec/*']},
-    entry_points = {'console_scripts': [
-        'pgxn = pgxnclient.cli:command_dispatch',
-        'pgxnclient = pgxnclient.cli:script', ]},
-    test_suite = 'pgxnclient.tests',
-    classifiers = [x for x in classifiers.split('\n') if x],
-    zip_safe = False,   # because we dynamically look for commands
-    install_requires = requires,
-    tests_require = tests_require,
-    version = version,
+    packages=find_packages(),
+    package_data={'pgxnclient': ['libexec/*']},
+    entry_points={
+        'console_scripts': [
+            'pgxn = pgxnclient.cli:command_dispatch',
+            'pgxnclient = pgxnclient.cli:script',
+        ]
+    },
+    test_suite='pgxnclient.tests',
+    classifiers=[x for x in classifiers.split('\n') if x],
+    zip_safe=False,  # because we dynamically look for commands
+    install_requires=requires,
+    tests_require=tests_require,
+    version=version,
 )
-

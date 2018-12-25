@@ -7,8 +7,14 @@ pgxnclient -- misc utilities package
 # This file is part of the PGXN client
 
 
-__all__ = ['OrderedDict', 'load_json', 'load_jsons', 'sha1', 'b',
-    'find_executable']
+__all__ = [
+    'OrderedDict',
+    'load_json',
+    'load_jsons',
+    'sha1',
+    'b',
+    'find_executable',
+]
 
 
 import os
@@ -23,6 +29,7 @@ def load_json(f):
     if not isinstance(data, six.text_type):
         data = data.decode('utf-8')
     return load_jsons(data)
+
 
 def load_jsons(data):
     return json.loads(data, object_pairs_hook=OrderedDict)
@@ -43,4 +50,3 @@ def find_executable(name):
         fn = os.path.abspath(os.path.join(dir, name))
         if os.path.exists(fn):
             return os.path.abspath(fn)
-

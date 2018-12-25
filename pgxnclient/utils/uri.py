@@ -34,10 +34,13 @@ from six.moves.urllib.parse import quote
 
 __all__ = ["expand_template", "TemplateSyntaxError"]
 
+
 class TemplateSyntaxError(Exception):
     pass
 
+
 _template_pattern = re.compile(r"{([^}]+)}")
+
 
 def expand_template(template, values={}, **kwargs):
     """Expand a URI template."""
@@ -45,6 +48,7 @@ def expand_template(template, values={}, **kwargs):
     values.update(kwargs)
     values = percent_encode(values)
     return _template_pattern.sub(lambda m: _handle_match(m, values), template)
+
 
 def _handle_match(match, values):
     op, arg, variables = parse_expansion(match.group(1))
@@ -58,6 +62,7 @@ def _handle_match(match, values):
         key, default = list(variables.items())[0]
         return values.get(key, default)
 
+
 #
 # Parse an expansion
 # Adapted directly from the spec (Appendix A); extra validation has been added
@@ -65,6 +70,7 @@ def _handle_match(match, values):
 #
 
 _varname_pattern = re.compile(r"^[A-Za-z0-9]\w*$")
+
 
 def parse_expansion(expansion):
     """
@@ -96,12 +102,13 @@ def parse_expansion(expansion):
                 raise TemplateSyntaxError("Invalid variable: %r" % var)
         else:
             (varname, vardefault) = (var, None)
-        
+
         if not _varname_pattern.match(varname):
             raise TemplateSyntaxError("Invalid variable: %r" % varname)
         variables[varname] = vardefault
-        
+
     return (op, arg, variables)
+
 
 #
 # Encode an entire dictionary of values
@@ -115,18 +122,21 @@ def percent_encode(values):
             rv[k] = [quote(s) for s in v]
     return rv
 
+
 #
 # Operators; see Section 3.3.
 # Shoved into a class just so we have an ad hoc namespace.
 #
 
+
 class _operators(object):
-    
     @staticmethod
     def opt(variables, arg, values):
         for k in variables.keys():
             v = values.get(k, None)
-            if v is None or (not isinstance(v, six.string_types) and len(v) == 0):
+            if v is None or (
+                not isinstance(v, six.string_types) and len(v) == 0
+            ):
                 continue
             else:
                 return arg
@@ -146,11 +156,13 @@ class _operators(object):
 
     @staticmethod
     def join(variables, arg, values):
-        return arg.join([
-            "%s=%s" % (k, values.get(k, default))
-            for k, default in variables.items()
-            if values.get(k, default) is not None
-        ])
+        return arg.join(
+            [
+                "%s=%s" % (k, values.get(k, default))
+                for k, default in variables.items()
+                if values.get(k, default) is not None
+            ]
+        )
 
     @staticmethod
     def prefix(variables, arg, values):
@@ -160,7 +172,7 @@ class _operators(object):
             return arg + v
         else:
             return ""
-            
+
     @staticmethod
     def append(variables, arg, values):
         k, default = list(variables.items())[0]
@@ -169,6 +181,7 @@ class _operators(object):
             return v + arg
         else:
             return ""
+
 
 #
 # A bunch more tests that don't rightly fit in docstrings elsewhere
@@ -298,4 +311,5 @@ __test__ = {"test_pre": _test_pre, "syntax_errors": _syntax_errors}
 
 if __name__ == '__main__':
     import doctest
+
     doctest.testmod()

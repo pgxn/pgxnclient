@@ -17,6 +17,7 @@ def ifunlink(fn):
 
 _testdata_dir = None
 
+
 def get_test_filename(*parts):
     """Return the complete file name for a testing file.
 
@@ -38,4 +39,3 @@ def get_test_filename(*parts):
             _testdata_dir = tmp
 
     return os.path.join(_testdata_dir, 'testdata', *parts)
-

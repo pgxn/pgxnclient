@@ -17,16 +17,24 @@ __version__ = '1.3.dev0'
 LIBEXECDIRS = [
     # public, path
     (False, './libexec/'),
-    (True,  '/usr/local/libexec/pgxnclient/'),
-    ]
+    (True, '/usr/local/libexec/pgxnclient/'),
+]
 
 
-assert len([x for x in LIBEXECDIRS if x[0]]) == 1, \
-    "only one libexec directory should be public"
+assert (
+    len([x for x in LIBEXECDIRS if x[0]]) == 1
+), "only one libexec directory should be public"
 
 __all__ = [
-    'Spec', 'SemVer', 'Label', 'Term', 'Identifier',
-    'get_scripts_dirs', 'get_public_script_dir', 'find_script' ]
+    'Spec',
+    'SemVer',
+    'Label',
+    'Term',
+    'Identifier',
+    'get_scripts_dirs',
+    'get_public_script_dir',
+    'find_script',
+]
 
 import os
 
@@ -39,17 +47,22 @@ def get_scripts_dirs():
     """
     Return the absolute path of the directories containing the client scripts.
     """
-    return [ os.path.normpath(os.path.join(
-            os.path.dirname(__file__), p))
-        for (_, p) in LIBEXECDIRS ]
+    return [
+        os.path.normpath(os.path.join(os.path.dirname(__file__), p))
+        for (_, p) in LIBEXECDIRS
+    ]
+
 
 def get_public_scripts_dir():
     """
     Return the absolute path of the public directory for the client scripts.
     """
-    return [ os.path.normpath(os.path.join(
-            os.path.dirname(__file__), p))
-        for (public, p) in LIBEXECDIRS if public ][0]
+    return [
+        os.path.normpath(os.path.join(os.path.dirname(__file__), p))
+        for (public, p) in LIBEXECDIRS
+        if public
+    ][0]
+
 
 def find_script(name):
     """Return the absoulute path of a pgxn script.
@@ -65,5 +78,3 @@ def find_script(name):
         fn = os.path.join(p, name)
         if os.path.isfile(fn):
             return fn
-
-
