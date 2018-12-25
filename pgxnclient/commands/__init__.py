@@ -229,7 +229,7 @@ class Command(six.with_metaclass(CommandType, object)):
         try:
             return Popen(cmd, *args, **kwargs)
         except OSError as e:
-            if not isinstance(cmd, basestring):
+            if not isinstance(cmd, six.string_types):
                 cmd = ' '.join(cmd)
             msg = _("%s running command: %s") % (e, cmd)
             raise ProcessError(msg)
@@ -552,7 +552,7 @@ class WithMake(WithPgConfig):
 
         cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % self.get_pg_config()])
 
-        if isinstance(cmd, basestring):
+        if isinstance(cmd, six.string_types):
             cmdline.append(cmd)
         else: # a list
             cmdline.extend(cmd)

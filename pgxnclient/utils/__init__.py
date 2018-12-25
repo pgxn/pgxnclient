@@ -16,10 +16,12 @@ import sys
 import json
 from collections import OrderedDict
 
+import six
+
 
 def load_json(f):
     data = f.read()
-    if not isinstance(data, unicode):
+    if not isinstance(data, six.text_type):
         data = data.decode('utf-8')
     return load_jsons(data)
 

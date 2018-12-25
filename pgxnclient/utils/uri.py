@@ -29,6 +29,7 @@ You can also use keyword arguments for a more pythonic style::
 """
 
 import re
+import six
 import urllib
 
 __all__ = ["expand_template", "TemplateSyntaxError"]
@@ -108,7 +109,7 @@ def parse_expansion(expansion):
 def percent_encode(values):
     rv = {}
     for k, v in values.items():
-        if isinstance(v, basestring):
+        if isinstance(v, six.string_types):
             rv[k] = urllib.quote(v)
         else:
             rv[k] = [urllib.quote(s) for s in v]
@@ -125,7 +126,7 @@ class _operators(object):
     def opt(variables, arg, values):
         for k in variables.keys():
             v = values.get(k, None)
-            if v is None or (not isinstance(v, basestring) and len(v) == 0):
+            if v is None or (not isinstance(v, six.string_types) and len(v) == 0):
                 continue
             else:
                 return arg

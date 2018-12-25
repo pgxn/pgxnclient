@@ -14,6 +14,8 @@ import logging
 import tempfile
 from subprocess import PIPE
 
+import six
+
 from pgxnclient import SemVer
 from pgxnclient import archive
 from pgxnclient import network
@@ -298,7 +300,7 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
             logger.debug('running sql command: "%s"', tdata)
             p = self.popen(cmdline, stdin=PIPE)
             # for Python 3: just assume default encoding will do
-            if isinstance(data, unicode):
+            if isinstance(data, six.text_type):
                 data = data.encode()
             p.communicate(data)
 
