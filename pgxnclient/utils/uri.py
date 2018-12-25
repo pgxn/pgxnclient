@@ -29,7 +29,8 @@ You can also use keyword arguments for a more pythonic style::
 """
 
 import re
-import urllib
+import six
+from six.moves.urllib.parse import quote
 
 __all__ = ["expand_template", "TemplateSyntaxError"]
 
@@ -54,7 +55,7 @@ def _handle_match(match, values):
             raise TemplateSyntaxError("Unexpected operator: %r" % op)
     else:
         assert len(variables) == 1
-        key, default = variables.items()[0]
+        key, default = list(variables.items())[0]
         return values.get(key, default)
 
 #
@@ -108,10 +109,10 @@ def parse_expansion(expansion):
 def percent_encode(values):
     rv = {}
     for k, v in values.items():
-        if isinstance(v, basestring):
-            rv[k] = urllib.quote(v)
+        if isinstance(v, six.string_types):
+            rv[k] = quote(v)
         else:
-            rv[k] = [urllib.quote(s) for s in v]
+            rv[k] = [quote(s) for s in v]
     return rv
 
 #
@@ -125,7 +126,7 @@ class _operators(object):
     def opt(variables, arg, values):
         for k in variables.keys():
             v = values.get(k, None)
-            if v is None or (not isinstance(v, basestring) and len(v) == 0):
+            if v is None or (not isinstance(v, six.string_types) and len(v) == 0):
                 continue
             else:
                 return arg
@@ -140,7 +141,7 @@ class _operators(object):
 
     @staticmethod
     def listjoin(variables, arg, values):
-        k = variables.keys()[0]
+        k = list(variables.keys())[0]
         return arg.join(values.get(k, []))
 
     @staticmethod
@@ -153,7 +154,7 @@ class _operators(object):
 
     @staticmethod
     def prefix(variables, arg, values):
-        k, default = variables.items()[0]
+        k, default = list(variables.items())[0]
         v = values.get(k, default)
         if v is not None and len(v) > 0:
             return arg + v
@@ -162,7 +163,7 @@ class _operators(object):
             
     @staticmethod
     def append(variables, arg, values):
-        k, default = variables.items()[0]
+        k, default = list(variables.items())[0]
         v = values.get(k, default)
         if v is not None and len(v) > 0:
             return v + arg

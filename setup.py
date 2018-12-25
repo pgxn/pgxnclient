@@ -27,17 +27,13 @@ finally:
     f.close()
 
 # External dependencies, depending on the Python version
-requires = []
-tests_require = []
+requires = ['six']
+tests_require = ['mock']
 
-if sys.version_info < (2, 5):
-    raise ValueError("PGXN client requires at least Python 2.5")
-elif sys.version_info < (2, 7):
-    requires.append('simplejson>=2.1')
-
-tests_require.append('mock')
 if sys.version_info < (2, 7):
-    tests_require.append('unittest2')
+    raise ValueError("PGXN client requires at least Python 2.7")
+if (3,) < sys.version_info < (3, 4):
+    raise ValueError("PGXN client requires at least Python 3.4")
 
 
 classifiers = """
@@ -48,12 +44,7 @@ Intended Audience :: System Administrators
 License :: OSI Approved :: BSD License
 Operating System :: POSIX
 Programming Language :: Python :: 2
-Programming Language :: Python :: 2.5
-Programming Language :: Python :: 2.6
-Programming Language :: Python :: 2.7
 Programming Language :: Python :: 3
-Programming Language :: Python :: 3.1
-Programming Language :: Python :: 3.2
 Topic :: Database
 """
 
@@ -64,6 +55,7 @@ setup(
     author_email = 'daniele.varrazzo@gmail.com',
     url = 'https://github.com/dvarrazzo/pgxnclient',
     license = 'BSD',
+    python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
     packages = find_packages(),
     package_data = {'pgxnclient': ['libexec/*']},
     entry_points = {'console_scripts': [
@@ -75,6 +67,5 @@ setup(
     install_requires = requires,
     tests_require = tests_require,
     version = version,
-    use_2to3 = True,
 )
 

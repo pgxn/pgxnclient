@@ -6,9 +6,7 @@ pgxnclient -- client API stub
 
 # This file is part of the PGXN client
 
-from __future__ import with_statement
-
-from urllib import urlencode
+from six.moves.urllib.parse import urlencode
 
 from pgxnclient import network
 from pgxnclient.utils import load_json

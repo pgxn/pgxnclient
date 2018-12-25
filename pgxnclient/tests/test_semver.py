@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from pgxnclient.tests import unittest
 
 from pgxnclient import SemVer
@@ -117,7 +119,7 @@ class SemVerTestCase(unittest.TestCase):
             try:
                 self.assertEqual(SemVer.clean(s1), SemVer(s2))
             except:
-                print s1, s2
+                print(s1, s2)
                 raise
 
     def test_cant_clean(self):

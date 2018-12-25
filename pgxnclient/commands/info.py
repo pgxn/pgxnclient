@@ -6,6 +6,8 @@ pgxnclient -- informative commands implementation
 
 # This file is part of the PGXN client
 
+from __future__ import print_function
+
 from pgxnclient.i18n import _, N_
 from pgxnclient import SemVer
 from pgxnclient.errors import NotFound, ResourceNotFound
@@ -45,14 +47,14 @@ class Mirror(Command):
 
         for i, d in enumerate(data):
             if not detailed:
-                print d['uri']
+                print(d['uri'])
             else:
                 for k in [
                 "uri", "frequency", "location", "bandwidth", "organization",
                 "email", "timezone", "src", "rsync", "notes",]:
-                    print "%s: %s" % (k, d.get(k, ''))
+                    print("%s: %s" % (k, d.get(k, '')))
 
-                print
+                print()
 
 
 import re
@@ -87,13 +89,13 @@ class Search(Command):
         data = self.api.search(self.opts.where, self.opts.query)
 
         for hit in data['hits']:
-            print "%s %s" % (hit['dist'], hit['version'])
+            print("%s %s" % (hit['dist'], hit['version']))
             if 'excerpt' in hit:
                 excerpt = self.clean_excerpt(hit['excerpt'])
 
                 for line in textwrap.wrap(excerpt, 72):
-                    print "    " + line
-                print
+                    print("    " + line)
+                print()
 
     def clean_excerpt(self, excerpt):
         """Clean up the excerpt returned in the json result for output."""
@@ -151,12 +153,12 @@ class Info(WithSpec, Command):
     def print_meta(self, spec):
         data = self._get_dist_data(spec.name)
         ver = self.get_best_version(data, spec, quiet=True)
-        print self.api.meta(spec.name, ver, as_json=False)
+        print(self.api.meta(spec.name, ver, as_json=False))
 
     def print_readme(self, spec):
         data = self._get_dist_data(spec.name)
         ver = self.get_best_version(data, spec, quiet=True)
-        print self.api.readme(spec.name, ver)
+        print(self.api.readme(spec.name, ver))
 
     def print_details(self, spec):
         data = self._get_dist_data(spec.name)
@@ -172,39 +174,39 @@ class Info(WithSpec, Command):
 
             if isinstance(v, list):
                 for vv in v:
-                    print "%s: %s" % (k, vv)
+                    print("%s: %s" % (k, vv))
             elif isinstance(v, dict):
-                for kk, vv in v.iteritems():
-                    print "%s: %s: %s" % (k, kk, vv)
+                for kk, vv in v.items():
+                    print("%s: %s: %s" % (k, kk, vv))
             else:
-                print "%s: %s" % (k, v)
+                print("%s: %s" % (k, v))
 
         k = 'provides'
-        for ext, dext in data[k].iteritems():
-            print "%s: %s: %s" % (k, ext, dext['version'])
+        for ext, dext in data[k].items():
+            print("%s: %s: %s" % (k, ext, dext['version']))
 
         k = 'prereqs'
         if k in data:
-            for phase, rels in data[k].iteritems():
-                for rel, pkgs in rels.iteritems():
-                    for pkg, ver in pkgs.iteritems():
-                        print "%s: %s: %s %s" % (phase, rel, pkg, ver)
+            for phase, rels in data[k].items():
+                for rel, pkgs in rels.items():
+                    for pkg, ver in pkgs.items():
+                        print("%s: %s: %s %s" % (phase, rel, pkg, ver))
 
     def print_versions(self, spec):
         data = self._get_dist_data(spec.name)
         name = data['name']
         vs = [ (SemVer(d['version']), s)
-            for s, ds in data['releases'].iteritems()
+            for s, ds in data['releases'].items()
             for d in ds ]
         vs = [ (v, s) for v, s in vs if spec.accepted(v) ]
         vs.sort(reverse=True)
         for v, s in vs:
-            print name, v, s
+            print(name, v, s)
 
     def _get_dist_data(self, name):
         try:
             return self.api.dist(name)
-        except NotFound, e:
+        except NotFound as e:
             # maybe the user was looking for an extension instead?
             try:
                 ext = self.api.ext(name)
@@ -212,7 +214,7 @@ class Info(WithSpec, Command):
                 pass
             else:
                 vs = ext.get('versions', {})
-                for extver, ds in vs.iteritems():
+                for extver, ds in vs.items():
                     for d in ds:
                         if 'dist' not in d: continue
                         dist = d['dist']

@@ -9,7 +9,7 @@ pgxnclient -- specification object
 
 import os
 import re
-import urllib
+from six.moves.urllib.parse import unquote_plus
 import operator as _op
 
 from pgxnclient.i18n import _
@@ -78,7 +78,7 @@ class Spec(object):
 
         # check if it's a local resource
         if spec.startswith('file://'):
-            try_file = urllib.unquote_plus(spec[len('file://'):])
+            try_file = unquote_plus(spec[len('file://'):])
         elif os.sep in spec:
             try_file = spec
         else:

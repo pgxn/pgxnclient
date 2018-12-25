@@ -10,14 +10,15 @@ modules.
 
 # This file is part of the PGXN client
 
-from __future__ import with_statement
-
 import os
 import sys
 import logging
+import argparse
 from subprocess import Popen, PIPE
 
-from pgxnclient.utils import load_json, argparse, find_executable
+import six
+
+from pgxnclient.utils import load_json, find_executable
 
 from pgxnclient import __version__
 from pgxnclient import network
@@ -44,10 +45,15 @@ def get_option_parser():
         # usage = _("%(prog)s [global options] COMMAND [command options]"),
         description =
             _("Interact with the PostgreSQL Extension Network (PGXN)."),
+        add_help=False,
     )
     parser.add_argument("--version", action='version',
         version="%%(prog)s %s" % __version__,
         help = _("print the version number and exit"))
+
+    # Drop the conflicting -h argument
+    parser.add_argument("--help", action='help', default=argparse.SUPPRESS,
+        help=_('show this help message and exit'))
 
     subparsers = parser.add_subparsers(
         title = _("available commands"),
@@ -83,7 +89,7 @@ def load_commands():
 
         try:
             __import__(modname)
-        except Exception, e:
+        except Exception as e:
             logger.warn(_("error importing commands module %s: %s - %s"),
                 modname, e.__class__.__name__, e)
 
@@ -113,7 +119,7 @@ class CommandType(type):
         super(CommandType, cls).__init__(name, bases, dct)
 
 
-class Command(object):
+class Command(six.with_metaclass(CommandType, object)):
     """
     Base class to implement client commands.
 
@@ -124,7 +130,6 @@ class Command(object):
     `run()` method. If command line parser customization is required,
     `customize_parser()` should be extended.
     """
-    __metaclass__ = CommandType
     name = None
     description = None
 
@@ -164,8 +169,13 @@ class Command(object):
         subp = subparsers.add_parser(self.name,
             help = gettext(self.description),
             description = description or gettext(self.description),
+            add_help=False,
             epilog = epilog)
         subp.set_defaults(cmd=self)
+
+        # Drop the conflicting -h argument
+        subp.add_argument("--help", action='help', default=argparse.SUPPRESS,
+            help=_('show this help message and exit'))
 
         glb = subp.add_argument_group(_("global options"))
         glb.add_argument("--mirror", metavar="URL",
@@ -218,8 +228,8 @@ class Command(object):
         logger.debug("running command: %s", cmd)
         try:
             return Popen(cmd, *args, **kwargs)
-        except OSError, e:
-            if not isinstance(cmd, basestring):
+        except OSError as e:
+            if not isinstance(cmd, six.string_types):
                 cmd = ' '.join(cmd)
             msg = _("%s running command: %s") % (e, cmd)
             raise ProcessError(msg)
@@ -277,7 +287,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
 
         try:
             spec = Spec.parse(spec)
-        except (ValueError, BadSpecError), e:
+        except (ValueError, BadSpecError) as e:
             self.parser.error(_("cannot parse package '%s': %s")
                 % (spec, e))
 
@@ -304,8 +314,8 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
 
         # Get the maximum version for each release status satisfying the spec
         vers = [ None ] * len(Spec.STATUS)
-        for n, d in drels.iteritems():
-            vs = filter(spec.accepted, [SemVer(r['version']) for r in d])
+        for n, d in drels.items():
+            vs = list(filter(spec.accepted, [SemVer(r['version']) for r in d]))
             if vs:
                 vers[Spec.STATUS[n]] = max(vs)
 
@@ -316,9 +326,9 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         Return the best distribution version from an extension's data
         """
         # Get the maximum version for each release status satisfying the spec
-        vers = [ [] for i in xrange(len(Spec.STATUS)) ]
+        vers = [ [] for i in range(len(Spec.STATUS)) ]
         vmap = {} # ext_version -> (dist_name, dist_version)
-        for ev, dists in data.get('versions', {}).iteritems():
+        for ev, dists in data.get('versions', {}).items():
             ev = SemVer(ev)
             if not spec.accepted(ev):
                 continue
@@ -329,7 +339,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
                 vmap[ev] = (dist['dist'], dv)
 
         # for each rel status only take the max one.
-        for i in xrange(len(vers)):
+        for i in range(len(vers)):
             vers[i] = vers[i] and max(vers[i]) or None
 
         ev = self._get_best_version(vers, spec, quiet=False)
@@ -542,7 +552,7 @@ class WithMake(WithPgConfig):
 
         cmdline.extend([self.get_make(), 'PG_CONFIG=%s' % self.get_pg_config()])
 
-        if isinstance(cmd, basestring):
+        if isinstance(cmd, six.string_types):
             cmdline.append(cmd)
         else: # a list
             cmdline.extend(cmd)

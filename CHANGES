@@ -3,11 +3,14 @@
 PGXN Client changes log
 -----------------------
 
+
 pgxnclient 1.2.2
 ================
 
+- Dropped support for Python < 2.7 and Python 3 < 3.4.
 - Exit with nonzero return code after command line parsing errors
   (ticket #23).
+- Use six to make the codebase portable between Python 2 and 3.
 
 
 pgxnclient 1.2.1

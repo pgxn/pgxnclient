@@ -59,29 +59,29 @@ def script():
         main(args)
 
     # Different ways to fail
-    except UserAbort, e:
+    except UserAbort as e:
         # The user replied "no" to some question
         logger.info("%s", e)
         sys.exit(1)
 
-    except PgxnException, e:
+    except PgxnException as e:
         # An regular error from the program
         logger.error("%s", e)
         sys.exit(1)
 
-    except SystemExit, e:
+    except SystemExit as e:
         # Usually the arg parser bailing out.
         if isinstance(getattr(e, 'code', None), int):
             sys.exit(e.code)
         else:
             sys.exit(1)
 
-    except Exception, e:
+    except Exception as e:
         logger.error(_("unexpected error: %s - %s"),
             e.__class__.__name__, e, exc_info=True)
         sys.exit(1)
 
-    except BaseException, e:
+    except BaseException as e:
         # ctrl-c
         sys.exit(1)
 

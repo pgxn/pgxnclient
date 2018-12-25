@@ -26,6 +26,5 @@ docs:
 
 clean:
 	rm -rf build pgxnclient.egg-info
-	rm -rf simplejson-*.egg mock-*.egg unittest2-*.egg
+	rm -rf mock-*.egg
 	$(MAKE) -C docs $@
-
