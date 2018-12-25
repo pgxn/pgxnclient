@@ -8,7 +8,7 @@ The test suite relies on the files in the 'testdata' dir, which are currently
 not installed but only avaliable in the sdist.
 """
 
-# Copyright (C) 2011-2012 Daniele Varrazzo
+# Copyright (C) 2011-2018 Daniele Varrazzo
 
 # This file is part of the PGXN client
 

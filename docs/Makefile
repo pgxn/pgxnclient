@@ -2,7 +2,7 @@
 #
 # Use 'make env', then 'make html' to build the HTML documentation
 #
-# Copyright (C) 2011-2012 Daniele Varrazzo
+# Copyright (C) 2011-2018 Daniele Varrazzo
 
 PYTHON := python$(PYTHON_VERSION)
 PYTHON_VERSION ?= $(shell $(PYTHON) -c 'import sys; print ("%d.%d" % sys.version_info[:2])')
