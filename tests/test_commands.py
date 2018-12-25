@@ -1098,5 +1098,16 @@ class SearchTestCase(unittest.TestCase):
         main(['search', '--docs', 'foo bar', 'baz'])
 
 
+class HelpTestCase(unittest.TestCase):
+    @patch('sys.stdout')
+    def test_libexec(self, stdout):
+        from pgxnclient.cli import main
+
+        main(['help', '--libexec'])
+        out = ''.join([a[0] for a, k in stdout.write.call_args_list])
+        assert out.strip()
+        assert out.count('\n') == 1
+
+
 if __name__ == '__main__':
     unittest.main()
