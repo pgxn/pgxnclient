@@ -72,7 +72,7 @@ def download(f, fn, rename=True):
     :param fn: name of the file to write. If a dir, save into it.
     :param rename: if true and a file *fn* exist, rename the downloaded file
         adding a prefix ``-1``, ``-2``... before the extension.
-    
+
     Return the name of the file saved.
     """
     if os.path.isdir(fn):

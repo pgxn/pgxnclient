@@ -130,7 +130,7 @@ class SemVerTestCase(unittest.TestCase):
         ]:
             try:
                 self.assertEqual(SemVer.clean(s1), SemVer(s2))
-            except:
+            except Exception:
                 print(s1, s2)
                 raise
 

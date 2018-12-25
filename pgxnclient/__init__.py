@@ -6,6 +6,13 @@ pgxnclient -- main package
 
 # This file is part of the PGXN client
 
+import os
+
+from pgxnclient.spec import Spec
+from pgxnclient.utils.semver import SemVer
+from pgxnclient.utils.strings import Label, Term, Identifier
+
+
 __version__ = '1.3.dev0'
 
 # Paths where to find the command executables.
@@ -35,12 +42,6 @@ __all__ = [
     'get_public_script_dir',
     'find_script',
 ]
-
-import os
-
-from pgxnclient.spec import Spec
-from pgxnclient.utils.semver import SemVer
-from pgxnclient.utils.strings import Label, Term, Identifier
 
 
 def get_scripts_dirs():

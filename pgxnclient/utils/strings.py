@@ -66,7 +66,7 @@ class Label(CIStr):
 
 
 class Term(CIStr):
-    """
+    r"""
     A Term is a subtype of String that must be at least two characters long
     contain no slash (/), backslash (\), control, or space characters.
 

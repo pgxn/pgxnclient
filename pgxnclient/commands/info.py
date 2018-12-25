@@ -8,12 +8,17 @@ pgxnclient -- informative commands implementation
 
 from __future__ import print_function
 
+import re
+import logging
+import textwrap
+import xml.sax.saxutils as saxutils
+
+import six
+
 from pgxnclient.i18n import _, N_
 from pgxnclient import SemVer
 from pgxnclient.errors import NotFound, ResourceNotFound
 from pgxnclient.commands import Command, WithSpec
-
-import logging
 
 logger = logging.getLogger('pgxnclient.commands')
 
@@ -68,11 +73,6 @@ class Mirror(Command):
                     print("%s: %s" % (k, d.get(k, '')))
 
                 print()
-
-
-import re
-import textwrap
-import xml.sax.saxutils as saxutils
 
 
 class Search(Command):
@@ -139,7 +139,7 @@ class Search(Command):
 
         # Convert numerical entities
         excerpt = re.sub(
-            r'\&\#(\d+)\;', lambda c: unichr(int(c.group(1))), excerpt
+            r'\&\#(\d+)\;', lambda c: six.unichr(int(c.group(1))), excerpt
         )
 
         # Hilight found terms

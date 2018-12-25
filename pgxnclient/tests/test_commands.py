@@ -5,6 +5,8 @@ import tempfile
 import shutil
 from six.moves.urllib.parse import quote
 
+from pgxnclient.tar import TarArchive
+from pgxnclient.zip import ZipArchive
 from pgxnclient.errors import (
     PgxnClientException,
     ResourceNotFound,
@@ -131,7 +133,7 @@ src: rsync://master.pgxn.org/pgxn/
 rsync: 
 notes: 
 
-""",
+""",  # noqa
         )
 
 
@@ -251,7 +253,7 @@ class DownloadTestCase(unittest.TestCase):
             return fake_get_file(
                 url,
                 urlmap={
-                    'https://api.pgxn.org/dist/foobar/0.42.1/META.json': 'https://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'
+                    'https://api.pgxn.org/dist/foobar/0.42.1/META.json': 'https://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'  # noqa
                 },
             )
 
@@ -264,7 +266,7 @@ class DownloadTestCase(unittest.TestCase):
             from pgxnclient.cli import main
             from pgxnclient.errors import BadChecksum
 
-            e = self.assertRaises(BadChecksum, main, ['download', 'foobar'])
+            self.assertRaises(BadChecksum, main, ['download', 'foobar'])
 
             self.assert_(not os.path.exists(fn))
 
@@ -415,12 +417,7 @@ class Assertions(object):
 
 # With mock patching a method seems tricky: looks there's no way to get to
 # 'self' as the mock method is unbound.
-from pgxnclient.tar import TarArchive
-
 TarArchive.unpack_orig = TarArchive.unpack
-
-from pgxnclient.zip import ZipArchive
-
 ZipArchive.unpack_orig = ZipArchive.unpack
 
 
@@ -517,7 +514,7 @@ class InstallTestCase(unittest.TestCase, Assertions):
             return fake_get_file(
                 url,
                 urlmap={
-                    'https://api.pgxn.org/dist/foobar/0.42.1/META.json': 'https://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'
+                    'https://api.pgxn.org/dist/foobar/0.42.1/META.json': 'https://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'  # noqa
                 },
             )
 
@@ -736,7 +733,7 @@ class CheckTestCase(unittest.TestCase, Assertions):
             return fake_get_file(
                 url,
                 urlmap={
-                    'https://api.pgxn.org/dist/foobar/0.42.1/META.json': 'https://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'
+                    'https://api.pgxn.org/dist/foobar/0.42.1/META.json': 'https://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'  # noqa
                 },
             )
 

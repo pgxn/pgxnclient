@@ -12,6 +12,7 @@ modules.
 
 import os
 import sys
+import shlex
 import logging
 import argparse
 from subprocess import Popen, PIPE
@@ -27,6 +28,7 @@ from pgxnclient import archive
 from pgxnclient.api import Api
 from pgxnclient.i18n import _, gettext
 from pgxnclient.errors import (
+    BadSpecError,
     NotFound,
     PgxnClientException,
     ProcessError,
@@ -252,7 +254,7 @@ class Command(six.with_metaclass(CommandType, object)):
             return True
 
         while 1:
-            ans = raw_input(_("%s [y/N] ") % prompt)
+            ans = six.input(_("%s [y/N] ") % prompt)
             if _('no').startswith(ans.lower()):
                 raise UserAbort(_("operation interrupted on user request"))
             elif _('yes').startswith(ans.lower()):
@@ -275,9 +277,6 @@ class Command(six.with_metaclass(CommandType, object)):
                 cmd = ' '.join(cmd)
             msg = _("%s running command: %s") % (e, cmd)
             raise ProcessError(msg)
-
-
-from pgxnclient.errors import BadSpecError
 
 
 class WithSpec(Command):
@@ -600,9 +599,6 @@ class WithPgConfig(object):
         if not pg_config:
             raise PgxnClientException(_("pg_config executable not found"))
         return pg_config
-
-
-import shlex
 
 
 class WithMake(WithPgConfig):

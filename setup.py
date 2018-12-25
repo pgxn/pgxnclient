@@ -50,7 +50,9 @@ Topic :: Database
 
 setup(
     name='pgxnclient',
-    description='A command line tool to interact with the PostgreSQL Extension Network.',
+    description=(
+        'A command line tool to interact with the PostgreSQL Extension Network.'
+    ),
     author='Daniele Varrazzo',
     author_email='daniele.varrazzo@gmail.com',
     url='https://github.com/dvarrazzo/pgxnclient',

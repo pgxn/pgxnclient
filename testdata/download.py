@@ -17,6 +17,6 @@ if __name__ == '__main__':
             f.write(urlopen(url).read())
         finally:
             f.close()
-    except Exception as e:
+    except Exception:
         os.unlink(fn)
         raise

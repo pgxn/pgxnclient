@@ -79,16 +79,11 @@ def script():
         else:
             sys.exit(1)
 
-    except Exception as e:
-        logger.error(
-            _("unexpected error: %s - %s"),
-            e.__class__.__name__,
-            e,
-            exc_info=True,
-        )
+    except Exception:
+        logger.exception(_("unexpected error"))
         sys.exit(1)
 
-    except BaseException as e:
+    except BaseException:
         # ctrl-c
         sys.exit(1)
 

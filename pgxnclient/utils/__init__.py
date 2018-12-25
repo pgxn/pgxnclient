@@ -7,19 +7,15 @@ pgxnclient -- misc utilities package
 # This file is part of the PGXN client
 
 
-__all__ = [
-    'OrderedDict',
-    'load_json',
-    'load_jsons',
-    'sha1',
-    'b',
-    'find_executable',
-]
+__all__ = ['load_json', 'load_jsons', 'sha1', 'find_executable']
 
 
 import os
 import json
 from collections import OrderedDict
+
+# Import the sha1 object without warnings
+from hashlib import sha1
 
 import six
 
@@ -33,10 +29,6 @@ def load_json(f):
 
 def load_jsons(data):
     return json.loads(data, object_pairs_hook=OrderedDict)
-
-
-# Import the sha1 object without warnings
-from hashlib import sha1
 
 
 def find_executable(name):
