@@ -16,6 +16,8 @@ import logging
 import argparse
 from subprocess import Popen, PIPE
 
+import six
+
 from pgxnclient.utils import load_json, find_executable
 
 from pgxnclient import __version__
@@ -117,7 +119,7 @@ class CommandType(type):
         super(CommandType, cls).__init__(name, bases, dct)
 
 
-class Command(object):
+class Command(six.with_metaclass(CommandType, object)):
     """
     Base class to implement client commands.
 
@@ -128,7 +130,6 @@ class Command(object):
     `run()` method. If command line parser customization is required,
     `customize_parser()` should be extended.
     """
-    __metaclass__ = CommandType
     name = None
     description = None
 

@@ -7,8 +7,9 @@ pgxnclient -- network interaction
 # This file is part of the PGXN client
 
 import os
-import urllib2
-from urlparse import urlsplit
+from six.moves.urllib.request import build_opener
+from six.moves.urllib.error import HTTPError, URLError
+from six.moves.urllib.parse import urlsplit
 from itertools import count
 from contextlib import closing
 
@@ -20,12 +21,12 @@ import logging
 logger = logging.getLogger('pgxnclient.network')
 
 def get_file(url):
-    opener = urllib2.build_opener()
+    opener = build_opener()
     opener.addheaders = [('User-agent', 'pgxnclient/%s' % __version__)]
     logger.debug('opening url: %s', url)
     try:
         return closing(opener.open(url))
-    except urllib2.HTTPError as e:
+    except HTTPError as e:
         if e.code == 404:
             raise ResourceNotFound(_("resource not found: '%s'") % e.url)
         elif e.code == 400:
@@ -37,7 +38,7 @@ def get_file(url):
         else:
             raise NetworkError(_("unexpected response %d for '%s'")
                 % (e.code, e.url))
-    except urllib2.URLError as e:
+    except URLError as e:
         raise NetworkError(_("network error: %s") % e.reason)
 
 def get_local_file_name(target, url):

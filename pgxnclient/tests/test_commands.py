@@ -3,7 +3,7 @@ from mock import patch, Mock
 import os
 import tempfile
 import shutil
-from urllib import quote
+from six.moves.urllib.parse import quote
 
 from pgxnclient.utils import b
 from pgxnclient.errors import PgxnClientException, ResourceNotFound, InsufficientPrivileges
