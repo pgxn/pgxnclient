@@ -157,7 +157,7 @@ class DownloadTestCase(unittest.TestCase):
 
         from pgxnclient.cli import main
         try:
-            main(['download', 'http://api.pgxn.org/dist/foobar/0.43.2b1/foobar-0.43.2b1.zip'])
+            main(['download', 'https://api.pgxn.org/dist/foobar/0.43.2b1/foobar-0.43.2b1.zip'])
             self.assert_(os.path.exists(fn))
         finally:
             ifunlink(fn)
@@ -213,8 +213,8 @@ class DownloadTestCase(unittest.TestCase):
     def test_download_bad_sha1(self, mock):
         def fakefake(url):
             return fake_get_file(url, urlmap = {
-                'http://api.pgxn.org/dist/foobar/0.42.1/META.json':
-                'http://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'})
+                'https://api.pgxn.org/dist/foobar/0.42.1/META.json':
+                'https://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'})
 
         mock.side_effect = fakefake
 
@@ -393,7 +393,7 @@ class InstallTestCase(unittest.TestCase, Assertions):
             libdir=os.environ['HOME'], bindir='/')
 
         from pgxnclient.cli import main
-        main(['install', 'http://api.pgxn.org/dist/foobar/0.42.1/foobar-0.42.1.zip'])
+        main(['install', 'https://api.pgxn.org/dist/foobar/0.42.1/foobar-0.42.1.zip'])
 
         self.assertEquals(self.mock_popen.call_count, 2)
         self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
@@ -412,8 +412,8 @@ class InstallTestCase(unittest.TestCase, Assertions):
     def test_install_bad_sha1(self):
         def fakefake(url):
             return fake_get_file(url, urlmap = {
-                'http://api.pgxn.org/dist/foobar/0.42.1/META.json':
-                'http://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'})
+                'https://api.pgxn.org/dist/foobar/0.42.1/META.json':
+                'https://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'})
 
         self.mock_get.side_effect = fakefake
 
@@ -541,7 +541,7 @@ class CheckTestCase(unittest.TestCase, Assertions):
 
     def test_check_url(self):
         from pgxnclient.cli import main
-        main(['check', 'http://api.pgxn.org/dist/foobar/0.42.1/foobar-0.42.1.zip'])
+        main(['check', 'https://api.pgxn.org/dist/foobar/0.42.1/foobar-0.42.1.zip'])
 
         self.assertEquals(self.mock_popen.call_count, 1)
         self.assertCallArgs([self.make], self.mock_popen.call_args_list[0][0][0][:1])
@@ -584,8 +584,8 @@ class CheckTestCase(unittest.TestCase, Assertions):
     def test_check_bad_sha1(self):
         def fakefake(url):
             return fake_get_file(url, urlmap = {
-                'http://api.pgxn.org/dist/foobar/0.42.1/META.json':
-                'http://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'})
+                'https://api.pgxn.org/dist/foobar/0.42.1/META.json':
+                'https://api.pgxn.org/dist/foobar/0.42.1/META-badsha1.json'})
 
         self.mock_get.side_effect = fakefake
         self.mock_popen.return_value.returncode = 1
@@ -710,7 +710,7 @@ class LoadTestCase(unittest.TestCase):
 
         from pgxnclient.cli import main
         main(['load', '--yes',
-            'http://api.pgxn.org/dist/foobar/0.42.1/foobar-0.42.1.zip'])
+            'https://api.pgxn.org/dist/foobar/0.42.1/foobar-0.42.1.zip'])
 
         self.assertEquals(mock_unpack.call_count, 0)
         self.assertEquals(self.mock_popen.call_count, 1)
@@ -727,7 +727,7 @@ class LoadTestCase(unittest.TestCase):
 
         from pgxnclient.cli import main
         main(['load', '--yes',
-            'http://example.org/foobar-0.42.1.tar.gz'])
+            'https://example.org/foobar-0.42.1.tar.gz'])
 
         self.assertEquals(mock_unpack.call_count, 0)
         self.assertEquals(self.mock_popen.call_count, 1)
