@@ -10,7 +10,7 @@ from six.moves.urllib.request import urlopen
 
 if __name__ == '__main__':
     url = sys.argv[1]
-    fn = quote(url, safe='')
+    fn = os.path.join(os.path.dirname(__file__), quote(url, safe=''))
     f = open(fn, "wb")
     try:
         try:
