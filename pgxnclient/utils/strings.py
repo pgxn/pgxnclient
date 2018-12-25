@@ -10,7 +10,7 @@ Strings -- implementation of a few specific string subclasses.
 import re
 
 from pgxnclient.i18n import _
-from pgxnclient.utils.argparse import ArgumentTypeError
+from argparse import ArgumentTypeError
 
 
 class CIStr(str):

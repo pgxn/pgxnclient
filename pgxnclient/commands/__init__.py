@@ -13,9 +13,10 @@ modules.
 import os
 import sys
 import logging
+import argparse
 from subprocess import Popen, PIPE
 
-from pgxnclient.utils import load_json, argparse, find_executable
+from pgxnclient.utils import load_json, find_executable
 
 from pgxnclient import __version__
 from pgxnclient import network
@@ -42,10 +43,15 @@ def get_option_parser():
         # usage = _("%(prog)s [global options] COMMAND [command options]"),
         description =
             _("Interact with the PostgreSQL Extension Network (PGXN)."),
+        add_help=False,
     )
     parser.add_argument("--version", action='version',
         version="%%(prog)s %s" % __version__,
         help = _("print the version number and exit"))
+
+    # Drop the conflicting -h argument
+    parser.add_argument("--help", action='help', default=argparse.SUPPRESS,
+        help=_('show this help message and exit'))
 
     subparsers = parser.add_subparsers(
         title = _("available commands"),
@@ -162,8 +168,13 @@ class Command(object):
         subp = subparsers.add_parser(self.name,
             help = gettext(self.description),
             description = description or gettext(self.description),
+            add_help=False,
             epilog = epilog)
         subp.set_defaults(cmd=self)
+
+        # Drop the conflicting -h argument
+        subp.add_argument("--help", action='help', default=argparse.SUPPRESS,
+            help=_('show this help message and exit'))
 
         glb = subp.add_argument_group(_("global options"))
         glb.add_argument("--mirror", metavar="URL",
