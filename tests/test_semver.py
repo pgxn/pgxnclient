@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from pgxnclient.tests import unittest
+import unittest
 
 from pgxnclient import SemVer
 

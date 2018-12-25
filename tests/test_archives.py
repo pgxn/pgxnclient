@@ -1,10 +1,11 @@
+import unittest
+
 from pgxnclient import tar
 from pgxnclient import zip
 from pgxnclient import archive
 
-from pgxnclient.tests import unittest
 from pgxnclient.errors import PgxnClientException
-from pgxnclient.tests.testutils import get_test_filename
+from .testutils import get_test_filename
 
 
 class TestArchive(unittest.TestCase):

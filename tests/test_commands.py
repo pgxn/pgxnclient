@@ -1,8 +1,9 @@
-from mock import patch, Mock
-
 import os
-import tempfile
 import shutil
+import tempfile
+import unittest
+
+from mock import patch, Mock
 from six.moves.urllib.parse import quote
 
 from pgxnclient.tar import TarArchive
@@ -12,8 +13,7 @@ from pgxnclient.errors import (
     ResourceNotFound,
     InsufficientPrivileges,
 )
-from pgxnclient.tests import unittest
-from pgxnclient.tests.testutils import ifunlink, get_test_filename
+from .testutils import ifunlink, get_test_filename
 
 
 class FakeFile(object):

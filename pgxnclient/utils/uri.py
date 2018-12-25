@@ -12,7 +12,7 @@ Some bits are inspired by or based on:
 
 Simple usage::
 
-    >>> import uri
+    >>> from pgxnclient.utils import uri
 
     >>> args = {'foo': 'it worked'}
     >>> uri.expand_template("http://example.com/{foo}", args)
@@ -80,8 +80,11 @@ def parse_expansion(expansion):
 
     For example::
 
-        >>> parse_expansion("-join|&|a,b,c=1")
-        ('join', '&', {'a': None, 'c': '1', 'b': None})
+        >>> parse_expansion("-join|&|a,b,c=1")[0:2]
+        ('join', '&')
+
+        >>> sorted(parse_expansion("-join|&|a,b,c=1")[2].items())
+        [('a', None), ('b', None), ('c', '1')]
 
         >>> parse_expansion("c=1")
         (None, None, {'c': '1'})
@@ -272,37 +275,37 @@ _test_pre = """
 """
 
 _syntax_errors = """
-    >>> expand_template("{fred=}")
+    >>> expand_template("{fred=}")  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
     TemplateSyntaxError: Invalid variable: 'fred='
 
-    >>> expand_template("{f:}")
+    >>> expand_template("{f:}")  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
     TemplateSyntaxError: Invalid variable: 'f:'
 
-    >>> expand_template("{f<}")
+    >>> expand_template("{f<}")  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
     TemplateSyntaxError: Invalid variable: 'f<'
 
-    >>> expand_template("{<:}")
+    >>> expand_template("{<:}")  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
     TemplateSyntaxError: Invalid variable: '<:'
 
-    >>> expand_template("{<:fred,barney}")
+    >>> expand_template("{<:fred,barney}")  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
     TemplateSyntaxError: Invalid variable: '<:fred'
 
-    >>> expand_template("{>:}")
+    >>> expand_template("{>:}")  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
     TemplateSyntaxError: Invalid variable: '>:'
 
-    >>> expand_template("{>:fred,barney}")
+    >>> expand_template("{>:fred,barney}")  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
     TemplateSyntaxError: Invalid variable: '>:fred'
