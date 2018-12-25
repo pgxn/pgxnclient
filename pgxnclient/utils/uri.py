@@ -30,7 +30,7 @@ You can also use keyword arguments for a more pythonic style::
 
 import re
 import six
-import urllib
+from six.moves.urllib.parse import quote
 
 __all__ = ["expand_template", "TemplateSyntaxError"]
 
@@ -110,9 +110,9 @@ def percent_encode(values):
     rv = {}
     for k, v in values.items():
         if isinstance(v, six.string_types):
-            rv[k] = urllib.quote(v)
+            rv[k] = quote(v)
         else:
-            rv[k] = [urllib.quote(s) for s in v]
+            rv[k] = [quote(s) for s in v]
     return rv
 
 #
