@@ -29,9 +29,9 @@ instead::
 The documentation of the installation tool of your choice will also show how
 to perform a local installation.
 
-.. __: http://pypi.python.org/pypi/pgxnclient
+.. __: https://pypi.org/project/pgxnclient/
 .. _easy_install: http://peak.telecommunity.com/DevCenter/EasyInstall
-.. _pip: http://www.pip-installer.org/en/latest/
+.. _pip: https://pip.pypa.io/en/latest/
 .. _zc.buildout: http://www.buildout.org/
 
 
@@ -44,8 +44,8 @@ program using::
 
     $ python setup.py install
 
-.. __: http://pypi.python.org/pypi/pgxnclient/
-.. __: https://github.com/dvarrazzo/pgxnclient/
+.. __: https://pypi.org/project/pgxnclient/
+.. __: https://github.com/dvarrazzo/pgxnclient
 
 
 Running from the project directory
@@ -63,6 +63,6 @@ run the :program:`bin/pgxn` script::
     $ ./bin/pgxn --version
     pgxnclient 1.0.3.dev0   # just an example
 
-.. __: http://pypi.python.org/pypi/pgxnclient/
-.. __: https://github.com/dvarrazzo/pgxnclient/
+.. __: https://pypi.org/project/pgxnclient/
+.. __: https://github.com/dvarrazzo/pgxnclient
 

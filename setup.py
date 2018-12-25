@@ -62,7 +62,7 @@ setup(
     description = 'A command line tool to interact with the PostgreSQL Extension Network.',
     author = 'Daniele Varrazzo',
     author_email = 'daniele.varrazzo@gmail.com',
-    url = 'http://pgxnclient.projects.postgresql.org/',
+    url = 'https://github.com/dvarrazzo/pgxnclient',
     license = 'BSD',
     packages = find_packages(),
     package_data = {'pgxnclient': ['libexec/*']},
