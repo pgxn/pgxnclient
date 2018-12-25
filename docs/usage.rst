@@ -29,7 +29,7 @@ A few options are available to all the commands:
 
 :samp:`--mirror {URL}`
     Select a mirror to interact with. If not specified the default is
-    ``http://api.pgxn.org/``.
+    ``https://api.pgxn.org/``.
 
 ``--verbose``
     Print more information during the process.
@@ -322,7 +322,7 @@ reverse order respect to the order in which they are specified in the
 extensions provided, specifying them after *SPEC*: the extensions will be
 unloaded in the order specified.
 
-.. _DROP EXTENSION: http://www.postgresql.org/docs/current/sql-dropextension.html
+.. _DROP EXTENSION: https://www.postgresql.org/docs/current/sql-dropextension.html
 
 See the load_ command for details about the command arguments.
 
