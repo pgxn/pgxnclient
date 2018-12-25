@@ -59,9 +59,13 @@ class Help(Command):
         path = os.environ.get('PATH', '').split(os.pathsep)
         path[0:0] = get_scripts_dirs()
         for p in path:
-            if not os.path.isdir(p):
+            try:
+                files = os.listdir(p)
+            except OSError:
+                # Dir missing, or not readable
                 continue
-            for fn in os.listdir(p):
+
+            for fn in files:
                 if fn.startswith('pgxn-'):
                     rv.append(fn[5:])
 
