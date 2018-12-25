@@ -13,13 +13,7 @@ not installed but only avaliable in the sdist.
 # This file is part of the PGXN client
 
 
-import sys
-
-# import here the unit test module we want to use
-if sys.version_info < (2,7):
-    import unittest2 as unittest
-else:
-    import unittest
+import unittest
 
 
 # fix unittest maintainers stubborness: see Python issue #9424
