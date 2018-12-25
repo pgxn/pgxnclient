@@ -6,6 +6,8 @@ pgxnclient -- command line entry point
 
 # This file is part of the PGXN client
 
+from __future__ import print_function
+
 import os
 import sys
 
@@ -122,7 +124,10 @@ def command_dispatch(argv=None):
 def _get_exec(cmd):
     fn = find_script('pgxn-' + cmd)
     if not fn:
-        print >>sys.stderr, "pgxn: unknown command: '%s'. See 'pgxn --help'" % cmd
+        print(
+            "pgxn: unknown command: '%s'. See 'pgxn --help'" % cmd,
+            file=sys.stderr,
+        )
         sys.exit(2)
 
     return fn
