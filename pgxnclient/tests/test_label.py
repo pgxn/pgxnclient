@@ -2,13 +2,15 @@ from pgxnclient.tests import unittest
 
 from pgxnclient import Label, Term, Identifier
 
+
 class LabelTestCase(unittest.TestCase):
     def test_ok(self):
         for s in [
             'd',
             'a1234',
             'abcd1234-5432XYZ',
-            'a12345678901234567890123456789012345678901234567890123456789012',]:
+            'a12345678901234567890123456789012345678901234567890123456789012',
+        ]:
             self.assertEqual(Label(s), s)
             self.assertEqual(Label(s), Label(s))
             self.assert_(Label(s) <= Label(s))
@@ -16,9 +18,12 @@ class LabelTestCase(unittest.TestCase):
 
     def test_bad(self):
         def ar(s):
-            try: Label(s)
-            except ValueError: pass
-            else: self.fail("ValueError not raised: '%s'" % s)
+            try:
+                Label(s)
+            except ValueError:
+                pass
+            else:
+                self.fail("ValueError not raised: '%s'" % s)
 
         for s in [
             '',
@@ -28,12 +33,13 @@ class LabelTestCase(unittest.TestCase):
             '-a',
             'a-',
             'a_b',
-            'a123456789012345678901234567890123456789012345678901234567890123',]:
+            'a123456789012345678901234567890123456789012345678901234567890123',
+        ]:
             ar(s)
 
     def test_compare(self):
         self.assertEqual(Label('a'), Label('A'))
-        self.assertNotEqual(str(Label('a')), str(Label('A')))   # preserving
+        self.assertNotEqual(str(Label('a')), str(Label('A')))  # preserving
 
     def test_order(self):
         self.assert_(Label('a') < Label('B') < Label('c'))
@@ -48,9 +54,7 @@ class LabelTestCase(unittest.TestCase):
 
 class TermTestCase(unittest.TestCase):
     def test_ok(self):
-        for s in [
-            'aa'
-            'adfkjh"()', ]:
+        for s in ['aa' 'adfkjh"()']:
             self.assertEqual(Term(s), s)
             self.assertEqual(Term(s), Term(s))
             self.assert_(Term(s) <= Term(s))
@@ -58,17 +62,14 @@ class TermTestCase(unittest.TestCase):
 
     def test_bad(self):
         def ar(s):
-            try: Term(s)
-            except ValueError: pass
-            else: self.fail("ValueError not raised: '%s'" % s)
+            try:
+                Term(s)
+            except ValueError:
+                pass
+            else:
+                self.fail("ValueError not raised: '%s'" % s)
 
-        for s in [
-            'a',
-            'aa ',
-            'a/a',
-            'a\\a',
-            'a\ta',
-            'aa\x01' ]:
+        for s in ['a', 'aa ', 'a/a', 'a\\a', 'a\ta', 'aa\x01']:
             ar(s)
 
 
@@ -77,18 +78,11 @@ class TestIdentifier(unittest.TestCase):
         self.assertRaises(ValueError, Identifier, "")
 
     def test_unquoted(self):
-        for s in [
-            'x',
-            'xxxxx',
-            'abcxyz_0189',
-            'ABCXYZ_0189', ]:
+        for s in ['x', 'xxxxx', 'abcxyz_0189', 'ABCXYZ_0189']:
             self.assertEqual(Identifier(s), s)
 
     def test_quoted(self):
-        for s, q in [
-            ('x-y', '"x-y"'),
-            (' ', '" "'),
-            ('x"y', '"x""y"')]:
+        for s, q in [('x-y', '"x-y"'), (' ', '" "'), ('x"y', '"x""y"')]:
             self.assertEqual(Identifier(s), q)
 
 

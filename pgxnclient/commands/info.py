@@ -8,12 +8,18 @@ pgxnclient -- informative commands implementation
 
 from __future__ import print_function
 
+import re
+import logging
+import textwrap
+import xml.sax.saxutils as saxutils
+
+import six
+
 from pgxnclient.i18n import _, N_
 from pgxnclient import SemVer
 from pgxnclient.errors import NotFound, ResourceNotFound
 from pgxnclient.commands import Command, WithSpec
 
-import logging
 logger = logging.getLogger('pgxnclient.commands')
 
 
@@ -24,13 +30,23 @@ class Mirror(Command):
     @classmethod
     def customize_parser(self, parser, subparsers, **kwargs):
         subp = super(Mirror, self).customize_parser(
-            parser, subparsers, **kwargs)
+            parser, subparsers, **kwargs
+        )
 
-        subp.add_argument('uri', nargs='?', metavar="URI",
-            help = _("return detailed info about this mirror."
-                " If not specified return a list of mirror URIs"))
-        subp.add_argument('--detailed', action="store_true",
-            help = _("return full details for each mirror"))
+        subp.add_argument(
+            'uri',
+            nargs='?',
+            metavar="URI",
+            help=_(
+                "return detailed info about this mirror."
+                " If not specified return a list of mirror URIs"
+            ),
+        )
+        subp.add_argument(
+            '--detailed',
+            action="store_true",
+            help=_("return full details for each mirror"),
+        )
 
         return subp
 
@@ -38,10 +54,11 @@ class Mirror(Command):
         data = self.api.mirrors()
         if self.opts.uri:
             detailed = True
-            data = [ d for d in data if d['uri'] == self.opts.uri ]
+            data = [d for d in data if d['uri'] == self.opts.uri]
             if not data:
                 raise ResourceNotFound(
-                    _('mirror not found: %s') % self.opts.uri)
+                    _('mirror not found: %s') % self.opts.uri
+                )
         else:
             detailed = self.opts.detailed
 
@@ -49,17 +66,14 @@ class Mirror(Command):
             if not detailed:
                 print(d['uri'])
             else:
-                for k in [
-                "uri", "frequency", "location", "bandwidth", "organization",
-                "email", "timezone", "src", "rsync", "notes",]:
+                for k in u"""
+                    uri frequency location bandwidth organization email
+                    timezone src rsync notes
+                """.split():
                     print("%s: %s" % (k, d.get(k, '')))
 
                 print()
 
-
-import re
-import textwrap
-import xml.sax.saxutils as saxutils
 
 class Search(Command):
     name = 'search'
@@ -68,20 +82,35 @@ class Search(Command):
     @classmethod
     def customize_parser(self, parser, subparsers, **kwargs):
         subp = super(Search, self).customize_parser(
-            parser, subparsers, **kwargs)
+            parser, subparsers, **kwargs
+        )
 
         g = subp.add_mutually_exclusive_group()
-        g.add_argument('--docs', dest='where', action='store_const',
-            const='docs', default='docs',
-            help=_("search in documentation [default]"))
-        g.add_argument('--dist', dest='where', action='store_const',
+        g.add_argument(
+            '--docs',
+            dest='where',
+            action='store_const',
+            const='docs',
+            default='docs',
+            help=_("search in documentation [default]"),
+        )
+        g.add_argument(
+            '--dist',
+            dest='where',
+            action='store_const',
             const="dists",
-            help=_("search in distributions"))
-        g.add_argument('--ext', dest='where', action='store_const',
+            help=_("search in distributions"),
+        )
+        g.add_argument(
+            '--ext',
+            dest='where',
+            action='store_const',
             const='extensions',
-            help=_("search in extensions"))
-        subp.add_argument('query', metavar='TERM', nargs='+',
-            help = _("a string to search"))
+            help=_("search in extensions"),
+        )
+        subp.add_argument(
+            'query', metavar='TERM', nargs='+', help=_("a string to search")
+        )
 
         return subp
 
@@ -109,9 +138,9 @@ class Search(Command):
         excerpt = excerpt.replace('&quot;', '"')
 
         # Convert numerical entities
-        excerpt = re.sub(r'\&\#(\d+)\;',
-            lambda c: unichr(int(c.group(1))),
-            excerpt)
+        excerpt = re.sub(
+            r'\&\#(\d+)\;', lambda c: six.unichr(int(c.group(1))), excerpt
+        )
 
         # Hilight found terms
         # TODO: use proper highlight with escape chars?
@@ -121,28 +150,45 @@ class Search(Command):
 
         return excerpt
 
+
 class Info(WithSpec, Command):
     name = 'info'
     description = N_("print information about a distribution")
 
     @classmethod
     def customize_parser(self, parser, subparsers, **kwargs):
-        subp = super(Info, self).customize_parser(
-            parser, subparsers, **kwargs)
+        subp = super(Info, self).customize_parser(parser, subparsers, **kwargs)
 
         g = subp.add_mutually_exclusive_group()
-        g.add_argument('--details', dest='what',
-            action='store_const', const='details', default='details',
-            help=_("show details about the distribution [default]"))
-        g.add_argument('--meta', dest='what',
-            action='store_const', const='meta',
-            help=_("show the distribution META.json"))
-        g.add_argument('--readme', dest='what',
-            action='store_const', const='readme',
-            help=_("show the distribution README"))
-        g.add_argument('--versions', dest='what',
-            action='store_const', const='versions',
-            help=_("show the list of available versions"))
+        g.add_argument(
+            '--details',
+            dest='what',
+            action='store_const',
+            const='details',
+            default='details',
+            help=_("show details about the distribution [default]"),
+        )
+        g.add_argument(
+            '--meta',
+            dest='what',
+            action='store_const',
+            const='meta',
+            help=_("show the distribution META.json"),
+        )
+        g.add_argument(
+            '--readme',
+            dest='what',
+            action='store_const',
+            const='readme',
+            help=_("show the distribution README"),
+        )
+        g.add_argument(
+            '--versions',
+            dest='what',
+            action='store_const',
+            const='versions',
+            help=_("show the list of available versions"),
+        )
 
         return subp
 
@@ -164,8 +210,10 @@ class Info(WithSpec, Command):
         data = self._get_dist_data(spec.name)
         ver = self.get_best_version(data, spec, quiet=True)
         data = self.api.meta(spec.name, ver)
-        for k in [u'name', u'abstract', u'description', u'maintainer', u'license',
-                u'release_status', u'version', u'date', u'sha1']:
+        for k in u"""
+            name abstract description maintainer license release_status
+            version date sha1
+        """.split():
             try:
                 v = data[k]
             except KeyError:
@@ -195,10 +243,12 @@ class Info(WithSpec, Command):
     def print_versions(self, spec):
         data = self._get_dist_data(spec.name)
         name = data['name']
-        vs = [ (SemVer(d['version']), s)
+        vs = [
+            (SemVer(d['version']), s)
             for s, ds in data['releases'].items()
-            for d in ds ]
-        vs = [ (v, s) for v, s in vs if spec.accepted(v) ]
+            for d in ds
+        ]
+        vs = [(v, s) for v, s in vs if spec.accepted(v)]
         vs.sort(reverse=True)
         for v, s in vs:
             print(name, v, s)
@@ -216,12 +266,16 @@ class Info(WithSpec, Command):
                 vs = ext.get('versions', {})
                 for extver, ds in vs.items():
                     for d in ds:
-                        if 'dist' not in d: continue
+                        if 'dist' not in d:
+                            continue
                         dist = d['dist']
                         distver = d.get('version', 'unknown')
                         logger.info(
                             _("extension %s %s found in distribution %s %s"),
-                            name, extver, dist, distver)
+                            name,
+                            extver,
+                            dist,
+                            distver,
+                        )
 
             raise e
-

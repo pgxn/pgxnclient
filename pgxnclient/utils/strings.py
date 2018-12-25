@@ -17,6 +17,7 @@ class CIStr(str):
     """
     A case preserving string with non case-sensitive comparison.
     """
+
     def __eq__(self, other):
         if isinstance(other, CIStr):
             return self.lower() == other.lower()
@@ -55,35 +56,36 @@ class Label(CIStr):
     restrictions on the length. Labels must be 63 characters or less."
 
     """
+
     def __new__(cls, value):
         if not Label._re_chk.match(value):
             raise ValueError(_("bad label: '%s'") % value)
         return CIStr.__new__(cls, value)
 
-    _re_chk = re.compile(
-        r'^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$',
-        re.IGNORECASE)
+    _re_chk = re.compile(r'^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$', re.IGNORECASE)
 
 
 class Term(CIStr):
-    """
+    r"""
     A Term is a subtype of String that must be at least two characters long
     contain no slash (/), backslash (\), control, or space characters.
 
     See https://pgxn.org/spec#Term
     """
+
     def __new__(cls, value):
         if not Term._re_chk.match(value) or min(map(ord, value)) < 32:
             raise ValueError(_("not a valid term term: '%s'") % value)
         return CIStr.__new__(cls, value)
 
-    _re_chk = re.compile( r'^[^\s/\\]{2,}$')
+    _re_chk = re.compile(r'^[^\s/\\]{2,}$')
 
 
 class Identifier(CIStr):
     """
     A string modeling a PostgreSQL identifier.
     """
+
     def __new__(cls, value):
         if not value:
             raise ValueError("PostgreSQL identifiers cannot be blank")
@@ -92,9 +94,7 @@ class Identifier(CIStr):
         # TODO: identifier are actually case sensitive if quoted
         return CIStr.__new__(cls, value)
 
-    _re_chk = re.compile(
-        r'^[a-z_][a-z0-9_\$]*$',
-        re.IGNORECASE)
+    _re_chk = re.compile(r'^[a-z_][a-z0-9_\$]*$', re.IGNORECASE)
 
     @classmethod
     def parse_arg(self, s):
@@ -106,4 +106,3 @@ class Identifier(CIStr):
         except ValueError as e:
             # shouldn't happen anymore as we quote invalid identifiers
             raise ArgumentTypeError(e)
-

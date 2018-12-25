@@ -25,4 +25,3 @@ if unittest.TestCase.assert_ is not unittest.TestCase.assertTrue:
 
 if __name__ == '__main__':
     unittest.main()
-

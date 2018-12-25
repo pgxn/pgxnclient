@@ -20,8 +20,10 @@ class Api(object):
 
     def dist(self, dist, version=''):
         try:
-            with self.call(version and 'meta' or 'dist',
-                    {'dist': dist, 'version': version}) as f:
+            with self.call(
+                version and 'meta' or 'dist',
+                {'dist': dist, 'version': version},
+            ) as f:
                 return load_json(f)
         except ResourceNotFound:
             raise NotFound("distribution '%s' not found" % dist)
@@ -114,5 +116,3 @@ class Api(object):
                 raise NetworkError("API index not found at '%s'" % url)
 
         return self._api_index
-
-

@@ -35,35 +35,43 @@ import operator
 
 from pgxnclient.i18n import _
 
+
 class SemVer(str):
     """A string representing a semantic version number.
 
     Non valid version numbers raise ValueError.
     """
+
     def __new__(cls, value):
         self = str.__new__(cls, value)
         self.tuple = SemVer.parse(value)
         return self
 
     @property
-    def major(self): return self.tuple[0]
+    def major(self):
+        return self.tuple[0]
 
     @property
-    def minor(self): return self.tuple[1]
+    def minor(self):
+        return self.tuple[1]
 
     @property
-    def patch(self): return self.tuple[2]
+    def patch(self):
+        return self.tuple[2]
 
     @property
-    def trail(self): return self.tuple[3]
+    def trail(self):
+        return self.tuple[3]
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, str(self))
 
     def __eq__(self, other):
         if isinstance(other, SemVer):
-            return self.tuple[:3] == other.tuple[:3] \
+            return (
+                self.tuple[:3] == other.tuple[:3]
                 and self.tuple[3].lower() == other.tuple[3].lower()
+            )
         elif isinstance(other, str):
             return self == SemVer(other)
         else:
@@ -79,12 +87,15 @@ class SemVer(str):
         if isinstance(other, SemVer):
             t1 = self.tuple[:3]
             t2 = other.tuple[:3]
-            if t1 != t2: return op(t1, t2)
+            if t1 != t2:
+                return op(t1, t2)
 
             s1 = self.tuple[3].lower()
             s2 = other.tuple[3].lower()
-            if s1 == s2: return False
-            if s1 and s2: return op(s1, s2)
+            if s1 == s2:
+                return False
+            if s1 and s2:
+                return op(s1, s2)
             return op(bool(s2), bool(s1))
 
         elif isinstance(other, str):
@@ -114,8 +125,10 @@ class SemVer(str):
             raise ValueError(_("bad version number: '%s'") % s)
 
         maj, min, patch, trail = m.groups()
-        if not patch: patch = 0
-        if not trail: trail = ''
+        if not patch:
+            patch = 0
+        if not trail:
+            trail = ''
         return (int(maj), int(min), int(patch), trail)
 
     @classmethod
@@ -128,13 +141,15 @@ class SemVer(str):
             raise ValueError(_("bad version number: '%s' - can't clean") % s)
 
         maj, min, patch, trail = m.groups()
-        maj =  maj and int(maj) or 0
+        maj = maj and int(maj) or 0
         min = min and int(min) or 0
         patch = patch and int(patch) or 0
         trail = trail and '-' + trail.strip() or ''
         return "%d.%d.%d%s" % (maj, min, patch, trail)
 
-re_semver = re.compile(r"""
+
+re_semver = re.compile(
+    r"""
     ^
         (0|[1-9][0-9]*)
     \.  (0|[1-9][0-9]*)
@@ -145,9 +160,11 @@ re_semver = re.compile(r"""
     )?
     $
     """,
-    re.IGNORECASE | re.VERBOSE)
+    re.IGNORECASE | re.VERBOSE,
+)
 
-re_clean = re.compile(r"""
+re_clean = re.compile(
+    r"""
     ^
         ([0-9]+)?
     \.? ([0-9]+)?
@@ -158,5 +175,5 @@ re_clean = re.compile(r"""
     )?
     $
     """,
-    re.IGNORECASE | re.VERBOSE)
-
+    re.IGNORECASE | re.VERBOSE,
+)

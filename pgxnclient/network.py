@@ -15,10 +15,17 @@ from contextlib import closing
 
 from pgxnclient import __version__
 from pgxnclient.i18n import _
-from pgxnclient.errors import PgxnClientException, NetworkError, ResourceNotFound, BadRequestError
+from pgxnclient.errors import (
+    PgxnClientException,
+    NetworkError,
+    ResourceNotFound,
+    BadRequestError,
+)
 
 import logging
+
 logger = logging.getLogger('pgxnclient.network')
+
 
 def get_file(url):
     opener = build_opener()
@@ -36,10 +43,12 @@ def get_file(url):
         elif e.code == 503:
             raise NetworkError(_("service unavailable"))
         else:
-            raise NetworkError(_("unexpected response %d for '%s'")
-                % (e.code, e.url))
+            raise NetworkError(
+                _("unexpected response %d for '%s'") % (e.code, e.url)
+            )
     except URLError as e:
         raise NetworkError(_("network error: %s") % e.reason)
+
 
 def get_local_file_name(target, url):
     """Return a good name for a local file.
@@ -55,6 +64,7 @@ def get_local_file_name(target, url):
 
     return os.path.abspath(fn)
 
+
 def download(f, fn, rename=True):
     """Download a file locally.
 
@@ -62,7 +72,7 @@ def download(f, fn, rename=True):
     :param fn: name of the file to write. If a dir, save into it.
     :param rename: if true and a file *fn* exist, rename the downloaded file
         adding a prefix ``-1``, ``-2``... before the extension.
-    
+
     Return the name of the file saved.
     """
     if os.path.isdir(fn):
@@ -82,15 +92,15 @@ def download(f, fn, rename=True):
         fout = open(fn, "wb")
     except Exception as e:
         raise PgxnClientException(
-            _("cannot open target file: %s: %s")
-                % (e.__class__.__name__, e))
+            _("cannot open target file: %s: %s") % (e.__class__.__name__, e)
+        )
     try:
         while 1:
             data = f.read(8192)
-            if not data: break
+            if not data:
+                break
             fout.write(data)
     finally:
         fout.close()
 
     return fn
-

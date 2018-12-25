@@ -14,11 +14,13 @@ from pgxnclient.errors import PgxnClientException
 from pgxnclient.archive import Archive
 
 import logging
+
 logger = logging.getLogger('pgxnclient.tar')
 
 
 class TarArchive(Archive):
     """Handle .tar archives"""
+
     _file = None
 
     def can_open(self):
@@ -30,7 +32,8 @@ class TarArchive(Archive):
             self._file = tarfile.open(self.filename, 'r')
         except Exception as e:
             raise PgxnClientException(
-                _("cannot open archive '%s': %s") % (self.filename, e))
+                _("cannot open archive '%s': %s") % (self.filename, e)
+            )
 
     def close(self):
         if self._file is not None:
@@ -55,7 +58,8 @@ class TarArchive(Archive):
                 fname = os.path.abspath(os.path.join(destdir, fn))
                 if not fname.startswith(destdir):
                     raise PgxnClientException(
-                        _("archive file '%s' trying to escape!") % fname)
+                        _("archive file '%s' trying to escape!") % fname
+                    )
 
             self._file.extractall(path=destdir)
         finally:
@@ -66,4 +70,3 @@ class TarArchive(Archive):
 
 def unpack(filename, destdir):
     return TarArchive(filename).unpack(destdir)
-

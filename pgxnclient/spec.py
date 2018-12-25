@@ -28,13 +28,17 @@ class Spec(object):
     TESTING = 1
     STABLE = 2
 
-    STATUS = {
-        'unstable': UNSTABLE,
-        'testing': TESTING,
-        'stable': STABLE, }
+    STATUS = {'unstable': UNSTABLE, 'testing': TESTING, 'stable': STABLE}
 
-    def __init__(self, name=None, op=None, ver=None,
-            dirname=None, filename=None, url=None):
+    def __init__(
+        self,
+        name=None,
+        op=None,
+        ver=None,
+        dirname=None,
+        filename=None,
+        url=None,
+    ):
         self.name = name and name.lower()
         self.op = op
         self.ver = ver
@@ -78,7 +82,7 @@ class Spec(object):
 
         # check if it's a local resource
         if spec.startswith('file://'):
-            try_file = unquote_plus(spec[len('file://'):])
+            try_file = unquote_plus(spec[len('file://') :])
         elif os.sep in spec:
             try_file = spec
         else:
@@ -99,7 +103,8 @@ class Spec(object):
         m = re.match(r'(.+?)(?:(==|=|>=|>|<=|<)(.*))?$', spec)
         if m is None:
             raise BadSpecError(
-                _("bad format for version specification: '%s'"), spec)
+                _("bad format for version specification: '%s'"), spec
+            )
 
         name = Term(m.group(1))
         op = m.group(2)
@@ -113,12 +118,18 @@ class Spec(object):
 
         return Spec(name, op, ver)
 
-    def accepted(self, version, _map = {
-            '==': _op.eq, '<=': _op.le, '<': _op.lt, '>=': _op.ge, '>': _op.gt}):
+    def accepted(
+        self,
+        version,
+        _map={
+            '==': _op.eq,
+            '<=': _op.le,
+            '<': _op.lt,
+            '>=': _op.ge,
+            '>': _op.gt,
+        },
+    ):
         """Return True if the given version is accepted in the spec."""
         if self.op is None:
             return True
         return _map[self.op](version, self.ver)
-
-
-

@@ -21,7 +21,11 @@ from pgxnclient import archive
 from pgxnclient import network
 from pgxnclient.i18n import _, N_
 from pgxnclient.utils import sha1
-from pgxnclient.errors import BadChecksum, PgxnClientException, InsufficientPrivileges
+from pgxnclient.errors import (
+    BadChecksum,
+    PgxnClientException,
+    InsufficientPrivileges,
+)
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
 from pgxnclient.commands import WithSpecUrl, WithSpecLocal, WithSudo
 from pgxnclient.utils.temp import temp_dir
@@ -37,9 +41,14 @@ class Download(WithSpecUrl, Command):
     @classmethod
     def customize_parser(self, parser, subparsers, **kwargs):
         subp = super(Download, self).customize_parser(
-            parser, subparsers, **kwargs)
-        subp.add_argument('--target', metavar='PATH', default='.',
-            help = _('Target directory and/or filename to save'))
+            parser, subparsers, **kwargs
+        )
+        subp.add_argument(
+            '--target',
+            metavar='PATH',
+            default='.',
+            help=_('Target directory and/or filename to save'),
+        )
 
         return subp
 
@@ -56,7 +65,8 @@ class Download(WithSpecUrl, Command):
             chk = data['sha1']
         except KeyError:
             raise PgxnClientException(
-                "sha1 missing from the distribution meta")
+                "sha1 missing from the distribution meta"
+            )
 
         with self.api.download(data['name'], SemVer(data['version'])) as fin:
             fn = network.download(fin, self.opts.target)
@@ -78,7 +88,8 @@ class Download(WithSpecUrl, Command):
         try:
             while 1:
                 data = f.read(8192)
-                if not data: break
+                if not data:
+                    break
                 sha.update(data)
         finally:
             f.close()
@@ -86,8 +97,7 @@ class Download(WithSpecUrl, Command):
         sha = sha.hexdigest()
         if sha != chk:
             os.unlink(fn)
-            logger.error(_("file %s has sha1 %s instead of %s"),
-                fn, sha, chk)
+            logger.error(_("file %s has sha1 %s instead of %s"), fn, sha, chk)
             raise BadChecksum(_("bad sha1 in downloaded file"))
 
 
@@ -95,6 +105,7 @@ class InstallUninstall(WithMake, WithSpecUrl, WithSpecLocal, Command):
     """
     Base class to implement the ``install`` and ``uninstall`` commands.
     """
+
     def run(self):
         with temp_dir() as dir:
             return self._run(dir)
@@ -131,26 +142,32 @@ class InstallUninstall(WithMake, WithSpecUrl, WithSpecLocal, Command):
         p.communicate()
         if p.returncode:
             raise PgxnClientException(
-                _("configure failed with return code %s") % p.returncode)
+                _("configure failed with return code %s") % p.returncode
+            )
 
 
 class SudoInstallUninstall(WithSudo, InstallUninstall):
     """
     Installation commands base class supporting sudo operations.
     """
+
     def run(self):
         if not self.is_libdir_writable() and not self.opts.sudo:
             dir = self.call_pg_config('libdir')
-            raise InsufficientPrivileges(_(
-                "PostgreSQL library directory (%s) not writable: "
-                "you should run the program as superuser, or specify "
-                "a 'sudo' program") % dir)
+            raise InsufficientPrivileges(
+                _(
+                    "PostgreSQL library directory (%s) not writable: "
+                    "you should run the program as superuser, or specify "
+                    "a 'sudo' program"
+                )
+                % dir
+            )
 
         return super(SudoInstallUninstall, self).run()
 
     def get_sudo_prog(self):
         if self.is_libdir_writable():
-            return None     # not needed
+            return None  # not needed
 
         return self.opts.sudo
 
@@ -210,7 +227,7 @@ class Check(WithDatabase, InstallUninstall):
 
         cmd = ['installcheck']
         if 'PGDATABASE' in upenv:
-            cmd.append("CONTRIB_TESTDB=" +  env['PGDATABASE'])
+            cmd.append("CONTRIB_TESTDB=" + env['PGDATABASE'])
 
         try:
             self.run_make(cmd, dir=pdir, env=env)
@@ -220,27 +237,40 @@ class Check(WithDatabase, InstallUninstall):
                 fn = os.path.join(pdir, 'regression.' + ext)
                 if os.path.exists(fn):
                     dest = './regression.' + ext
-                    if not os.path.exists(dest) or not os.path.samefile(fn, dest):
+                    if not os.path.exists(dest) or not os.path.samefile(
+                        fn, dest
+                    ):
                         logger.info(_('copying regression.%s'), ext)
                         shutil.copy(fn, dest)
             raise
 
 
-class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command):
+class LoadUnload(
+    WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
+):
     """
     Base class to implement the ``load`` and ``unload`` commands.
     """
+
     @classmethod
     def customize_parser(self, parser, subparsers, **kwargs):
         subp = super(LoadUnload, self).customize_parser(
-            parser, subparsers, **kwargs)
+            parser, subparsers, **kwargs
+        )
 
-        subp.add_argument('--schema', metavar="SCHEMA",
+        subp.add_argument(
+            '--schema',
+            metavar="SCHEMA",
             type=Identifier.parse_arg,
-            help=_("use SCHEMA instead of the default schema"))
+            help=_("use SCHEMA instead of the default schema"),
+        )
 
-        subp.add_argument('extensions', metavar='EXT', nargs='*',
-            help = _("only specified extensions [default: all]"))
+        subp.add_argument(
+            'extensions',
+            metavar='EXT',
+            nargs='*',
+            help=_("only specified extensions [default: all]"),
+        )
 
         return subp
 
@@ -253,17 +283,16 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
 
     def parse_pg_version(self, data):
         try:
-            return (
-                int(data[:-4]),
-                int(data[-4:-2]),
-                int(data[-2:]))
+            return (int(data[:-4]), int(data[-4:-2]), int(data[-2:]))
         except Exception:
             raise PgxnClientException(
-                "cannot parse version number from '%s'" % data)
+                "cannot parse version number from '%s'" % data
+            )
 
     def is_extension(self, name):
-        fn = os.path.join(self.call_pg_config('sharedir'),
-            "extension", name + ".control")
+        fn = os.path.join(
+            self.call_pg_config('sharedir'), "extension", name + ".control"
+        )
         logger.debug("checking if exists %s", fn)
         return os.path.exists(fn)
 
@@ -271,7 +300,7 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
         cmdline = [self.find_psql()]
         cmdline.extend(self.get_psql_options())
         if command is not None:
-            cmdline.append('-tA')   # tuple only, unaligned
+            cmdline.append('-tA')  # tuple only, unaligned
             cmdline.extend(['-c', command])
 
         logger.debug("calling %s", cmdline)
@@ -279,7 +308,8 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
         out, err = p.communicate()
         if p.returncode:
             raise PgxnClientException(
-                "psql returned %s running command" % (p.returncode))
+                "psql returned %s running command" % (p.returncode)
+            )
 
         return out.decode('utf-8')
 
@@ -306,7 +336,8 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
 
         if p.returncode:
             raise PgxnClientException(
-                "psql returned %s loading extension" % (p.returncode))
+                "psql returned %s loading extension" % (p.returncode)
+            )
 
     def find_psql(self):
         return self.call_pg_config('bindir') + '/psql'
@@ -336,7 +367,8 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
         else:
             raise PgxnClientException(
                 "cannot find sql file for extension '%s': '%s'"
-                % (name, sqlfile))
+                % (name, sqlfile)
+            )
 
     def patch_for_schema(self, fn):
         """
@@ -351,8 +383,10 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
         schema = self.opts.schema
 
         f = open(fn)
-        try: data = f.read()
-        finally: f.close()
+        try:
+            data = f.read()
+        finally:
+            f.close()
 
         if not schema:
             return data
@@ -366,13 +400,19 @@ class LoadUnload(WithPgConfig, WithDatabase, WithSpecUrl, WithSpecLocal, Command
         else:
             newdata = re_path.sub("SET search_path = %s;" % schema, data)
 
-        diff = ''.join(difflib.unified_diff(
-            [r + '\n' for r in data.splitlines()],
-            [r + '\n' for r in newdata.splitlines()],
-            fn, fn + ".schema"))
-        msg = _("""
+        diff = ''.join(
+            difflib.unified_diff(
+                [r + '\n' for r in data.splitlines()],
+                [r + '\n' for r in newdata.splitlines()],
+                fn,
+                fn + ".schema",
+            )
+        )
+        msg = _(
+            """
 In order to operate in the schema %s, the following changes will be
-performed:\n\n%s\n\nDo you want to continue?""")
+performed:\n\n%s\n\nDo you want to continue?"""
+        )
         self.confirm(msg % (schema, diff))
 
         return newdata
@@ -393,8 +433,7 @@ performed:\n\n%s\n\nDo you want to continue?""")
         p = self.popen(cmdline, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         p.communicate()
         if p.returncode:
-            raise PgxnClientException(
-                "schema %s does not exist" % schema)
+            raise PgxnClientException("schema %s does not exist" % schema)
 
     def _get_extensions(self):
         """
@@ -415,9 +454,10 @@ performed:\n\n%s\n\nDo you want to continue?""")
                 if ext != name:
                     raise PgxnClientException(
                         "can't find extension '%s' in the distribution '%s'"
-                            % (name, spec))
+                        % (name, spec)
+                    )
 
-            return [ (name, None) ]
+            return [(name, None)]
 
         rv = []
 
@@ -434,7 +474,8 @@ performed:\n\n%s\n\nDo you want to continue?""")
                 except KeyError:
                     raise PgxnClientException(
                         "can't find extension '%s' in the distribution '%s'"
-                            % (name, spec))
+                        % (name, spec)
+                    )
                 rv.append((name, data.get('file')))
 
         return rv
@@ -450,28 +491,35 @@ class Load(LoadUnload):
             self.load_ext(name, sql)
 
     def load_ext(self, name, sqlfile):
-        logger.debug(_("loading extension '%s' with file: %s"),
-            name, sqlfile)
+        logger.debug(_("loading extension '%s' with file: %s"), name, sqlfile)
 
         if sqlfile and not sqlfile.endswith('.sql'):
             logger.info(
-                _("the specified file '%s' doesn't seem SQL:"
-                    " assuming '%s' is not a PostgreSQL extension"),
-                    sqlfile, name)
+                _(
+                    "the specified file '%s' doesn't seem SQL:"
+                    " assuming '%s' is not a PostgreSQL extension"
+                ),
+                sqlfile,
+                name,
+            )
             return
 
         pgver = self.get_pg_version()
 
-        if pgver >= (9,1,0):
+        if pgver >= (9, 1, 0):
             if self.is_extension(name):
                 self.create_extension(name)
                 return
             else:
-                self.confirm(_("""\
+                self.confirm(
+                    _(
+                        """\
 The extension '%s' doesn't contain a control file:
 it will be installed as a loose set of objects.
-Do you want to continue?""")
-                    % name)
+Do you want to continue?"""
+                    )
+                    % name
+                )
 
         confirm = False
         if not sqlfile:
@@ -480,11 +528,15 @@ Do you want to continue?""")
 
         fn = self.find_sql_file(name, sqlfile)
         if confirm:
-            self.confirm(_("""\
+            self.confirm(
+                _(
+                    """\
 The extension '%s' doesn't specify a SQL file.
 '%s' is probably the right one.
-Do you want to load it?""")
-                % (name, fn))
+Do you want to load it?"""
+                )
+                % (name, fn)
+            )
 
         # TODO: is confirmation asked only once? Also, check for repetition
         # in unload.
@@ -520,28 +572,37 @@ class Unload(LoadUnload):
             self.unload_ext(name, sql)
 
     def unload_ext(self, name, sqlfile):
-        logger.debug(_("unloading extension '%s' with file: %s"),
-            name, sqlfile)
+        logger.debug(
+            _("unloading extension '%s' with file: %s"), name, sqlfile
+        )
 
         if sqlfile and not sqlfile.endswith('.sql'):
             logger.info(
-                _("the specified file '%s' doesn't seem SQL:"
-                    " assuming '%s' is not a PostgreSQL extension"),
-                    sqlfile, name)
+                _(
+                    "the specified file '%s' doesn't seem SQL:"
+                    " assuming '%s' is not a PostgreSQL extension"
+                ),
+                sqlfile,
+                name,
+            )
             return
 
         pgver = self.get_pg_version()
 
-        if pgver >= (9,1,0):
+        if pgver >= (9, 1, 0):
             if self.is_extension(name):
                 self.drop_extension(name)
                 return
             else:
-                self.confirm(_("""\
+                self.confirm(
+                    _(
+                        """\
 The extension '%s' doesn't contain a control file:
 will look for an SQL script to unload the objects.
-Do you want to continue?""")
-                    % name)
+Do you want to continue?"""
+                    )
+                    % name
+                )
 
         if not sqlfile:
             sqlfile = name + '.sql'
@@ -550,11 +611,15 @@ Do you want to continue?""")
         sqlfile = os.path.join(tmp[0], 'uninstall_' + tmp[1])
 
         fn = self.find_sql_file(name, sqlfile)
-        self.confirm(_("""\
+        self.confirm(
+            _(
+                """\
 In order to unload the extension '%s' looks like you will have
 to load the file '%s'.
-Do you want to execute it?""")
-                % (name, fn))
+Do you want to execute it?"""
+            )
+            % (name, fn)
+        )
 
         data = self.patch_for_schema(fn)
         self.load_sql(data=data)
@@ -563,4 +628,3 @@ Do you want to execute it?""")
         # TODO: cascade
         cmd = "DROP EXTENSION %s;" % Identifier(name)
         self.load_sql(data=cmd)
-
