@@ -176,27 +176,27 @@ class Info(WithSpec, Command):
                 for vv in v:
                     print("%s: %s" % (k, vv))
             elif isinstance(v, dict):
-                for kk, vv in v.iteritems():
+                for kk, vv in v.items():
                     print("%s: %s: %s" % (k, kk, vv))
             else:
                 print("%s: %s" % (k, v))
 
         k = 'provides'
-        for ext, dext in data[k].iteritems():
+        for ext, dext in data[k].items():
             print("%s: %s: %s" % (k, ext, dext['version']))
 
         k = 'prereqs'
         if k in data:
-            for phase, rels in data[k].iteritems():
-                for rel, pkgs in rels.iteritems():
-                    for pkg, ver in pkgs.iteritems():
+            for phase, rels in data[k].items():
+                for rel, pkgs in rels.items():
+                    for pkg, ver in pkgs.items():
                         print("%s: %s: %s %s" % (phase, rel, pkg, ver))
 
     def print_versions(self, spec):
         data = self._get_dist_data(spec.name)
         name = data['name']
         vs = [ (SemVer(d['version']), s)
-            for s, ds in data['releases'].iteritems()
+            for s, ds in data['releases'].items()
             for d in ds ]
         vs = [ (v, s) for v, s in vs if spec.accepted(v) ]
         vs.sort(reverse=True)
@@ -214,7 +214,7 @@ class Info(WithSpec, Command):
                 pass
             else:
                 vs = ext.get('versions', {})
-                for extver, ds in vs.iteritems():
+                for extver, ds in vs.items():
                     for d in ds:
                         if 'dist' not in d: continue
                         dist = d['dist']

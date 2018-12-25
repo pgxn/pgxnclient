@@ -55,7 +55,7 @@ def _handle_match(match, values):
             raise TemplateSyntaxError("Unexpected operator: %r" % op)
     else:
         assert len(variables) == 1
-        key, default = variables.items()[0]
+        key, default = list(variables.items())[0]
         return values.get(key, default)
 
 #
@@ -141,7 +141,7 @@ class _operators(object):
 
     @staticmethod
     def listjoin(variables, arg, values):
-        k = variables.keys()[0]
+        k = list(variables.keys())[0]
         return arg.join(values.get(k, []))
 
     @staticmethod
@@ -154,7 +154,7 @@ class _operators(object):
 
     @staticmethod
     def prefix(variables, arg, values):
-        k, default = variables.items()[0]
+        k, default = list(variables.items())[0]
         v = values.get(k, default)
         if v is not None and len(v) > 0:
             return arg + v
@@ -163,7 +163,7 @@ class _operators(object):
             
     @staticmethod
     def append(variables, arg, values):
-        k, default = variables.items()[0]
+        k, default = list(variables.items())[0]
         v = values.get(k, default)
         if v is not None and len(v) > 0:
             return v + arg

@@ -314,7 +314,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
 
         # Get the maximum version for each release status satisfying the spec
         vers = [ None ] * len(Spec.STATUS)
-        for n, d in drels.iteritems():
+        for n, d in drels.items():
             vs = filter(spec.accepted, [SemVer(r['version']) for r in d])
             if vs:
                 vers[Spec.STATUS[n]] = max(vs)
@@ -328,7 +328,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         # Get the maximum version for each release status satisfying the spec
         vers = [ [] for i in xrange(len(Spec.STATUS)) ]
         vmap = {} # ext_version -> (dist_name, dist_version)
-        for ev, dists in data.get('versions', {}).iteritems():
+        for ev, dists in data.get('versions', {}).items():
             ev = SemVer(ev)
             if not spec.accepted(ev):
                 continue
