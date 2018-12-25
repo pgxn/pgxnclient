@@ -11,27 +11,11 @@ __all__ = ['OrderedDict', 'load_json', 'load_jsons', 'sha1', 'b',
     'find_executable']
 
 
-import sys
 import os
+import sys
+import json
+from collections import OrderedDict
 
-# OrderedDict available from Python 2.7
-if sys.version_info >= (2, 7):
-    from collections import OrderedDict
-else:
-    from pgxnclient.utils.ordereddict import OrderedDict
-
-
-# Import the proper JSON library.
-#
-# Dependencies note: simplejson is certified for Python 2.5.  Support for
-# Python 2.4 was available up to version 2.0.9, but this version doesn't
-# support ordered dicts. In Py 2.6 the package is in stdlib, but without
-# orddict support, so we use simplejson 2.1 again. From Python 2.7 the stdlilb
-# json module has orddict support so we don't need the external dependency.
-if sys.version_info >= (2, 7):
-    import json
-else:
-    import simplejson as json
 
 def load_json(f):
     data = f.read()
