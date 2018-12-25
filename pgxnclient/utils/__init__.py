@@ -12,7 +12,6 @@ __all__ = ['OrderedDict', 'load_json', 'load_jsons', 'sha1', 'b',
 
 
 import os
-import sys
 import json
 from collections import OrderedDict
 
@@ -31,16 +30,6 @@ def load_jsons(data):
 
 # Import the sha1 object without warnings
 from hashlib import sha1
-
-
-# For compatibility from Python 2.4 to 3.x
-# b('str') is equivalent to b'str' but works on Python < 2.6 too
-if sys.version_info < (3,):
-    def b(s):
-        return s
-else:
-    def b(s):
-        return s.encode('utf8')
 
 
 def find_executable(name):

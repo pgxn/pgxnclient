@@ -20,7 +20,7 @@ from pgxnclient import SemVer
 from pgxnclient import archive
 from pgxnclient import network
 from pgxnclient.i18n import _, N_
-from pgxnclient.utils import sha1, b
+from pgxnclient.utils import sha1
 from pgxnclient.errors import BadChecksum, PgxnClientException, InsufficientPrivileges
 from pgxnclient.commands import Command, WithDatabase, WithMake, WithPgConfig
 from pgxnclient.commands import WithSpecUrl, WithSpecLocal, WithSudo
@@ -166,7 +166,7 @@ class SudoInstallUninstall(WithSudo, InstallUninstall):
         logger.debug("testing if %s is writable", dir)
         try:
             f = tempfile.TemporaryFile(prefix="pgxn-", suffix=".test", dir=dir)
-            f.write(b('test'))
+            f.write(b'test')
             f.close()
         except (IOError, OSError):
             rv = False

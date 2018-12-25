@@ -10,7 +10,6 @@ import os
 import stat
 import zipfile
 
-from pgxnclient.utils import b
 from pgxnclient.i18n import _
 from pgxnclient.errors import PgxnClientException
 from pgxnclient.archive import Archive
@@ -78,7 +77,7 @@ class ZipArchive(Archive):
                     # In order to restore the executable bit, I haven't find
                     # anything that looks like an executable flag in the zipinfo,
                     # so look at the hashbangs...
-                    isexec = data[:2] == b('#!')
+                    isexec = data[:2] == b'#!'
                     fout.write(data)
                 finally:
                     fout.close()

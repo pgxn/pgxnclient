@@ -5,7 +5,6 @@ import tempfile
 import shutil
 from six.moves.urllib.parse import quote
 
-from pgxnclient.utils import b
 from pgxnclient.errors import PgxnClientException, ResourceNotFound, InsufficientPrivileges
 from pgxnclient.tests import unittest
 from pgxnclient.tests.testutils import ifunlink, get_test_filename
@@ -56,34 +55,34 @@ class InfoTestCase(unittest.TestCase):
 
     def test_info(self):
         output = self._get_output(['info', '--versions', 'foobar'])
-        self.assertEqual(output, b("""\
+        self.assertEqual(output, b"""\
 foobar 0.43.2b1 testing
 foobar 0.42.1 stable
 foobar 0.42.0 stable
-"""))
+""")
 
     def test_info_op(self):
         output = self._get_output(['info', '--versions', 'foobar>0.42.0'])
-        self.assertEqual(output, b("""\
+        self.assertEqual(output, b"""\
 foobar 0.43.2b1 testing
 foobar 0.42.1 stable
-"""))
+""")
 
     def test_info_empty(self):
         output = self._get_output(['info', '--versions', 'foobar>=0.43.2'])
-        self.assertEqual(output, b(""))
+        self.assertEqual(output, b"")
 
     def test_info_case_insensitive(self):
         output = self._get_output(['info', '--versions', 'Foobar'])
-        self.assertEqual(output, b("""\
+        self.assertEqual(output, b"""\
 foobar 0.43.2b1 testing
 foobar 0.42.1 stable
 foobar 0.42.0 stable
-"""))
+""")
 
     def test_mirrors_list(self):
         output = self._get_output(['mirror'])
-        self.assertEqual(output, b("""\
+        self.assertEqual(output, b"""\
 http://pgxn.depesz.com/
 http://www.postgres-support.ch/pgxn/
 http://pgxn.justatheory.com/
@@ -92,11 +91,11 @@ http://mirrors.cat.pdx.edu/pgxn/
 http://pgxn.dalibo.org/
 http://pgxn.cxsoftware.org/
 http://api.pgxn.org/
-"""))
+""")
 
     def test_mirror_info(self):
         output = self._get_output(['mirror', 'http://pgxn.justatheory.com/'])
-        self.assertEqual(output, b("""\
+        self.assertEqual(output, b"""\
 uri: http://pgxn.justatheory.com/
 frequency: daily
 location: Portland, OR, USA
@@ -108,7 +107,7 @@ src: rsync://master.pgxn.org/pgxn/
 rsync: 
 notes: 
 
-"""))
+""")
 
 
 class CommandTestCase(unittest.TestCase):
@@ -602,7 +601,7 @@ class LoadTestCase(unittest.TestCase):
         self._p1 = patch('pgxnclient.commands.Popen')
         self.mock_popen = self._p1.start()
         self.mock_popen.return_value.returncode = 0
-        self.mock_popen.return_value.communicate.return_value = (b(''), b(''))
+        self.mock_popen.return_value.communicate.return_value = (b'', b'')
 
         self._p2 = patch('pgxnclient.commands.install.LoadUnload.is_extension')
         self.mock_isext = self._p2.start()
@@ -659,7 +658,7 @@ class LoadTestCase(unittest.TestCase):
         self.assert_('psql' in self.mock_popen.call_args[0][0][0])
         communicate = self.mock_popen.return_value.communicate
         self.assertEquals(communicate.call_args[0][0],
-            b('CREATE EXTENSION foobar;'))
+            b'CREATE EXTENSION foobar;')
 
     @patch('pgxnclient.tar.TarArchive.unpack')
     @patch('pgxnclient.network.get_file')
@@ -675,7 +674,7 @@ class LoadTestCase(unittest.TestCase):
         self.assert_('psql' in self.mock_popen.call_args[0][0][0])
         communicate = self.mock_popen.return_value.communicate
         self.assertEquals(communicate.call_args[0][0],
-            b('CREATE EXTENSION foobar;'))
+            b'CREATE EXTENSION foobar;')
 
     @patch('pgxnclient.network.get_file')
     def test_load_local_dir(self, mock_get):
@@ -696,7 +695,7 @@ class LoadTestCase(unittest.TestCase):
         self.assert_('psql' in self.mock_popen.call_args[0][0][0])
         communicate = self.mock_popen.return_value.communicate
         self.assertEquals(communicate.call_args[0][0],
-            b('CREATE EXTENSION foobar;'))
+            b'CREATE EXTENSION foobar;')
 
     @patch('pgxnclient.zip.ZipArchive.unpack')
     @patch('pgxnclient.network.get_file')
@@ -713,7 +712,7 @@ class LoadTestCase(unittest.TestCase):
         self.assert_('psql' in self.mock_popen.call_args[0][0][0])
         communicate = self.mock_popen.return_value.communicate
         self.assertEquals(communicate.call_args[0][0],
-            b('CREATE EXTENSION foobar;'))
+            b'CREATE EXTENSION foobar;')
 
     @patch('pgxnclient.tar.TarArchive.unpack')
     @patch('pgxnclient.network.get_file')
@@ -730,7 +729,7 @@ class LoadTestCase(unittest.TestCase):
         self.assert_('psql' in self.mock_popen.call_args[0][0][0])
         communicate = self.mock_popen.return_value.communicate
         self.assertEquals(communicate.call_args[0][0],
-            b('CREATE EXTENSION foobar;'))
+            b'CREATE EXTENSION foobar;')
 
     def test_load_extensions_order(self):
         tdir = tempfile.mkdtemp()
@@ -751,13 +750,13 @@ class LoadTestCase(unittest.TestCase):
         self.assert_('psql' in self.mock_popen.call_args[0][0][0])
         communicate = self.mock_popen.return_value.communicate
         self.assertEquals(communicate.call_args_list[0][0][0],
-            b('CREATE EXTENSION foo;'))
+            b'CREATE EXTENSION foo;')
         self.assertEquals(communicate.call_args_list[1][0][0],
-            b('CREATE EXTENSION bar;'))
+            b'CREATE EXTENSION bar;')
         self.assertEquals(communicate.call_args_list[2][0][0],
-            b('CREATE EXTENSION baz;'))
+            b'CREATE EXTENSION baz;')
         self.assertEquals(communicate.call_args_list[3][0][0],
-            b('CREATE EXTENSION qux;'))
+            b'CREATE EXTENSION qux;')
 
     def test_unload_extensions_order(self):
         tdir = tempfile.mkdtemp()
@@ -778,13 +777,13 @@ class LoadTestCase(unittest.TestCase):
         self.assert_('psql' in self.mock_popen.call_args[0][0][0])
         communicate = self.mock_popen.return_value.communicate
         self.assertEquals(communicate.call_args_list[0][0][0],
-            b('DROP EXTENSION qux;'))
+            b'DROP EXTENSION qux;')
         self.assertEquals(communicate.call_args_list[1][0][0],
-            b('DROP EXTENSION baz;'))
+            b'DROP EXTENSION baz;')
         self.assertEquals(communicate.call_args_list[2][0][0],
-            b('DROP EXTENSION bar;'))
+            b'DROP EXTENSION bar;')
         self.assertEquals(communicate.call_args_list[3][0][0],
-            b('DROP EXTENSION foo;'))
+            b'DROP EXTENSION foo;')
 
     def test_load_list(self):
         tdir = tempfile.mkdtemp()
@@ -805,9 +804,9 @@ class LoadTestCase(unittest.TestCase):
         self.assert_('psql' in self.mock_popen.call_args[0][0][0])
         communicate = self.mock_popen.return_value.communicate
         self.assertEquals(communicate.call_args_list[0][0][0],
-            b('CREATE EXTENSION baz;'))
+            b'CREATE EXTENSION baz;')
         self.assertEquals(communicate.call_args_list[1][0][0],
-            b('CREATE EXTENSION foo;'))
+            b'CREATE EXTENSION foo;')
 
     def test_unload_list(self):
         tdir = tempfile.mkdtemp()
@@ -828,9 +827,9 @@ class LoadTestCase(unittest.TestCase):
         self.assert_('psql' in self.mock_popen.call_args[0][0][0])
         communicate = self.mock_popen.return_value.communicate
         self.assertEquals(communicate.call_args_list[0][0][0],
-            b('DROP EXTENSION baz;'))
+            b'DROP EXTENSION baz;')
         self.assertEquals(communicate.call_args_list[1][0][0],
-            b('DROP EXTENSION foo;'))
+            b'DROP EXTENSION foo;')
 
     def test_load_missing(self):
         tdir = tempfile.mkdtemp()
