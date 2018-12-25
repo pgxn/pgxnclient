@@ -1,0 +1,71 @@
+{
+   "abstract": "Provides first() and last() aggregate functions.",
+   "date": "2014-06-10T11:08:09Z",
+   "docs": {
+      "README": {
+         "title": "README"
+      },
+      "doc/first_last_agg": {
+         "title": "first-last-agg 0.1.4"
+      }
+   },
+   "license": "postgresql",
+   "maintainer": [
+      "Jan Urbański <wulczer@wulczer.org>"
+   ],
+   "name": "first_last_agg",
+   "prereqs": {
+      "build": {
+         "requires": {
+            "PostgreSQL": "9.0.0"
+         }
+      }
+   },
+   "provides": {
+      "first_last_agg": {
+         "docfile": "doc/first_last_agg.md",
+         "docpath": "doc/first_last_agg",
+         "file": "sql/first_last_agg.sql",
+         "version": "0.1.4"
+      }
+   },
+   "release_status": "stable",
+   "releases": {
+      "stable": [
+         {
+            "date": "2014-06-10T11:08:09Z",
+            "version": "0.1.4"
+         }
+      ],
+      "testing": [
+         {
+            "date": "2011-05-26T10:28:37Z",
+            "version": "0.1.2"
+         }
+      ]
+   },
+   "resources": {
+      "bugtracker": {
+         "web": "http://github.com/wulczer/first_last_agg/issues/"
+      },
+      "repository": {
+         "type": "git",
+         "url": "git://github.com/wulczer/first_last_agg.git",
+         "web": "http://github.com/wulczer/first_last_agg/"
+      }
+   },
+   "sha1": "797a48bd3ea1a080a024d15e9384932702f1e0cf",
+   "special_files": [
+      "README.md",
+      "META.json",
+      "Makefile",
+      "first_last_agg.control"
+   ],
+   "tags": [
+      "first aggregate",
+      "last aggregate",
+      "aggregate function"
+   ],
+   "user": "wulczer",
+   "version": "0.1.4"
+}

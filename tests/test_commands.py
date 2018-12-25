@@ -55,13 +55,13 @@ class InfoTestCase(unittest.TestCase):
         @patch('sys.stdout')
         @patch('pgxnclient.network.get_file')
         def do(mock, stdout):
+            stdout.encoding = 'UTF-8'
             mock.side_effect = fake_get_file
+
             from pgxnclient.cli import main
 
             main(cmdline)
-            return u''.join(
-                [a[0] for a, k in stdout.write.call_args_list]
-            ).encode('ascii')
+            return b''.join([a[0] for a, k in stdout.write.call_args_list])
 
         return do()
 
@@ -135,6 +135,28 @@ notes:
 
 """,  # noqa
         )
+
+    @patch('sys.stdout')
+    @patch('pgxnclient.network.get_file')
+    def test_nonascii(self, mock_get, stdout):
+        mock_get.side_effect = fake_get_file
+
+        from pgxnclient.cli import main
+
+        stdout.encoding = 'UTF-8'
+        main(['info', 'first_last_agg'])
+        out = max(b''.join([a[0] for a, k in stdout.write.call_args_list]))
+        if not isinstance(out, int):
+            out = ord(out)
+        assert out > 127
+
+        stdout.reset_mock()
+        stdout.encoding = None
+        main(['info', 'first_last_agg'])
+        out = max(b''.join([a[0] for a, k in stdout.write.call_args_list]))
+        if not isinstance(out, int):
+            out = ord(out)
+        assert out < 127
 
 
 class CommandTestCase(unittest.TestCase):
@@ -1092,21 +1114,47 @@ class SearchTestCase(unittest.TestCase):
     @patch('sys.stdout')
     @patch('pgxnclient.network.get_file')
     def test_search_quoting(self, mock_get, stdout):
+        stdout.encoding = 'UTF-8'
         mock_get.side_effect = fake_get_file
+
         from pgxnclient.cli import main
 
         main(['search', '--docs', 'foo bar', 'baz'])
+
+    @patch('sys.stdout')
+    @patch('pgxnclient.network.get_file')
+    def test_nonascii(self, mock_get, stdout):
+        mock_get.side_effect = fake_get_file
+
+        from pgxnclient.cli import main
+
+        stdout.encoding = 'UTF-8'
+        main(['search', 'oracle'])
+        out = max(b''.join([a[0] for a, k in stdout.write.call_args_list]))
+        if not isinstance(out, int):
+            out = ord(out)
+        assert out > 127
+
+        stdout.reset_mock()
+        stdout.encoding = None
+        main(['search', 'oracle'])
+        out = max(b''.join([a[0] for a, k in stdout.write.call_args_list]))
+        if not isinstance(out, int):
+            out = ord(out)
+        assert out < 127
 
 
 class HelpTestCase(unittest.TestCase):
     @patch('sys.stdout')
     def test_libexec(self, stdout):
+        stdout.encoding = 'UTF-8'
+
         from pgxnclient.cli import main
 
         main(['help', '--libexec'])
-        out = ''.join([a[0] for a, k in stdout.write.call_args_list])
+        out = b''.join([a[0] for a, k in stdout.write.call_args_list])
         assert out.strip()
-        assert out.count('\n') == 1
+        assert out.count(b'\n') == 1
 
 
 if __name__ == '__main__':

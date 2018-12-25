@@ -6,12 +6,11 @@ pgxnclient -- help commands implementation
 
 # This file is part of the PGXN client
 
-from __future__ import print_function
-
 import os
 
 from pgxnclient import get_scripts_dirs, get_public_scripts_dir
 from pgxnclient.i18n import _, N_
+from pgxnclient.utils import emit
 from pgxnclient.commands import Command
 
 
@@ -61,11 +60,11 @@ class Help(Command):
     def print_all_commands(self):
         cmds = self.find_all_commands()
         title = _("Available PGXN Client commands")
-        print(title)
-        print("-" * len(title))
+        emit(title)
+        emit("-" * len(title))
 
         for cmd in cmds:
-            print("  " + cmd)
+            emit("  " + cmd)
 
     def find_all_commands(self):
         rv = []
@@ -86,4 +85,4 @@ class Help(Command):
         return rv
 
     def print_libexec(self):
-        print(get_public_scripts_dir())
+        emit(get_public_scripts_dir())

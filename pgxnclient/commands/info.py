@@ -6,8 +6,6 @@ pgxnclient -- informative commands implementation
 
 # This file is part of the PGXN client
 
-from __future__ import print_function
-
 import re
 import logging
 import textwrap
@@ -15,8 +13,9 @@ import xml.sax.saxutils as saxutils
 
 import six
 
-from pgxnclient.i18n import _, N_
 from pgxnclient import SemVer
+from pgxnclient.i18n import _, N_
+from pgxnclient.utils import emit
 from pgxnclient.errors import NotFound, ResourceNotFound
 from pgxnclient.commands import Command, WithSpec
 
@@ -64,15 +63,15 @@ class Mirror(Command):
 
         for i, d in enumerate(data):
             if not detailed:
-                print(d['uri'])
+                emit(d['uri'])
             else:
                 for k in u"""
                     uri frequency location bandwidth organization email
                     timezone src rsync notes
                 """.split():
-                    print("%s: %s" % (k, d.get(k, '')))
+                    emit("%s: %s" % (k, d.get(k, '')))
 
-                print()
+                emit()
 
 
 class Search(Command):
@@ -118,13 +117,13 @@ class Search(Command):
         data = self.api.search(self.opts.where, self.opts.query)
 
         for hit in data['hits']:
-            print("%s %s" % (hit['dist'], hit['version']))
+            emit("%s %s" % (hit['dist'], hit['version']))
             if 'excerpt' in hit:
                 excerpt = self.clean_excerpt(hit['excerpt'])
 
                 for line in textwrap.wrap(excerpt, 72):
-                    print("    " + line)
-                print()
+                    emit("    " + line)
+                emit()
 
     def clean_excerpt(self, excerpt):
         """Clean up the excerpt returned in the json result for output."""
@@ -199,12 +198,12 @@ class Info(WithSpec, Command):
     def print_meta(self, spec):
         data = self._get_dist_data(spec.name)
         ver = self.get_best_version(data, spec, quiet=True)
-        print(self.api.meta(spec.name, ver, as_json=False))
+        emit(self.api.meta(spec.name, ver, as_json=False))
 
     def print_readme(self, spec):
         data = self._get_dist_data(spec.name)
         ver = self.get_best_version(data, spec, quiet=True)
-        print(self.api.readme(spec.name, ver))
+        emit(self.api.readme(spec.name, ver))
 
     def print_details(self, spec):
         data = self._get_dist_data(spec.name)
@@ -222,23 +221,23 @@ class Info(WithSpec, Command):
 
             if isinstance(v, list):
                 for vv in v:
-                    print("%s: %s" % (k, vv))
+                    emit("%s: %s" % (k, vv))
             elif isinstance(v, dict):
                 for kk, vv in v.items():
-                    print("%s: %s: %s" % (k, kk, vv))
+                    emit("%s: %s: %s" % (k, kk, vv))
             else:
-                print("%s: %s" % (k, v))
+                emit("%s: %s" % (k, v))
 
         k = 'provides'
         for ext, dext in data[k].items():
-            print("%s: %s: %s" % (k, ext, dext['version']))
+            emit("%s: %s: %s" % (k, ext, dext['version']))
 
         k = 'prereqs'
         if k in data:
             for phase, rels in data[k].items():
                 for rel, pkgs in rels.items():
                     for pkg, ver in pkgs.items():
-                        print("%s: %s: %s %s" % (phase, rel, pkg, ver))
+                        emit("%s: %s: %s %s" % (phase, rel, pkg, ver))
 
     def print_versions(self, spec):
         data = self._get_dist_data(spec.name)
@@ -251,7 +250,7 @@ class Info(WithSpec, Command):
         vs = [(v, s) for v, s in vs if spec.accepted(v)]
         vs.sort(reverse=True)
         for v, s in vs:
-            print(name, v, s)
+            emit("%s %s %s" % (name, v, s))
 
     def _get_dist_data(self, name):
         try:

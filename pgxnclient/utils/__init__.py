@@ -7,10 +7,13 @@ pgxnclient -- misc utilities package
 # This file is part of the PGXN client
 
 
-__all__ = ['load_json', 'load_jsons', 'sha1', 'find_executable']
+from __future__ import print_function
+
+__all__ = ['emit', 'load_json', 'load_jsons', 'sha1', 'find_executable']
 
 
 import os
+import sys
 import json
 from collections import OrderedDict
 
@@ -18,6 +21,26 @@ from collections import OrderedDict
 from hashlib import sha1
 
 import six
+
+
+def emit(s=b'', file=None):
+    """
+    Print a string
+
+    Easy yes? No. Because if the string is unicode and we are piping stdout
+    into something we end up with sys.stdout.encoding = None and Python trying
+    to use ascii to encode, barfing on the first accented letter (hello Jan).
+    """
+    if file is None:
+        file = sys.stdout
+
+    enc = file.encoding or 'ascii'
+
+    if isinstance(s, six.text_type):
+        s = s.encode(enc, 'replace')
+
+    file.write(s)
+    file.write(b'\n')
 
 
 def load_json(f):
