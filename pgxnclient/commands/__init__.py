@@ -81,7 +81,7 @@ def load_commands():
 
         try:
             __import__(modname)
-        except Exception, e:
+        except Exception as e:
             logger.warn(_("error importing commands module %s: %s - %s"),
                 modname, e.__class__.__name__, e)
 
@@ -216,7 +216,7 @@ class Command(object):
         logger.debug("running command: %s", cmd)
         try:
             return Popen(cmd, *args, **kwargs)
-        except OSError, e:
+        except OSError as e:
             if not isinstance(cmd, basestring):
                 cmd = ' '.join(cmd)
             msg = _("%s running command: %s") % (e, cmd)
@@ -275,7 +275,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
 
         try:
             spec = Spec.parse(spec)
-        except (ValueError, BadSpecError), e:
+        except (ValueError, BadSpecError) as e:
             self.parser.error(_("cannot parse package '%s': %s")
                 % (spec, e))
 

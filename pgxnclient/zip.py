@@ -31,7 +31,7 @@ class ZipArchive(Archive):
         assert not self._file, "archive already open"
         try:
             self._file = zipfile.ZipFile(self.filename, 'r')
-        except Exception, e:
+        except Exception as e:
             raise PgxnClientException(
                 _("cannot open archive '%s': %s") % (self.filename, e))
 

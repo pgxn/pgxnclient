@@ -25,7 +25,7 @@ def get_file(url):
     logger.debug('opening url: %s', url)
     try:
         return closing(opener.open(url))
-    except urllib2.HTTPError, e:
+    except urllib2.HTTPError as e:
         if e.code == 404:
             raise ResourceNotFound(_("resource not found: '%s'") % e.url)
         elif e.code == 400:
@@ -37,7 +37,7 @@ def get_file(url):
         else:
             raise NetworkError(_("unexpected response %d for '%s'")
                 % (e.code, e.url))
-    except urllib2.URLError, e:
+    except urllib2.URLError as e:
         raise NetworkError(_("network error: %s") % e.reason)
 
 def get_local_file_name(target, url):
@@ -79,7 +79,7 @@ def download(f, fn, rename=True):
     logger.info(_("saving %s"), fn)
     try:
         fout = open(fn, "wb")
-    except Exception, e:
+    except Exception as e:
         raise PgxnClientException(
             _("cannot open target file: %s: %s")
                 % (e.__class__.__name__, e))

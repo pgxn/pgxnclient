@@ -103,7 +103,7 @@ class Identifier(CIStr):
         """
         try:
             return Identifier(s)
-        except ValueError, e:
+        except ValueError as e:
             # shouldn't happen anymore as we quote invalid identifiers
             raise ArgumentTypeError(e)
 

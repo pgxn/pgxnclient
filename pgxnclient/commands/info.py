@@ -206,7 +206,7 @@ class Info(WithSpec, Command):
     def _get_dist_data(self, name):
         try:
             return self.api.dist(name)
-        except NotFound, e:
+        except NotFound as e:
             # maybe the user was looking for an extension instead?
             try:
                 ext = self.api.ext(name)
