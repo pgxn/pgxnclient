@@ -326,7 +326,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         Return the best distribution version from an extension's data
         """
         # Get the maximum version for each release status satisfying the spec
-        vers = [ [] for i in xrange(len(Spec.STATUS)) ]
+        vers = [ [] for i in range(len(Spec.STATUS)) ]
         vmap = {} # ext_version -> (dist_name, dist_version)
         for ev, dists in data.get('versions', {}).items():
             ev = SemVer(ev)
@@ -339,7 +339,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
                 vmap[ev] = (dist['dist'], dv)
 
         # for each rel status only take the max one.
-        for i in xrange(len(vers)):
+        for i in range(len(vers)):
             vers[i] = vers[i] and max(vers[i]) or None
 
         ev = self._get_best_version(vers, spec, quiet=False)
