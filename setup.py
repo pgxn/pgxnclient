@@ -28,7 +28,8 @@ finally:
 
 # External dependencies, depending on the Python version
 requires = ['six']
-tests_require = ['mock']
+setup_requires = ['pytest-runner']
+tests_require = ['mock', 'pytest']
 
 if sys.version_info < (2, 7):
     raise ValueError("PGXN client requires at least Python 2.7")
@@ -66,10 +67,10 @@ setup(
             'pgxnclient = pgxnclient.cli:script',
         ]
     },
-    test_suite='pgxnclient.tests',
     classifiers=[x for x in classifiers.split('\n') if x],
     zip_safe=False,  # because we dynamically look for commands
     install_requires=requires,
+    setup_requires=setup_requires,
     tests_require=tests_require,
     version=version,
 )

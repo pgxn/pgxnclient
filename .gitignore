@@ -3,7 +3,6 @@ dist
 docs/html
 docs/env
 pgxnclient.egg-info
-mock-*.egg
 .eggs
 dbtest/regression.*
 dbtest/postgresql-*/*

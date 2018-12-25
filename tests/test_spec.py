@@ -1,4 +1,4 @@
-from pgxnclient.tests import unittest
+import unittest
 
 from pgxnclient import Spec
 
