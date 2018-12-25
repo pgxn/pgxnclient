@@ -315,7 +315,7 @@ indications, for instance 'pkgname=1.0', or 'pkgname>=2.1'.
         # Get the maximum version for each release status satisfying the spec
         vers = [ None ] * len(Spec.STATUS)
         for n, d in drels.items():
-            vs = filter(spec.accepted, [SemVer(r['version']) for r in d])
+            vs = list(filter(spec.accepted, [SemVer(r['version']) for r in d]))
             if vs:
                 vers[Spec.STATUS[n]] = max(vs)
 
