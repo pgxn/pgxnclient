@@ -217,7 +217,7 @@ class Info(WithSpec, Command):
             try:
                 v = data[k]
             except KeyError:
-                logger.warn(_("data key '%s' not found"), k)
+                logger.warning(_("data key '%s' not found"), k)
                 continue
 
             if isinstance(v, list):

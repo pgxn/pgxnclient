@@ -112,7 +112,7 @@ def load_commands():
         try:
             __import__(modname)
         except Exception as e:
-            logger.warn(
+            logger.warning(
                 _("error importing commands module %s: %s - %s"),
                 modname,
                 e.__class__.__name__,
