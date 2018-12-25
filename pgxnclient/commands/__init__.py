@@ -10,8 +10,6 @@ modules.
 
 # This file is part of the PGXN client
 
-from __future__ import with_statement
-
 import os
 import sys
 import logging
