@@ -6,6 +6,8 @@ pgxnclient -- help commands implementation
 
 # This file is part of the PGXN client
 
+from __future__ import print_function
+
 import os
 
 from pgxnclient import get_scripts_dirs, get_public_scripts_dir
@@ -48,11 +50,11 @@ class Help(Command):
     def print_all_commands(self):
         cmds = self.find_all_commands()
         title = _("Available PGXN Client commands")
-        print title
-        print "-" * len(title)
+        print(title)
+        print("-" * len(title))
 
         for cmd in cmds:
-            print "  " + cmd
+            print("  " + cmd)
 
     def find_all_commands(self):
         rv = []
@@ -73,5 +75,5 @@ class Help(Command):
         return rv
 
     def print_libexec(self):
-        print get_public_scripts_dir()
+        print(get_public_scripts_dir())
 
