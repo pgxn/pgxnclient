@@ -58,6 +58,7 @@ setup(
     author_email='daniele.varrazzo@gmail.com',
     url='https://github.com/dvarrazzo/pgxnclient',
     license='BSD',
+    # NOTE: keep consistent with docs/install.txt
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
     packages=find_packages(),
     package_data={'pgxnclient': ['libexec/*']},
