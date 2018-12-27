@@ -4,8 +4,8 @@ Installation
 Prerequisites
 -------------
 
-The program is implemented in Python. Versions from Python 2.5 onwards are
-supported, including Python 3.0 and successive.
+The program is implemented in Python. The current version can run using Python
+2.7 and 3.4 onwards.
 
 PostgreSQL client-side development tools are required to build and install
 extensions.
@@ -15,24 +15,21 @@ Installation from the Python Package Index
 ------------------------------------------
 
 The PGXN client is `hosted on PyPI`__, therefore the easiest way to install
-the program is through a Python installation tool such as easy_install_, pip_
-or `zc.buildout`_. For example a system-wide installation can be obtained
-with::
+the program is through a Python installation tool such as pip_. For example a
+system-wide installation can be obtained with::
 
-    $ sudo easy_install pgxnclient
+    $ sudo pip install pgxnclient
 
 To upgrade from a previous version to the most recent available you may run
 instead::
 
-    $ sudo easy_install -U pgxnclient
+    $ sudo pip install --upgrade pgxnclient
 
 The documentation of the installation tool of your choice will also show how
 to perform a local installation.
 
 .. __: https://pypi.org/project/pgxnclient/
-.. _easy_install: http://peak.telecommunity.com/DevCenter/EasyInstall
 .. _pip: https://pip.pypa.io/en/latest/
-.. _zc.buildout: http://www.buildout.org/
 
 
 Installation from source
@@ -61,8 +58,7 @@ run the :program:`bin/pgxn` script::
     $ cd /path/to/pgxnclient
     $ export PYTHONPATH=`pwd`
     $ ./bin/pgxn --version
-    pgxnclient 1.0.3.dev0   # just an example
+    pgxnclient 1.3.0   # just an example
 
 .. __: https://pypi.org/project/pgxnclient/
 .. __: https://github.com/dvarrazzo/pgxnclient
-
