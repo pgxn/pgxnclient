@@ -276,7 +276,7 @@ class LoadUnload(
 
     def get_pg_version(self):
         """Return the version of the selected database."""
-        data = self.call_psql('SHOW pg_version_num')
+        data = self.call_psql('SHOW server_version_num')
         pgver = self.parse_pg_version(data)
         logger.debug("PostgreSQL version: %d.%d.%d", *pgver)
         return pgver
