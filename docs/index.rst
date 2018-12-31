@@ -1,7 +1,7 @@
 PGXN Client's documentation
 ===========================
 
-The `PGXN Client <https://github.com/dvarrazzo/pgxnclient>`__ is a command
+The `PGXN Client <https://github.com/pgxn/pgxnclient>`__ is a command
 line tool designed to interact with the `PostgreSQL Extension Network
 <http://pgxn.org/>`__ allowing searching, compiling, installing, and removing
 extensions in PostgreSQL databases.
@@ -26,10 +26,9 @@ available outside the extension network.
 .. _semver: https://pgxn.org/dist/semver/
 .. __: https://www.postgresql.org/docs/current/extend-pgxs.html
 
-- Source repository: https://github.com/dvarrazzo/pgxnclient
+- Source repository: https://github.com/pgxn/pgxnclient
 - Downloads: https://pypi.python.org/pypi/pgxnclient/
 - Discussion group: https://groups.google.com/group/pgxn-users/
-- PgFoundry project: http://pgfoundry.org/projects/pgxnclient/
 
 
 Contents:

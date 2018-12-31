@@ -10,7 +10,7 @@ A command line tool to interact with the PostgreSQL Extension Network
     :target: https://travis-ci.org/dvarrazzo/pgxnclient
     :alt: build status
 
-The `PGXN Client <https://github.com/dvarrazzo/pgxnclient>`__ is a command
+The `PGXN Client <https://github.com/pgxn/pgxnclient>`__ is a command
 line tool designed to interact with the `PostgreSQL Extension Network
 <https://pgxn.org/>`__ allowing searching, compiling, installing, and removing
 extensions in PostgreSQL databases.
@@ -34,7 +34,7 @@ degrade gracefully in presence of any package hosted on PGXN.
 .. _semver: https://pgxn.org/dist/semver
 .. __: https://www.postgresql.org/docs/current/extend-pgxs.html
 
-- Source repository: https://github.com/dvarrazzo/pgxnclient
+- Source repository: https://github.com/pgxn/pgxnclient
 - Downloads: https://pypi.python.org/pypi/pgxnclient/
 - Discussion group: https://groups.google.com/group/pgxn-users/
 

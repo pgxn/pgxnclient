@@ -42,7 +42,7 @@ program using::
     $ python setup.py install
 
 .. __: https://pypi.org/project/pgxnclient/
-.. __: https://github.com/dvarrazzo/pgxnclient
+.. __: https://github.com/pgxn/pgxnclient
 
 
 Running from the project directory
@@ -61,4 +61,4 @@ run the :program:`bin/pgxn` script::
     pgxnclient 1.3.0   # just an example
 
 .. __: https://pypi.org/project/pgxnclient/
-.. __: https://github.com/dvarrazzo/pgxnclient
+.. __: https://github.com/pgxn/pgxnclient
