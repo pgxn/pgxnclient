@@ -6,8 +6,8 @@ A command line tool to interact with the PostgreSQL Extension Network
 
 |travis|
 
-.. |travis| image:: https://travis-ci.org/dvarrazzo/pgxnclient.svg?branch=master
-    :target: https://travis-ci.org/dvarrazzo/pgxnclient
+.. |travis| image:: https://travis-ci.org/pgxn/pgxnclient.svg?branch=master
+    :target: https://travis-ci.org/pgxn/pgxnclient
     :alt: build status
 
 The `PGXN Client <https://github.com/pgxn/pgxnclient>`__ is a command
