@@ -32,6 +32,3 @@ env:
 
 clean:
 	$(RM) -r html
-
-upload:
-	tar czf - -C html/ . | ssh shell.pgfoundry.org tar xzvf - -C /home/pgfoundry.org/groups/pgxnclient/htdocs
