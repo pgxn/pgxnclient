@@ -2,7 +2,7 @@
 pgxnclient -- command line entry point
 """
 
-# Copyright (C) 2011-2018 Daniele Varrazzo
+# Copyright (C) 2011-2019 Daniele Varrazzo
 
 # This file is part of the PGXN client
 

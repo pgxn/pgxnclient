@@ -5,7 +5,7 @@ The test suite can be run via setup.py test. But you better use "make check"
 in order to correctly set up the pythonpath.
 """
 
-# Copyright (C) 2011-2018 Daniele Varrazzo
+# Copyright (C) 2011-2019 Daniele Varrazzo
 
 # This file is part of the PGXN client
 
