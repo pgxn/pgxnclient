@@ -39,6 +39,11 @@ def emit(s=b'', file=None):
     if isinstance(s, six.text_type):
         s = s.encode(enc, 'replace')
 
+    # OTOH, printing bytes on Py3 to stdout/stderr will barf as well...
+    # It's facepalms all the way down.
+    if hasattr(file, 'buffer'):
+        file = file.buffer
+
     file.write(s)
     file.write(b'\n')
 

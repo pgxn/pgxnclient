@@ -61,7 +61,7 @@ class InfoTestCase(unittest.TestCase):
             from pgxnclient.cli import main
 
             main(cmdline)
-            return b''.join([a[0] for a, k in stdout.write.call_args_list])
+            return get_stdout_data(stdout)
 
         return do()
 
@@ -145,7 +145,7 @@ notes:
 
         stdout.encoding = 'UTF-8'
         main(['info', 'first_last_agg'])
-        out = max(b''.join([a[0] for a, k in stdout.write.call_args_list]))
+        out = max(get_stdout_data(stdout))
         if not isinstance(out, int):
             out = ord(out)
         assert out > 127
@@ -153,7 +153,7 @@ notes:
         stdout.reset_mock()
         stdout.encoding = None
         main(['info', 'first_last_agg'])
-        out = max(b''.join([a[0] for a, k in stdout.write.call_args_list]))
+        out = max(get_stdout_data(stdout))
         if not isinstance(out, int):
             out = ord(out)
         assert out < 127
@@ -1130,7 +1130,7 @@ class SearchTestCase(unittest.TestCase):
 
         stdout.encoding = 'UTF-8'
         main(['search', 'oracle'])
-        out = max(b''.join([a[0] for a, k in stdout.write.call_args_list]))
+        out = max(get_stdout_data(stdout))
         if not isinstance(out, int):
             out = ord(out)
         assert out > 127
@@ -1138,7 +1138,7 @@ class SearchTestCase(unittest.TestCase):
         stdout.reset_mock()
         stdout.encoding = None
         main(['search', 'oracle'])
-        out = max(b''.join([a[0] for a, k in stdout.write.call_args_list]))
+        out = max(get_stdout_data(stdout))
         if not isinstance(out, int):
             out = ord(out)
         assert out < 127
@@ -1152,9 +1152,16 @@ class HelpTestCase(unittest.TestCase):
         from pgxnclient.cli import main
 
         main(['help', '--libexec'])
-        out = b''.join([a[0] for a, k in stdout.write.call_args_list])
+        out = get_stdout_data(stdout)
         assert out.strip()
         assert out.count(b'\n') == 1
+
+
+def get_stdout_data(mock):
+    # TODO: reorganize tests to be less verbose and do this kind of cruft
+    # with fixtures and pytest-foo
+    calls = mock.write.call_args_list or mock.buffer.write.call_args_list
+    return b''.join([a[0] for a, k in calls])
 
 
 if __name__ == '__main__':
