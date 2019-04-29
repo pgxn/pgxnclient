@@ -11,20 +11,18 @@ pgxnclient -- setup script
 import os
 import sys
 from setuptools import setup, find_packages
+from setuptools.command.build_py import build_py
 
 # Grab the version without importing the module
 # or we will get import errors on install if prerequisites are still missing
 fn = os.path.join(os.path.dirname(__file__), 'pgxnclient', '__init__.py')
-f = open(fn)
-try:
+with open(fn) as f:
     for line in f:
         if line.startswith('__version__ ='):
             version = line.split("'")[1]
             break
     else:
         raise ValueError('cannot find __version__ in the pgxnclient module')
-finally:
-    f.close()
 
 # External dependencies, depending on the Python version
 requires = ['six']
@@ -48,6 +46,41 @@ Programming Language :: Python :: 2
 Programming Language :: Python :: 3
 Topic :: Database
 """
+
+
+class CustomBuildPy(build_py):
+    def run(self):
+        build_py.run(self)
+        self.fix_libexec_hashbangs()
+
+    def fix_libexec_hashbangs(self):
+        """Replace the hashbangs of the scripts in libexec."""
+        for package, src_dir, build_dir, filenames in self.data_files:
+            if package != 'pgxnclient':
+                continue
+            for filename in filenames:
+                if not filename.startswith('libexec/'):
+                    continue
+                self.fix_script_hashbang(os.path.join(build_dir, filename))
+
+    def fix_script_hashbang(self, filename):
+        """Replace the hashbangs of a script in libexec."""
+        if not os.path.exists(filename):
+            return
+        with open(filename) as f:
+            data = f.read()
+        if not data.startswith('#!'):
+            return
+        lines = data.splitlines()
+        if 'python' not in lines[0]:
+            return
+
+        lines[0] = '#!%s' % sys.executable
+        with open(filename, 'w') as f:
+            for line in lines:
+                f.write(line)
+                f.write('\n')
+
 
 setup(
     name='pgxnclient',
@@ -74,4 +107,5 @@ setup(
     setup_requires=setup_requires,
     tests_require=tests_require,
     version=version,
+    cmdclass={'build_py': CustomBuildPy},
 )
