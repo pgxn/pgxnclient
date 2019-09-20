@@ -96,6 +96,11 @@ setup(
     author='Daniele Varrazzo',
     author_email='daniele.varrazzo@gmail.com',
     url='https://github.com/pgxn/pgxnclient',
+    project_urls={
+        'Source': 'https://github.com/pgxn/pgxnclient',
+        'Documentation': 'https://pgxn.github.io/pgxnclient/',
+        'Discussion group': 'https://groups.google.com/group/pgxn-users/',
+    },
     license='BSD',
     # NOTE: keep consistent with docs/install.txt
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',

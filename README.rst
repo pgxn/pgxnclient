@@ -34,9 +34,12 @@ degrade gracefully in presence of any package hosted on PGXN.
 .. _semver: https://pgxn.org/dist/semver
 .. __: https://www.postgresql.org/docs/current/extend-pgxs.html
 
+- Documentation: https://pgxn.github.io/pgxnclient/
 - Source repository: https://github.com/pgxn/pgxnclient
 - Downloads: https://pypi.python.org/pypi/pgxnclient/
 - Discussion group: https://groups.google.com/group/pgxn-users/
 
-Please refer to the files in the ``docs`` directory for instructions about
-the program installation and usage.
+Please refer to the files in the ``docs`` directory or online__ for
+instructions about the program installation and usage.
+
+.. __: https://pgxn.github.io/pgxnclient/
