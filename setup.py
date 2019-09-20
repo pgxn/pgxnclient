@@ -13,16 +13,21 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 
+here = os.path.dirname(__file__)
+
 # Grab the version without importing the module
 # or we will get import errors on install if prerequisites are still missing
-fn = os.path.join(os.path.dirname(__file__), 'pgxnclient', '__init__.py')
-with open(fn) as f:
+with open(os.path.join(here, 'pgxnclient', '__init__.py')) as f:
     for line in f:
         if line.startswith('__version__ ='):
             version = line.split("'")[1]
             break
     else:
         raise ValueError('cannot find __version__ in the pgxnclient module')
+
+# Read the description from the readme
+with open(os.path.join(here, 'README.rst')) as f:
+    long_description = f.read()
 
 # External dependencies, depending on the Python version
 requires = ['six']
@@ -87,6 +92,7 @@ setup(
     description=(
         'A command line tool to interact with the PostgreSQL Extension Network.'
     ),
+    long_description=long_description,
     author='Daniele Varrazzo',
     author_email='daniele.varrazzo@gmail.com',
     url='https://github.com/pgxn/pgxnclient',
