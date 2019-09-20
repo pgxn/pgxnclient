@@ -9,7 +9,7 @@ pgxnclient 1.3
 
 - Use https by default to access the PGXN API.
 - Dropped support for Python < 2.7 and Python 3 < 3.4.
-- Logging information emitted on stdout instead of stderr.
+- Logging information emitted on stderr instead of stdout.
 - Exit with nonzero return code after command line parsing errors (ticket #23).
 - Don't fail if some directories in the ``PATH`` are not readable (ticket #24).
 - Don't file emitting non-ascii chars with stdout redirected (ticket #26).
