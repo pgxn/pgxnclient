@@ -95,11 +95,13 @@ setup(
     long_description=long_description,
     author='Daniele Varrazzo',
     author_email='daniele.varrazzo@gmail.com',
-    url='https://github.com/pgxn/pgxnclient',
+    url='https://pgxn.github.io/pgxnclient/',
     project_urls={
         'Source': 'https://github.com/pgxn/pgxnclient',
         'Documentation': 'https://pgxn.github.io/pgxnclient/',
+        'Bug Tracker': 'https://github.com/pgxn/pgxnclient/issues',
         'Discussion group': 'https://groups.google.com/group/pgxn-users/',
+        'Funding': 'https://github.com/sponsors/dvarrazzo',
     },
     license='BSD',
     # NOTE: keep consistent with docs/install.txt
