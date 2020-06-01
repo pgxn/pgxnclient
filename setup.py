@@ -106,7 +106,7 @@ setup(
     license='BSD',
     # NOTE: keep consistent with docs/install.txt
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
-    packages=find_packages(),
+    packages=find_packages(exclude=['tests']),
     package_data={'pgxnclient': ['libexec/*']},
     entry_points={
         'console_scripts': [
