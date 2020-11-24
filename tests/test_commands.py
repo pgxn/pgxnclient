@@ -1180,7 +1180,7 @@ def get_stdout_data(mock):
     # with fixtures and pytest-foo
     calls = mock.write.call_args_list or mock.buffer.write.call_args_list
     out = [a[0] for a, k in calls]
-    if out and isinstance(out[0], str):
+    if out and not isinstance(out[0], bytes):
         out = [x.encode("utf-8", "replace") for x in out]  # just guessing
     return b''.join(out)
 
