@@ -300,7 +300,6 @@ class LoadUnload(
         cmdline = [self.find_psql()]
         cmdline.extend(self.get_psql_options())
         if command is not None:
-            cmdline.append('-tAX')  # tuple only, unaligned, ignore psqlrc
             cmdline.extend(['-c', command])
 
         logger.debug("calling %s", cmdline)

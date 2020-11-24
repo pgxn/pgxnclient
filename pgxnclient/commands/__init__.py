@@ -804,6 +804,7 @@ variables PGDATABASE, PGHOST, PGPORT, PGUSER.
         Return the cmdline options to connect to the specified database.
         """
         rv = []
+        rv.append('-tAX')  # tuple only, unaligned, ignore psqlrc
         if self.opts.dbname:
             rv.extend(['--dbname', self.opts.dbname])
         if self.opts.host:

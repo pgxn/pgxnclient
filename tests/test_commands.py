@@ -821,6 +821,7 @@ class LoadTestCase(unittest.TestCase):
 
         main(['load', '--yes', '--dbname', 'dbdb', 'foobar'])
         args = self.mock_popen.call_args[0][0]
+        assert "-tAX" in args
         self.assertEqual('dbdb', args[args.index('--dbname') + 1])
 
         main(['load', '--yes', '-U', 'meme', 'foobar'])
