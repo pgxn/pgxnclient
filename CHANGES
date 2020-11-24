@@ -3,6 +3,11 @@
 PGXN Client changes log
 -----------------------
 
+pgxnclient 1.3.1
+================
+
+- Fixed error running ``pgxn`` with no argument (ticket #38).
+
 
 pgxnclient 1.3
 ==============

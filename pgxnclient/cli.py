@@ -30,7 +30,10 @@ def main(argv=None):
     load_commands()
     parser = get_option_parser()
     opt = parser.parse_args(argv)
-    run_command(opt, parser)
+    if hasattr(opt, 'cmd'):
+        run_command(opt, parser)
+    else:
+        parser.print_help()
 
 
 def script():

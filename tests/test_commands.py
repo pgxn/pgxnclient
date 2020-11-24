@@ -168,6 +168,20 @@ class CommandTestCase(unittest.TestCase):
             PgxnClientException, c.popen, "this-script-doesnt-exist"
         )
 
+    @patch('sys.stdout')
+    def test_empty_command(self, stdout):
+        from pgxnclient.cli import main
+
+        stdout.encoding = None
+        main()
+        out = get_stdout_data(stdout)
+
+        # The output is the same of 'help'
+        stdout.reset_mock()
+        main(["help"])
+        out_help = get_stdout_data(stdout)
+        assert out == out_help
+
 
 class DownloadTestCase(unittest.TestCase):
     @patch('pgxnclient.network.get_file')
@@ -1161,7 +1175,10 @@ def get_stdout_data(mock):
     # TODO: reorganize tests to be less verbose and do this kind of cruft
     # with fixtures and pytest-foo
     calls = mock.write.call_args_list or mock.buffer.write.call_args_list
-    return b''.join([a[0] for a, k in calls])
+    out = [a[0] for a, k in calls]
+    if out and isinstance(out[0], str):
+        out = [x.encode("utf-8", "replace") for x in out]  # just guessing
+    return b''.join(out)
 
 
 if __name__ == '__main__':
