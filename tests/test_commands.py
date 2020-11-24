@@ -173,7 +173,7 @@ class CommandTestCase(unittest.TestCase):
         from pgxnclient.cli import main
 
         stdout.encoding = None
-        main()
+        main([])
         out = get_stdout_data(stdout)
 
         # The output is the same of 'help'
