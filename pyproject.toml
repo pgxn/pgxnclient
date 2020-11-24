@@ -9,5 +9,6 @@ exclude = '''
     | \.git
     | \.eggs
     | buld
+    | dbtest
 )/
 '''
