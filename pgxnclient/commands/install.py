@@ -278,16 +278,24 @@ class LoadUnload(
         """Return the version of the selected database."""
         data = self.call_psql('SHOW server_version_num')
         pgver = self.parse_pg_version(data)
-        logger.debug("PostgreSQL version: %d.%d.%d", *pgver)
+        logger.debug("PostgreSQL version: %s", '.'.join(map(str, pgver)))
         return pgver
 
     def parse_pg_version(self, data):
+        data = data.rstrip()
         try:
-            return (int(data[:-4]), int(data[-4:-2]), int(data[-2:]))
+            nums = (int(data[:-4]), int(data[-4:-2]), int(data[-2:]))
         except Exception:
             raise PgxnClientException(
                 "cannot parse version number from '%s'" % data
             )
+
+        if nums[0] >= 10:
+            if nums[1]:
+                raise PgxnClientException("weird version number: '%s'" % data)
+            nums = (nums[0], nums[2])
+
+        return nums
 
     def is_extension(self, name):
         fn = os.path.join(

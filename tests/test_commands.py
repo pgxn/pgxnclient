@@ -812,6 +812,9 @@ class LoadTestCase(unittest.TestCase):
         cmd = Load(None)
         self.assertEquals((9, 0, 3), cmd.parse_pg_version('90003'))
         self.assertEquals((9, 1, 0), cmd.parse_pg_version('90100'))
+        self.assertEquals((10, 0), cmd.parse_pg_version('100000'))
+        self.assertEquals((13, 2), cmd.parse_pg_version('130002'))
+        self.assertEquals((13, 2), cmd.parse_pg_version('130002\n'))
 
     @patch('pgxnclient.network.get_file')
     def test_check_psql_options(self, mock_get):
