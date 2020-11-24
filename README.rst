@@ -42,4 +42,16 @@ degrade gracefully in presence of any package hosted on PGXN.
 Please refer to the files in the ``docs`` directory or online__ for
 instructions about the program installation and usage.
 
+
+Development
+-----------
+
+You can create a local development environment with::
+
+    virtualenv .venv
+    source .venv/bin/activate
+    pip install -e .[dev]
+
+and run `pytest` to run the test suite.
+
 .. __: https://pgxn.github.io/pgxnclient/

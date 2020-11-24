@@ -121,4 +121,5 @@ setup(
     tests_require=tests_require,
     version=version,
     cmdclass={'build_py': CustomBuildPy},
+    extras_require={'dev': ['pytest', 'mock', 'black']},
 )

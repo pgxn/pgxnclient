@@ -5,6 +5,7 @@ skip-string-normalization=true
 exclude = '''
 /(
       env
+    | \.venv
     | \.git
     | \.eggs
     | buld
