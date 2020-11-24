@@ -2,7 +2,7 @@
 pgxnclient -- temp files utilities
 """
 
-# Copyright (C) 2011-2019 Daniele Varrazzo
+# Copyright (C) 2011-2020 Daniele Varrazzo
 
 # This file is part of the PGXN client
 

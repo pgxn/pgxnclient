@@ -4,7 +4,7 @@
 #
 # Use'make html' to build the HTML documentation.
 #
-# Copyright (C) 2011-2019 Daniele Varrazzo
+# Copyright (C) 2011-2020 Daniele Varrazzo
 
 PYTHON := python
 ENV_DIR = $(shell pwd)/env
