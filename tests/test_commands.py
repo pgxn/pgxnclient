@@ -613,7 +613,7 @@ class InstallTestCase(unittest.TestCase, Assertions):
         make_cwd = self.mock_popen.call_args_list[1][1]['cwd']
 
         self.assertEquals(mock_unpack.call_count, 1)
-        tmpdir, = mock_unpack.call_args[0]
+        (tmpdir,) = mock_unpack.call_args[0]
         self.assertEqual(make_cwd, os.path.join(tmpdir, 'foobar-0.42.1'))
 
     @patch('pgxnclient.zip.ZipArchive.unpack')
@@ -635,7 +635,7 @@ class InstallTestCase(unittest.TestCase, Assertions):
         make_cwd = self.mock_popen.call_args_list[1][1]['cwd']
 
         self.assertEquals(mock_unpack.call_count, 1)
-        tmpdir, = mock_unpack.call_args[0]
+        (tmpdir,) = mock_unpack.call_args[0]
         self.assertEqual(make_cwd, os.path.join(tmpdir, 'foobar-0.42.1'))
 
     def test_install_url_file(self):

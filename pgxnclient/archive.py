@@ -14,15 +14,13 @@ from pgxnclient.errors import PgxnClientException
 
 
 def from_spec(spec):
-    """Return an `Archive` instance to handle the file requested by *spec*
-    """
+    """Return an `Archive` instance to handle the file requested by *spec*"""
     assert spec.is_file()
     return from_file(spec.filename)
 
 
 def from_file(filename):
-    """Return an `Archive` instance to handle the file *filename*
-    """
+    """Return an `Archive` instance to handle the file *filename*"""
     from pgxnclient.zip import ZipArchive
     from pgxnclient.tar import TarArchive
 
