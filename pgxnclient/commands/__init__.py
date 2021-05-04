@@ -254,7 +254,7 @@ class Command(six.with_metaclass(CommandType, object)):
             return True
 
         while 1:
-            ans = six.input(_("%s [y/N] ") % prompt)
+            ans = six.moves.input(_("%s [y/N] ") % prompt)
             if _('no').startswith(ans.lower()):
                 raise UserAbort(_("operation interrupted on user request"))
             elif _('yes').startswith(ans.lower()):
