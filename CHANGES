@@ -3,6 +3,12 @@
 PGXN Client changes log
 -----------------------
 
+pgxnclient 1.3.2
+================
+
+- Fixed crash on input (ticket #42)
+
+
 pgxnclient 1.3.1
 ================
 
