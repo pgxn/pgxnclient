@@ -3,7 +3,7 @@
 pgxnclient -- setup script
 """
 
-# Copyright (C) 2011-2020 Daniele Varrazzo
+# Copyright (C) 2011-2021 Daniele Varrazzo
 
 # This file is part of the PGXN client
 
