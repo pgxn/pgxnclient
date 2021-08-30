@@ -4,12 +4,6 @@
 A command line tool to interact with the PostgreSQL Extension Network
 =====================================================================
 
-|travis|
-
-.. |travis| image:: https://travis-ci.org/pgxn/pgxnclient.svg?branch=master
-    :target: https://travis-ci.org/pgxn/pgxnclient
-    :alt: build status
-
 The `PGXN Client <https://pgxn.github.io/pgxnclient/>`__ is a command
 line tool designed to interact with the `PostgreSQL Extension Network
 <https://pgxn.org/>`__ allowing searching, compiling, installing, and removing
